@@ -1,0 +1,36 @@
+(traffic_logging) {
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 20MiB
+			roll_keep 30
+			roll_keep_for 2160h
+		}
+		format json
+	}
+}
+
+dsheval.ai {
+	import traffic_logging
+
+	@dsh_eval path /dsheval /dsheval/*
+	handle @dsh_eval {
+		reverse_proxy dsh-eval-web:3000
+	}
+
+	handle {
+		reverse_proxy web:80
+	}
+}
+
+www.dsheval.ai {
+	import traffic_logging
+
+	@dsh_eval path /dsheval /dsheval/*
+	handle @dsh_eval {
+		reverse_proxy dsh-eval-web:3000
+	}
+
+	handle {
+		reverse_proxy web:80
+	}
+}

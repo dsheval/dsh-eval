@@ -1,0 +1,7 @@
+.git
+.DS_Store
+.next
+.vinext
+dist
+node_modules
+npm-debug.log*
