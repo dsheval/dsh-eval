@@ -1,0 +1,71 @@
+{
+  "$comment": "记忆插件名录。题集在 suite.json，这里只描述测谁、怎么装、清哪里。",
+  "type": "object",
+  "required": ["id", "profile", "baseline", "plugins"],
+  "properties": {
+    "id": { "type": "string" },
+    "profile": { "type": "string" },
+    "port": { "type": "integer" },
+    "rankingsUrl": { "type": "string" },
+    "baseline": { "$ref": "#/$defs/target" },
+    "plugins": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/target" }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "required": ["id", "plugin", "add", "wipe", "conflictsWith"],
+      "properties": {
+        "id": { "type": "string" },
+        "plugin": { "type": "string" },
+        "fullName": { "type": ["string", "null"] },
+        "add": { "type": ["string", "null"], "description": "交给 dsh plugin add 的 spec；C0 为 null" },
+        "removeName": { "type": "string", "description": "交给 dsh plugin remove 的实际包名；省略时使用 plugin" },
+        "requiredEnv": { "type": "array", "items": { "type": "string" }, "description": "缺少任一变量时标记未配置，不进入质量评分" },
+        "sourceRepo": { "type": "string" },
+        "sourceSubdir": { "type": "string" },
+        "sourceRef": { "type": "string" },
+        "sourceArchive": { "type": "string", "description": "固定源码快照 URL；使用前必须通过 sourceArchiveSha256 校验" },
+        "sourceArchiveSha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+        "sourceInstallMode": {
+          "enum": ["link", "file"],
+          "description": "源码包交给包管理器的方式；有运行时依赖的 wrapper 应使用 file"
+        },
+        "compatTextOutput": { "type": "boolean" },
+        "wipe": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "可用 {home}/{profile}/{workspace}/{workspaceA}/{workspaceB}；空数组表示未知，不盲删"
+        },
+        "conflictsWith": { "type": "array", "items": { "type": "string" } },
+        "needsKey": { "type": "boolean" },
+        "needsApproval": { "type": "boolean" },
+        "defaultProtocol": { "enum": ["passive", "guided", "session-reference"] },
+        "supportedProtocols": {
+          "type": "array",
+          "items": { "enum": ["passive", "guided", "session-reference"] }
+        },
+        "patches": { "type": "array", "items": { "type": "string" } },
+        "protocols": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "seedInstruction": { "type": "string" },
+              "probeInstruction": { "type": "string" },
+              "patches": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "agentPreset": { "type": "string", "description": "会话使用的 DSH Agent preset；省略时使用 memory-eval" },
+        "allowSessionReferences": { "type": "boolean", "description": "是否允许 DSH 原生历史会话引用参与质量评分" },
+        "referenceSeedSession": { "type": "boolean", "description": "追问时是否用 DSH 原生 session-reference 显式引用埋点会话" },
+        "env": { "type": "object", "additionalProperties": { "type": "string" }, "description": "只传给该条件的环境变量；值可使用 {baseHome}/{targetHome}" },
+        "focus": { "type": "string" }
+      }
+    }
+  }
+}

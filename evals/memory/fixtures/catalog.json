@@ -1,0 +1,150 @@
+{
+  "id": "dsh-memory-catalog-v2",
+  "profile": "memory-eval",
+  "port": 3180,
+  "rankingsUrl": "https://dsheval.ai/data",
+  "baseline": {
+    "id": "C0",
+    "plugin": "none",
+    "fullName": null,
+    "add": null,
+    "wipe": [],
+    "conflictsWith": [],
+    "needsKey": false,
+    "needsApproval": false,
+    "defaultProtocol": "passive",
+    "focus": "跨会话题应大面积失败，否则题废"
+  },
+  "plugins": [
+    {
+      "id": "P1",
+      "plugin": "mem9",
+      "fullName": "mem9-ai/mem9",
+      "add": "@mem9/dsh-plugin",
+      "removeName": "@mem9/dsh-plugin",
+      "wipe": [],
+      "conflictsWith": [],
+      "needsKey": true,
+      "requiredEnv": ["MEM9_API_KEY"],
+      "needsApproval": false,
+      "defaultProtocol": "passive",
+      "focus": "跨会话持久记忆"
+    },
+    {
+      "id": "P2",
+      "plugin": "graph-memory",
+      "fullName": "adoresever/graph-memory",
+      "add": "github:adoresever/graph-memory",
+      "wipe": ["{home}/graph-memory"],
+      "conflictsWith": [],
+      "needsKey": false,
+      "needsApproval": false,
+      "defaultProtocol": "passive",
+      "focus": "图谱记忆；主账只记跨会话"
+    },
+    {
+      "id": "P3",
+      "plugin": "mnemon",
+      "fullName": "mnemon-dev/mnemon",
+      "add": "source:mnemon-dev/mnemon",
+      "sourceRepo": "https://github.com/mnemon-dev/mnemon.git",
+      "sourceSubdir": ".",
+      "sourceRef": "2ccd7b41c5562a194c666173db598509a528f033",
+      "sourceArchive": "https://codeload.github.com/mnemon-dev/mnemon/zip/2ccd7b41c5562a194c666173db598509a528f033",
+      "sourceArchiveSha256": "05BE025C39E38B1DD3B2E652953076E14617390D09190BD31E995034C3FEA8EF",
+      "sourceInstallMode": "file",
+      "removeName": "@mnemon-dev/dsh-mnemon",
+      "wipe": ["{home}/mnemon"],
+      "conflictsWith": ["dsh-mnemon"],
+      "needsKey": false,
+      "needsApproval": false,
+      "defaultProtocol": "guided",
+      "env": {
+        "MNEMON_DATA_DIR": "{targetHome}/mnemon"
+      },
+      "patches": ["fixtures/patches/mnemon-isolated.patch.yml"],
+      "focus": "Mnemon 官方 DSH wrapper；底层依赖 dsh-mnemon，榜单需披露与 P5 的实现重叠"
+    },
+    {
+      "id": "P4",
+      "plugin": "dsh-memory-evolve",
+      "fullName": "csyangwen/dsh-memory-evolve",
+      "add": "https://codeload.github.com/csyangwen/dsh-memory-evolve/tar.gz/1e6e7eb15ce515b0f2bd2142bdee9a36c46c8b91",
+      "removeName": "dsh-memory-evolve",
+      "sourceRef": "1e6e7eb15ce515b0f2bd2142bdee9a36c46c8b91",
+      "wipe": ["{home}/memories"],
+      "conflictsWith": [],
+      "needsKey": false,
+      "needsApproval": false,
+      "defaultProtocol": "guided",
+      "focus": "跨会话记忆 + 待办/多代理"
+    },
+    {
+      "id": "P5",
+      "plugin": "dsh-mnemon",
+      "fullName": "omdsh-dev/dsh-mnemon",
+      "add": "dsh-mnemon",
+      "wipe": ["{home}/mnemon", "{workspace}/MEMORY.md", "{workspace}/USER.md"],
+      "conflictsWith": ["@mnemon-dev/dsh-mnemon"],
+      "needsKey": false,
+      "needsApproval": false,
+      "defaultProtocol": "guided",
+      "focus": "DSH 上的 Mnemon 层"
+    },
+    {
+      "id": "P6",
+      "plugin": "dsh-noema",
+      "fullName": "ZSeven-W/dsh-noema",
+      "add": "@zseven-w/dsh-noema",
+      "removeName": "@zseven-w/dsh-noema",
+      "wipe": ["{home}/noema"],
+      "conflictsWith": [],
+      "needsKey": false,
+      "needsApproval": false,
+      "defaultProtocol": "guided",
+      "patches": ["fixtures/patches/dsh-noema-isolated.patch.yml"],
+      "focus": "可检查的长期记忆"
+    },
+    {
+      "id": "P7",
+      "plugin": "dsh-memento",
+      "fullName": "PerryLink/dsh-memento",
+      "add": "dsh-memento",
+      "wipe": ["{home}/dsh-memento"],
+      "conflictsWith": [],
+      "needsKey": false,
+      "needsApproval": true,
+      "defaultProtocol": "guided",
+      "protocols": {
+        "guided": {
+          "label": "显式持久记忆（非交互自动审批配置）",
+          "patches": ["fixtures/patches/dsh-memento-guided.patch.yml"]
+        }
+      },
+      "focus": "有界、分层、需审批"
+    },
+    {
+      "id": "P8",
+      "plugin": "causal-memory",
+      "fullName": "JingxuanC/causal-memory",
+      "add": "source:JingxuanC/causal-memory/dsh-plugin",
+      "sourceRepo": "https://github.com/JingxuanC/causal-memory.git",
+      "sourceSubdir": "dsh-plugin",
+      "sourceRef": "e7dbaca8c7247a27040a7ca03540d0b7d3857c23",
+      "sourceArchive": "https://codeload.github.com/JingxuanC/causal-memory/zip/e7dbaca8c7247a27040a7ca03540d0b7d3857c23",
+      "sourceArchiveSha256": "A87902AA7C52E6EAAA0AD58D8FC2ECCC0F500C3238D8308DC337D0FB3C4FA310",
+      "removeName": "causal-memory-dsh-plugin",
+      "compatTextOutput": true,
+      "env": {
+        "CAUSAL_MEMORY_BIN": "{baseHome}/memory-eval-tools/causal-memory-venv/Scripts/causal-memory.exe"
+      },
+      "wipe": ["{home}/causal-memory"],
+      "conflictsWith": [],
+      "needsKey": false,
+      "needsApproval": false,
+      "defaultProtocol": "guided",
+      "patches": ["fixtures/patches/causal-memory-isolated.patch.yml"],
+      "focus": "因果记忆 / MCP"
+    }
+  ]
+}

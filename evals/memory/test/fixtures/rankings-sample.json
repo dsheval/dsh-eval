@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-26T00:00:00.000Z",
+  "snapshotDate": "2026-08-26",
+  "rankings": {
+    "total": [
+      {
+        "fullName": "mem9-ai/mem9",
+        "name": "mem9",
+        "description": "Persistent memory for agents",
+        "descriptionZh": "跨会话记忆",
+        "tags": ["memory"],
+        "topics": [],
+        "type": "cordis-plugin",
+        "stars": 1199,
+        "install": { "commands": ["dsh plugin add github:mem9-ai/mem9"] }
+      },
+      {
+        "fullName": "bowenliang123/dsh-context",
+        "name": "dsh-context",
+        "description": "Window composition and token accounting",
+        "descriptionZh": "窗口组成",
+        "tags": ["context"],
+        "topics": [],
+        "type": "cordis-plugin",
+        "stars": 1001
+      },
+      {
+        "fullName": "someone/nice-skill",
+        "name": "nice-skill",
+        "description": "A skill that remembers nothing",
+        "descriptionZh": "技能",
+        "tags": ["memory"],
+        "topics": [],
+        "type": "skill",
+        "stars": 9
+      },
+      {
+        "fullName": "omdsh-dev/dsh-mnemon",
+        "name": "dsh-mnemon",
+        "description": "Mnemon layer for DSH",
+        "descriptionZh": "DSH 上的 Mnemon",
+        "tags": ["mnemon"],
+        "topics": [],
+        "type": "cordis-plugin",
+        "stars": 216,
+        "install": { "commands": ["dsh plugin add dsh-mnemon"] }
+      }
+    ],
+    "rising": [],
+    "hot": []
+  }
+}

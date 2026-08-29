@@ -1,0 +1,10 @@
+# Keep Noema's real engine and defaults, but place its store inside this
+# condition's isolated DSH_HOME and disable imports from unrelated agent tools.
+- id: dsh-noema
+  config:
+    noemaRoot: !!js dshHomePath('noema')
+    importEnabled: false
+    importOnStartup: false
+    importWorkspaceFiles: false
+    acceptByDefault: true
+    guidance: true

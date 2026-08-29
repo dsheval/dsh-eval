@@ -1,0 +1,801 @@
+{
+  "id": "dsh-locomo-refined-20",
+  "source": {
+    "repo": "https://github.com/mem-eval-suite/LoCoMo_refined",
+    "questions": "data/public/questions.jsonl",
+    "n_source": 1382,
+    "license": "CC BY-NC 4.0"
+  },
+  "sampling": {
+    "seed": 20260827,
+    "quota": {
+      "4_single_hop": 12,
+      "2_temporal": 4,
+      "1_multi_hop": 3,
+      "3_open_domain": 1
+    },
+    "source_counts": {
+      "4": 802,
+      "2": 299,
+      "1": 213,
+      "3": 68
+    },
+    "filters": [
+      "只要纯文本题（is_multi_modality=false），避免失效图片",
+      "单跳证据只落在 1 个 session",
+      "多跳证据跨至少 2 个 session",
+      "10 段对话尽量各抽 2 题"
+    ],
+    "replaced": [
+      {
+        "id": "L18",
+        "from": "conv-48#q0074",
+        "to": "conv-41#q0002",
+        "reason": "原题答案是 no，且两段冲浪证据互相矛盾，不适合当记忆过线"
+      }
+    ]
+  },
+  "how_to_run": [
+    "每题单独一轮：按 seeds 顺序发进会话 A（不要说请记住）。",
+    "关会话后，把 probe 发进会话 B。",
+    "时间题不要改 date_time；相对时间（yesterday / last week / five years ago）要靠会话日期换算。",
+    "主账：回答命中 answers 任一完整候选，或覆盖 must_include。",
+    "不要和 T1–T8 合成一个总分。"
+  ],
+  "tasks": [
+    {
+      "id": "L01",
+      "title": "单跳",
+      "source_qa_id": "conv-26#q0066",
+      "sample_id": "conv-26",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Caroline",
+        "Melanie"
+      ],
+      "seeds": [
+        "[1:14 pm on 25 May, 2023] Caroline: That charity race sounds great, Mel! Making a difference & raising awareness for mental health is super rewarding - I'm really proud of you for taking part!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D2:2",
+          "session": 2,
+          "date_time": "1:14 pm on 25 May, 2023",
+          "speaker": "Caroline",
+          "text": "That charity race sounds great, Mel! Making a difference & raising awareness for mental health is super rewarding - I'm really proud of you for taking part!"
+        }
+      ],
+      "probe": "What did the charity race raise awareness for?",
+      "answers": [
+        "mental health"
+      ],
+      "must_include": [
+        "mental health"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L02",
+      "title": "单跳",
+      "source_qa_id": "conv-30#q0002",
+      "sample_id": "conv-30",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Jon",
+        "Gina"
+      ],
+      "seeds": [
+        "[4:04 pm on 20 January, 2023] Gina: Wow Jon, same here! Dance is pretty much my go-to for stress relief. Got any fave styles?",
+        "[4:04 pm on 20 January, 2023] Jon: I've been into dancing since I was a kid and it's been my passion and escape. I wanna start a dance studio so I can teach others the joy that dancing brings me."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:7",
+          "session": 1,
+          "date_time": "4:04 pm on 20 January, 2023",
+          "speaker": "Gina",
+          "text": "Wow Jon, same here! Dance is pretty much my go-to for stress relief. Got any fave styles?"
+        },
+        {
+          "dia_id": "D1:6",
+          "session": 1,
+          "date_time": "4:04 pm on 20 January, 2023",
+          "speaker": "Jon",
+          "text": "I've been into dancing since I was a kid and it's been my passion and escape. I wanna start a dance studio so I can teach others the joy that dancing brings me."
+        }
+      ],
+      "probe": "How do Jon and Gina both like to destress?",
+      "answers": [
+        "by dancing"
+      ],
+      "must_include": [
+        "danc"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L03",
+      "title": "单跳",
+      "source_qa_id": "conv-41#q0049",
+      "sample_id": "conv-41",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "John",
+        "Maria"
+      ],
+      "seeds": [
+        "[11:01 am on 17 December, 2022] John: I'm passionate about improving education and infrastructure in our community. Those are my main focuses."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:8",
+          "session": 1,
+          "date_time": "11:01 am on 17 December, 2022",
+          "speaker": "John",
+          "text": "I'm passionate about improving education and infrastructure in our community. Those are my main focuses."
+        }
+      ],
+      "probe": "What is John's main focus in local politics?",
+      "answers": [
+        "Improving education and infrastructure"
+      ],
+      "must_include": [
+        "education",
+        "infrastructure"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L04",
+      "title": "单跳",
+      "source_qa_id": "conv-42#q0070",
+      "sample_id": "conv-42",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Joanna",
+        "Nate"
+      ],
+      "seeds": [
+        "[11:54 am on 2 May, 2022] Nate: Gaming has been my focus - practicing a lot and even winning a few tournaments. Last week I won my second tournament!",
+        "[11:54 am on 2 May, 2022] Nate: Thanks! I usually play CS:GO, but I tried my hand at the local Street Fighter tournament this time since I play that game a lot with my friends, and turns out I'm really good!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D10:4",
+          "session": 10,
+          "date_time": "11:54 am on 2 May, 2022",
+          "speaker": "Nate",
+          "text": "Gaming has been my focus - practicing a lot and even winning a few tournaments. Last week I won my second tournament!"
+        },
+        {
+          "dia_id": "D10:6",
+          "session": 10,
+          "date_time": "11:54 am on 2 May, 2022",
+          "speaker": "Nate",
+          "text": "Thanks! I usually play CS:GO, but I tried my hand at the local Street Fighter tournament this time since I play that game a lot with my friends, and turns out I'm really good!"
+        }
+      ],
+      "probe": "What game was the second tournament that Nate won based on?",
+      "answers": [
+        "Street Fighter"
+      ],
+      "must_include": [
+        "street fighter"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L05",
+      "title": "单跳",
+      "source_qa_id": "conv-43#q0050",
+      "sample_id": "conv-43",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Tim",
+        "John"
+      ],
+      "seeds": [
+        "[7:48 pm on 21 May, 2023] John: The Minnesota Wolves! I can't wait to play with them!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:5",
+          "session": 1,
+          "date_time": "7:48 pm on 21 May, 2023",
+          "speaker": "John",
+          "text": "The Minnesota Wolves! I can't wait to play with them!"
+        }
+      ],
+      "probe": "Which team did John sign with on 21 May, 2023?",
+      "answers": [
+        "The Minnesota Wolves"
+      ],
+      "must_include": [
+        "wolves"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L06",
+      "title": "单跳",
+      "source_qa_id": "conv-44#q0052",
+      "sample_id": "conv-44",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Audrey",
+        "Andrew"
+      ],
+      "seeds": [
+        "[4:19 pm on 16 April, 2023] Andrew: They taste great too! We had some delicious croissants, muffins, and tarts! It was amazing!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D3:17",
+          "session": 3,
+          "date_time": "4:19 pm on 16 April, 2023",
+          "speaker": "Andrew",
+          "text": "They taste great too! We had some delicious croissants, muffins, and tarts! It was amazing!"
+        }
+      ],
+      "probe": "What kind of pastries did Andrew and his girlfriend have at the cafe?",
+      "answers": [
+        "croissants, muffins, and tarts"
+      ],
+      "must_include": [
+        "croissant",
+        "muffin",
+        "tart"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L07",
+      "title": "单跳",
+      "source_qa_id": "conv-47#q0052",
+      "sample_id": "conv-47",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "James",
+        "John"
+      ],
+      "seeds": [
+        "[3:47 pm on 17 March, 2022] James: Max and Daisy. Will be actually cool to build an app for dog walking and pet care. The goal is to connect pet owners with reliable dog walkers and provide helpful information on pet care."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:14",
+          "session": 1,
+          "date_time": "3:47 pm on 17 March, 2022",
+          "speaker": "James",
+          "text": "Max and Daisy. Will be actually cool to build an app for dog walking and pet care. The goal is to connect pet owners with reliable dog walkers and provide helpful information on pet care."
+        }
+      ],
+      "probe": "What type of mobile application does James plan to build with John?",
+      "answers": [
+        "An app for dog walking and pet care"
+      ],
+      "must_include": [
+        "dog walking"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L08",
+      "title": "单跳",
+      "source_qa_id": "conv-48#q0023",
+      "sample_id": "conv-48",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Deborah",
+        "Jolene"
+      ],
+      "seeds": [
+        "[9:48 am on 4 February, 2023] Jolene: Thanks Deborah! I'm really into this book called \"Sapiens\" - it's a fascinating look at human history and how technology has affected us. It's giving me a lot to think about!",
+        "[9:48 am on 4 February, 2023] Jolene: Two weeks ago I read \"Avalanche\" by Neal Stephenson in one sitting!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D4:21",
+          "session": 4,
+          "date_time": "9:48 am on 4 February, 2023",
+          "speaker": "Jolene",
+          "text": "Thanks Deborah! I'm really into this book called \"Sapiens\" - it's a fascinating look at human history and how technology has affected us. It's giving me a lot to think about!"
+        },
+        {
+          "dia_id": "D4:23",
+          "session": 4,
+          "date_time": "9:48 am on 4 February, 2023",
+          "speaker": "Jolene",
+          "text": "Two weeks ago I read \"Avalanche\" by Neal Stephenson in one sitting!"
+        }
+      ],
+      "probe": "What are Jolene's favorite books?",
+      "answers": [
+        "Sapiens, Avalanche by Neal Stephenson"
+      ],
+      "must_include": [
+        "sapiens",
+        "avalanche"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L09",
+      "title": "单跳",
+      "source_qa_id": "conv-49#q0065",
+      "sample_id": "conv-49",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Evan",
+        "Sam"
+      ],
+      "seeds": [
+        "[1:47 pm on 18 May, 2023] Evan: Hey Sam! Good to see you! Yeah, I just got back from a trip with my family in my new Prius."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:2",
+          "session": 1,
+          "date_time": "1:47 pm on 18 May, 2023",
+          "speaker": "Evan",
+          "text": "Hey Sam! Good to see you! Yeah, I just got back from a trip with my family in my new Prius."
+        }
+      ],
+      "probe": "What type of car did Evan get after his old Prius broke down?",
+      "answers": [
+        "new Prius"
+      ],
+      "must_include": [
+        "prius"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L10",
+      "title": "单跳",
+      "source_qa_id": "conv-50#q0056",
+      "sample_id": "conv-50",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Calvin",
+        "Dave"
+      ],
+      "seeds": [
+        "[11:53 am on 23 March, 2023] Calvin: I'm gonna be in Japan for a few months then off to Boston! I can't wait!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:15",
+          "session": 1,
+          "date_time": "11:53 am on 23 March, 2023",
+          "speaker": "Calvin",
+          "text": "I'm gonna be in Japan for a few months then off to Boston! I can't wait!"
+        }
+      ],
+      "probe": "How long did Calvin plan to stay in Japan?",
+      "answers": [
+        "A few months"
+      ],
+      "must_include": [
+        "few months"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L11",
+      "title": "单跳",
+      "source_qa_id": "conv-26#q0067",
+      "sample_id": "conv-26",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Caroline",
+        "Melanie"
+      ],
+      "seeds": [
+        "[1:14 pm on 25 May, 2023] Melanie: Thanks, Caroline! The event was really thought-provoking. I'm starting to realize that self-care is really important. It's a journey for me, but when I look after myself, I'm able to better look after my family."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D2:3",
+          "session": 2,
+          "date_time": "1:14 pm on 25 May, 2023",
+          "speaker": "Melanie",
+          "text": "Thanks, Caroline! The event was really thought-provoking. I'm starting to realize that self-care is really important. It's a journey for me, but when I look after myself, I'm able to better look after my family."
+        }
+      ],
+      "probe": "What did Melanie realize after the charity race?",
+      "answers": [
+        "self-care is important"
+      ],
+      "must_include": [
+        "self-care"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L12",
+      "title": "单跳",
+      "source_qa_id": "conv-30#q0004",
+      "sample_id": "conv-30",
+      "category": "4",
+      "category_name": "single-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Jon",
+        "Gina"
+      ],
+      "seeds": [
+        "[4:04 pm on 20 January, 2023] Jon: Hey Gina! Good to see you too. Lost my job as a banker yesterday, so I'm gonna take a shot at starting my own business.",
+        "[4:04 pm on 20 January, 2023] Jon: Sorry to hear that! I'm starting a dance studio 'cause I'm passionate about dancing and it'd be great to share it with others."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:2",
+          "session": 1,
+          "date_time": "4:04 pm on 20 January, 2023",
+          "speaker": "Jon",
+          "text": "Hey Gina! Good to see you too. Lost my job as a banker yesterday, so I'm gonna take a shot at starting my own business."
+        },
+        {
+          "dia_id": "D1:4",
+          "session": 1,
+          "date_time": "4:04 pm on 20 January, 2023",
+          "speaker": "Jon",
+          "text": "Sorry to hear that! I'm starting a dance studio 'cause I'm passionate about dancing and it'd be great to share it with others."
+        }
+      ],
+      "probe": "Why did Jon decide to start his dance studio?",
+      "answers": [
+        "He lost his job and decided to start his own business to share his passion."
+      ],
+      "must_include": [
+        "lost",
+        "dance"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L13",
+      "title": "时间推理",
+      "source_qa_id": "conv-41#q0001",
+      "sample_id": "conv-41",
+      "category": "2",
+      "category_name": "temporal",
+      "barrier": "close-session",
+      "speakers": [
+        "John",
+        "Maria"
+      ],
+      "seeds": [
+        "[6:10 pm on 22 December, 2022] Maria: Hey John, been a few days since we chatted. In the meantime, I donated my old car to a homeless shelter I volunteer at yesterday. How's the campaign going? I'm keen to hearabout it."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D2:1",
+          "session": 2,
+          "date_time": "6:10 pm on 22 December, 2022",
+          "speaker": "Maria",
+          "text": "Hey John, been a few days since we chatted. In the meantime, I donated my old car to a homeless shelter I volunteer at yesterday. How's the campaign going? I'm keen to hearabout it."
+        }
+      ],
+      "probe": "When did Maria donate her car?",
+      "answers": [
+        "21 December 2022"
+      ],
+      "must_include": [
+        "21",
+        "december",
+        "2022"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L14",
+      "title": "时间推理",
+      "source_qa_id": "conv-42#q0002",
+      "sample_id": "conv-42",
+      "category": "2",
+      "category_name": "temporal",
+      "barrier": "close-session",
+      "speakers": [
+        "Joanna",
+        "Nate"
+      ],
+      "seeds": [
+        "[7:31 pm on 21 January, 2022] Nate: Hey Joanna! That's cool! I won my first video game tournament last week - so exciting!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:3",
+          "session": 1,
+          "date_time": "7:31 pm on 21 January, 2022",
+          "speaker": "Nate",
+          "text": "Hey Joanna! That's cool! I won my first video game tournament last week - so exciting!"
+        }
+      ],
+      "probe": "When did Nate win his first video game tournament?",
+      "answers": [
+        "the week before 21 January, 2022",
+        "January, 2022",
+        "the middle of January, 2022",
+        "From January 10, 2022 to January 16, 2022"
+      ],
+      "must_include": [
+        "january",
+        "2022"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L15",
+      "title": "时间推理",
+      "source_qa_id": "conv-43#q0007",
+      "sample_id": "conv-43",
+      "category": "2",
+      "category_name": "temporal",
+      "barrier": "close-session",
+      "speakers": [
+        "Tim",
+        "John"
+      ],
+      "seeds": [
+        "[4:21 pm on 16 July, 2023] John: I started surfing five years ago and it's been great. I love the connection to nature."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D3:27",
+          "session": 3,
+          "date_time": "4:21 pm on 16 July, 2023",
+          "speaker": "John",
+          "text": "I started surfing five years ago and it's been great. I love the connection to nature."
+        }
+      ],
+      "probe": "What year did John start surfing?",
+      "answers": [
+        "2018"
+      ],
+      "must_include": [
+        "2018"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L16",
+      "title": "时间推理",
+      "source_qa_id": "conv-44#q0001",
+      "sample_id": "conv-44",
+      "category": "2",
+      "category_name": "temporal",
+      "barrier": "close-session",
+      "speakers": [
+        "Audrey",
+        "Andrew"
+      ],
+      "seeds": [
+        "[1:10 pm on 27 March, 2023] Andrew: Hey Audrey! So, I started a new job as a Financial Analyst last week - it's been quite a change from my previous job. How about you? Anything interesting happening?"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D1:2",
+          "session": 1,
+          "date_time": "1:10 pm on 27 March, 2023",
+          "speaker": "Andrew",
+          "text": "Hey Audrey! So, I started a new job as a Financial Analyst last week - it's been quite a change from my previous job. How about you? Anything interesting happening?"
+        }
+      ],
+      "probe": "When did Andrew start his new job as a financial analyst?",
+      "answers": [
+        "The week before March 27, 2023",
+        "From March 20, 2023 to March 26, 2023"
+      ],
+      "must_include": [
+        "march",
+        "2023"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L17",
+      "title": "多跳",
+      "source_qa_id": "conv-47#q0011",
+      "sample_id": "conv-47",
+      "category": "1",
+      "category_name": "multi-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "James",
+        "John"
+      ],
+      "seeds": [
+        "[2:36 pm on 29 April, 2022] John: Cool! Heard of \"The Name of the Wind\"? It's another great novel with awesome writing.",
+        "[5:07 pm on 16 June, 2022] John: Definitely! Two of my favorites are \"The Stormlight Archive\" and \"Kingkiller Chronicle\". If SF is your thing, check out \"The Expanse\" series. It's epic!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D8:14",
+          "session": 8,
+          "date_time": "2:36 pm on 29 April, 2022",
+          "speaker": "John",
+          "text": "Cool! Heard of \"The Name of the Wind\"? It's another great novel with awesome writing."
+        },
+        {
+          "dia_id": "D14:10",
+          "session": 14,
+          "date_time": "5:07 pm on 16 June, 2022",
+          "speaker": "John",
+          "text": "Definitely! Two of my favorites are \"The Stormlight Archive\" and \"Kingkiller Chronicle\". If SF is your thing, check out \"The Expanse\" series. It's epic!"
+        }
+      ],
+      "probe": "Which books has John recommended to James?",
+      "answers": [
+        "The Name of the Wind, Stormlight Archive, Kingkiller Chronicles, Expanse"
+      ],
+      "must_include": [
+        "name of the wind",
+        "stormlight",
+        "kingkiller",
+        "expanse"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L18",
+      "title": "多跳",
+      "source_qa_id": "conv-41#q0002",
+      "sample_id": "conv-41",
+      "category": "1",
+      "category_name": "multi-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "John",
+        "Maria"
+      ],
+      "seeds": [
+        "[6:10 pm on 22 December, 2022] John: Yep, let's keep making great memories with our loved ones and cherishing the time we have. I'm off to do some taekwondo!",
+        "[11:01 am on 17 December, 2022] John: Woah, Maria, that sounds cool! I'm doing kickboxing and it's giving me so much energy."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D2:28",
+          "session": 2,
+          "date_time": "6:10 pm on 22 December, 2022",
+          "speaker": "John",
+          "text": "Yep, let's keep making great memories with our loved ones and cherishing the time we have. I'm off to do some taekwondo!"
+        },
+        {
+          "dia_id": "D1:4",
+          "session": 1,
+          "date_time": "11:01 am on 17 December, 2022",
+          "speaker": "John",
+          "text": "Woah, Maria, that sounds cool! I'm doing kickboxing and it's giving me so much energy."
+        }
+      ],
+      "probe": "What martial arts has John done?",
+      "answers": [
+        "Kickboxing, Taekwondo"
+      ],
+      "must_include": [
+        "kickboxing",
+        "taekwondo"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L19",
+      "title": "多跳",
+      "source_qa_id": "conv-49#q0014",
+      "sample_id": "conv-49",
+      "category": "1",
+      "category_name": "multi-hop",
+      "barrier": "close-session",
+      "speakers": [
+        "Evan",
+        "Sam"
+      ],
+      "seeds": [
+        "[3:55 pm on 6 June, 2023] Sam: Cool, can't wait! Thank you. By the way, I'm coming from the shop and I had a frustrating issue at the supermarket. The self-checkout machines were all broken, my mood is terrible now!",
+        "[11:00 am on 31 December, 2023] Sam: Thanks, Evan! I'll give these a try. They look yum. Your help means a lot to me. Btw you know what? I went to the store again and, unsurprisingly, had issues with the self-checkout. It's becoming a regular annoyance."
+      ],
+      "evidence": [
+        {
+          "dia_id": "D3:16",
+          "session": 3,
+          "date_time": "3:55 pm on 6 June, 2023",
+          "speaker": "Sam",
+          "text": "Cool, can't wait! Thank you. By the way, I'm coming from the shop and I had a frustrating issue at the supermarket. The self-checkout machines were all broken, my mood is terrible now!"
+        },
+        {
+          "dia_id": "D22:19",
+          "session": 22,
+          "date_time": "11:00 am on 31 December, 2023",
+          "speaker": "Sam",
+          "text": "Thanks, Evan! I'll give these a try. They look yum. Your help means a lot to me. Btw you know what? I went to the store again and, unsurprisingly, had issues with the self-checkout. It's becoming a regular annoyance."
+        }
+      ],
+      "probe": "What recurring issue frustrates Sam at the grocery store?",
+      "answers": [
+        "Malfunctioning self-checkout machines."
+      ],
+      "must_include": [
+        "self-checkout"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    },
+    {
+      "id": "L20",
+      "title": "开放推断",
+      "source_qa_id": "conv-50#q0012",
+      "sample_id": "conv-50",
+      "category": "3",
+      "category_name": "open-domain",
+      "barrier": "close-session",
+      "speakers": [
+        "Calvin",
+        "Dave"
+      ],
+      "seeds": [
+        "[6:06 pm on 31 May, 2023] Calvin: Performing live always fuels my soul! I love the rush and connection with the crowd, the feeling's indescribable—it's an absolute high!"
+      ],
+      "evidence": [
+        {
+          "dia_id": "D7:11",
+          "session": 7,
+          "date_time": "6:06 pm on 31 May, 2023",
+          "speaker": "Calvin",
+          "text": "Performing live always fuels my soul! I love the rush and connection with the crowd, the feeling's indescribable—it's an absolute high!"
+        }
+      ],
+      "probe": "Would Calvin enjoy performing at the Hollywood Bowl?",
+      "answers": [
+        "Yes; because he enjoys the rush of performing onstage to large crowds",
+        "Yes"
+      ],
+      "must_include": [
+        "yes"
+      ],
+      "pass": "命中标准答案之一，或覆盖 must_include 全部记号",
+      "fail": "缺关键记号、说错、或编造未埋点事实"
+    }
+  ]
+}

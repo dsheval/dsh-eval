@@ -1,0 +1,7 @@
+# Headless capability test: preserve the plugin's approval seam semantics while
+# choosing its documented non-interactive policy. The run metadata records that
+# the guided protocol applied this overlay.
+- id: memento
+  config:
+    writePolicy: auto
+    language: zh
