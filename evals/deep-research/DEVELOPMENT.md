@@ -38,17 +38,19 @@
 
 P1 Hanai 和 P3 Scholar 不是普通的注册表安装。`scripts/prepare-wsl.sh` 在 Ubuntu/WSL 内准备固定 Node 24.19、pnpm、DSH 0.1.1-rc.2、源码构建和原生 Docker Engine；依赖放在 `~/.local/share/dsh-research-eval`，不写入仓库。P1 调用上游专用 Profile 安装器，P3 从构建后的本地源码安装。runner 会检查构建产物、Node/DSH 版本以及 P3 的 Docker daemon，任一缺失都 fail closed。
 
+固定工具链、源码构建、冒烟检查和正式评测使用专用非 root 账户 `dsheval`；只有安装或启动系统级 Docker Engine 时使用 `root`。`dsheval` 的 `~/.dsh/.credentials.yaml` 应只包含本轮需要的短期凭据，权限必须为 `0600`。
+
 ```powershell
-wsl.exe -d Ubuntu -- bash /mnt/d/dsh-eval/evals/deep-research/scripts/prepare-wsl.sh build-p1
-wsl.exe -d Ubuntu -- bash /mnt/d/dsh-eval/evals/deep-research/scripts/prepare-wsl.sh build-p3
-wsl.exe -d Ubuntu -- bash /mnt/d/dsh-eval/evals/deep-research/scripts/prepare-wsl.sh docker
+wsl.exe -d Ubuntu -u dsheval -- bash /mnt/d/dsh-eval/evals/deep-research/scripts/prepare-wsl.sh build-p1
+wsl.exe -d Ubuntu -u dsheval -- bash /mnt/d/dsh-eval/evals/deep-research/scripts/prepare-wsl.sh build-p3
+wsl.exe -d Ubuntu -u root -- bash /mnt/d/dsh-eval/evals/deep-research/scripts/prepare-wsl.sh docker
 ```
 
 源码 Profile 冒烟检查只做安装与组合配置验证，不启动 DSH Host、不调用模型：
 
 ```powershell
-wsl.exe -d Ubuntu -- bash -lc 'export DSH_RESEARCH_EVAL_DEPS="$HOME/.local/share/dsh-research-eval"; export PATH="$DSH_RESEARCH_EVAL_DEPS/runtime/node-v24.19.0/bin:$HOME/.local/bin:$PATH"; cd /mnt/d/dsh-eval/evals/deep-research; node scripts/admission-smoke.mjs P1'
-wsl.exe -d Ubuntu -- bash -lc 'export DSH_RESEARCH_EVAL_DEPS="$HOME/.local/share/dsh-research-eval"; export PATH="$DSH_RESEARCH_EVAL_DEPS/runtime/node-v24.19.0/bin:$HOME/.local/bin:$PATH"; cd /mnt/d/dsh-eval/evals/deep-research; node scripts/admission-smoke.mjs P3'
+wsl.exe -d Ubuntu -u dsheval -- bash -lc 'export DSH_RESEARCH_EVAL_DEPS="$HOME/.local/share/dsh-research-eval"; export PATH="$DSH_RESEARCH_EVAL_DEPS/runtime/node-v24.19.0/bin:$HOME/.local/bin:$PATH"; cd /mnt/d/dsh-eval/evals/deep-research; node scripts/admission-smoke.mjs P1'
+wsl.exe -d Ubuntu -u dsheval -- bash -lc 'export DSH_RESEARCH_EVAL_DEPS="$HOME/.local/share/dsh-research-eval"; export PATH="$DSH_RESEARCH_EVAL_DEPS/runtime/node-v24.19.0/bin:$HOME/.local/bin:$PATH"; cd /mnt/d/dsh-eval/evals/deep-research; node scripts/admission-smoke.mjs P3'
 ```
 
 其他插件走独立目标 DSH_HOME。即使卸载失败，也不会污染下一插件的 Profile。

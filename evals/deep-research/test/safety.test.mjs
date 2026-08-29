@@ -20,3 +20,12 @@ test("Host 从隔离 DSH_HOME 启动而不是评测目录", () => {
   assert.match(startBlock, /cwd:\s*home/);
   assert.doesNotMatch(startBlock, /cwd:\s*EVAL_ROOT/);
 });
+
+test("pnpm 原生依赖许可逐项传递，不能合并成一个无效包名", () => {
+  const source = readFileSync(new URL("../scripts/prepare-wsl.sh", import.meta.url), "utf8");
+  const expected = ["@deepseek-ai/dsh-subprocess-local", "@google/genai", "koffi", "node-pty", "protobufjs"];
+  for (const packageName of expected) {
+    assert.match(source, new RegExp(`--allow-build="${packageName.replace("/", "\\/")}"`));
+  }
+  assert.doesNotMatch(source, /--allow-build="[^"]*,[^"]*"/);
+});

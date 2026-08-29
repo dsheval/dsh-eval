@@ -69,7 +69,11 @@ install_dsh_cli() {
   export PATH="${NODE_ROOT}/bin:${BIN_ROOT}:${PATH}"
   install -d -m 0755 "${DSH_CLI_ROOT}"
   pnpm --dir "${DSH_CLI_ROOT}" add "@deepseek-ai/dsh@${DSH_VERSION}" --ignore-workspace \
-    --allow-build="@deepseek-ai/dsh-subprocess-local,@google/genai,koffi,node-pty,protobufjs"
+    --allow-build="@deepseek-ai/dsh-subprocess-local" \
+    --allow-build="@google/genai" \
+    --allow-build="koffi" \
+    --allow-build="node-pty" \
+    --allow-build="protobufjs"
   ln -sfn "${DSH_CLI_ROOT}/node_modules/@deepseek-ai/dsh/lib/bin.js" "${BIN_ROOT}/dsh"
   dsh --version
 }
