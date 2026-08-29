@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -6,17 +7,27 @@ import { test } from "node:test";
 import { loadCatalog } from "../src/catalog.mjs";
 import { RpcHttpError } from "../src/host.mjs";
 import { loadSuite } from "../src/lib.mjs";
-import { assertSafeWipe, expandWipe, prepareSourceCheckout } from "../src/plugin-ops.mjs";
+import {
+  assertSafeWipe,
+  expandWipe,
+  preparePackageTarball,
+  prepareSourceCheckout,
+} from "../src/plugin-ops.mjs";
 import { ensureProfile, WEB_BUNDLES } from "../src/profile.mjs";
 import {
   baselineBroken,
   expandTargetEnvironment,
+  isolatedHomeEnvironment,
   isRetryableHandlerFailure,
+  newHistoryEvents,
   planSuite,
+  pluginIsolationIssues,
   prepareTargets,
+  requiredTargetEnvironment,
   runSuite,
   runTaskWithHandlerFailureRetry,
   selectTasks,
+  startTarget,
 } from "../src/suite-runner.mjs";
 
 test("dry-run 计划对每个目标走同一套，不写死 P1–P8", async () => {
@@ -34,7 +45,7 @@ test("dry-run 计划对每个目标走同一套，不写死 P1–P8", async () =
   });
   assert.deepEqual(plan.targets, ["C0", "P1"]);
   assert.ok(plan.steps.includes("C0 install none"));
-  assert.ok(plan.steps.includes("P1 install @mem9/dsh-plugin"));
+  assert.ok(plan.steps.includes("P1 install @mem9/dsh-plugin@0.1.0"));
   assert.ok(plan.steps.includes("C0 T1 reset → seed → close-session → probe → score"));
   assert.ok(plan.steps.includes("P1 T8 reset → seed → kill-dsh → probe → score"));
   assert.ok(!plan.steps.some((step) => step.includes("P2 ")));
@@ -192,6 +203,111 @@ test("目标环境变量展开稳定工具目录且不写死用户路径", () =>
   );
   assert.equal(env.BIN, "D:/base/memory-eval-tools/bin.exe");
   assert.equal(env.DB, "D:/base/memory-eval-targets/P8/memory/db.sqlite");
+});
+
+test("只把名录声明的插件 Key 传进最小目标环境", () => {
+  const env = requiredTargetEnvironment(
+    { requiredEnv: ["MEM9_API_KEY"] },
+    { MEM9_API_KEY: "dedicated", GITHUB_TOKEN: "must-not-pass" },
+  );
+  assert.deepEqual(env, { MEM9_API_KEY: "dedicated" });
+  assert.deepEqual(isolatedHomeEnvironment("D:/eval/P1"), {
+    HOME: "D:/eval/P1",
+    USERPROFILE: "D:/eval/P1",
+    APPDATA: join("D:/eval/P1", ".appdata", "roaming"),
+    LOCALAPPDATA: join("D:/eval/P1", ".appdata", "local"),
+    XDG_CACHE_HOME: join("D:/eval/P1", ".cache"),
+    XDG_CONFIG_HOME: join("D:/eval/P1", ".config"),
+    XDG_DATA_HOME: join("D:/eval/P1", ".local", "share"),
+  });
+});
+
+test("第三方插件缺少隔离声明或专用凭据时安全拒绝", () => {
+  const credentials = join(mkdtempSync(join(tmpdir(), "memory-eval-isolation-")), "credentials.yml");
+  writeFileSync(credentials, "credential: short-lived\n");
+  assert.equal(pluginIsolationIssues({ add: null }, {}).length, 0);
+  assert.equal(pluginIsolationIssues({ add: "pkg@1.0.0" }, {}).length, 2);
+  assert.deepEqual(
+    pluginIsolationIssues(
+      { add: "pkg@1.0.0" },
+      { DSH_EVAL_ISOLATED: "1", DSH_EVAL_CREDENTIALS_FILE: credentials },
+    ),
+    [],
+  );
+  const dailyHome = mkdtempSync(join(tmpdir(), "memory-eval-daily-home-"));
+  const dailyCredentials = join(dailyHome, ".credentials.yaml");
+  writeFileSync(dailyCredentials, "credential: daily\n");
+  assert.match(
+    pluginIsolationIssues(
+      { add: "pkg@1.0.0" },
+      { DSH_EVAL_ISOLATED: "1", DSH_EVAL_CREDENTIALS_FILE: dailyCredentials },
+      { baseHome: dailyHome },
+    ).join("\n"),
+    /不能指向日常/,
+  );
+});
+
+test("Host 启动或 smoke 失败会降级为当前目标失败，不抛出中断整批", async () => {
+  const bootFailure = await startTarget({
+    boot: async () => { throw new Error("boot failed"); },
+    smoke: async () => {},
+  });
+  assert.equal(bootFailure.start, "失败");
+  assert.match(bootFailure.error.message, /boot failed/);
+
+  const smokeFailure = await startTarget({
+    boot: async () => ({ id: "host" }),
+    smoke: async () => { throw new Error("smoke failed"); },
+  });
+  assert.equal(smokeFailure.start, "失败");
+  assert.equal(smokeFailure.host, undefined);
+  assert.match(smokeFailure.error.message, /smoke failed/);
+});
+
+test("多轮 seed 的完整 history 只累计每轮新增事件", () => {
+  const first = [{ event: { id: "u1" } }, { event: { id: "a1" } }];
+  const second = [...first, { event: { id: "u2" } }, { event: { id: "a2" } }];
+  const third = [...second, { event: { id: "u3" } }, { event: { id: "a3" } }];
+  assert.deepEqual(newHistoryEvents([], first), first);
+  assert.deepEqual(newHistoryEvents(first, second), second.slice(2));
+  assert.deepEqual(newHistoryEvents(second, third), third.slice(4));
+});
+
+test("固定包下载后校验 SRI，并缓存通过校验的 tarball", async () => {
+  const root = mkdtempSync(join(tmpdir(), "memory-eval-package-cache-"));
+  const archive = Buffer.from("pinned package tarball");
+  const integrity = `sha512-${createHash("sha512").update(archive).digest("base64")}`;
+  let fetches = 0;
+  const target = {
+    id: "P-test",
+    packageTarball: "https://registry.npmjs.org/example/-/example-1.0.0.tgz",
+    packageIntegrity: integrity,
+  };
+  const first = await preparePackageTarball(target, {
+    sourceCacheRoot: root,
+    fetch: async () => {
+      fetches += 1;
+      return { ok: true, status: 200, arrayBuffer: async () => archive };
+    },
+  });
+  assert.equal(first.ok, true);
+  assert.equal(readFileSync(first.path, "utf8"), archive.toString());
+  const cached = await preparePackageTarball(target, {
+    sourceCacheRoot: root,
+    fetch: async () => { throw new Error("cache should avoid network"); },
+  });
+  assert.equal(cached.ok, true);
+  assert.equal(fetches, 1);
+
+  const rejected = await preparePackageTarball(
+    { ...target, id: "P-bad", packageIntegrity: `sha512-${Buffer.alloc(64).toString("base64")}` },
+    {
+      sourceCacheRoot: root,
+      fetch: async () => ({ ok: true, status: 200, arrayBuffer: async () => archive }),
+    },
+  );
+  assert.equal(rejected.ok, false);
+  assert.match(rejected.reason, /完整性校验失败/);
 });
 
 test("handler failure 会停 Host、清插件和会话、冷启动后整题重跑一次", async () => {

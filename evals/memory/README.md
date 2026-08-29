@@ -63,6 +63,17 @@ T7 若整库灌窗，记分时加 `--dumped`。自动跑用 `suite --detach`，�
 
 自动跑默认 `--protocol matched`：`mem9`、`graph-memory` 走 `passive`；依靠模型调用记忆工具的插件走 `guided`。要专门测所有插件的零提示体验，用 `--protocol passive`。`matched` 若同时包含两种协议，会分别跑 `C0:passive` 与 `C0:guided`；运行目录和排行榜也带协议名，不会混账。
 
+第三方插件会在 Host 进程中执行代码。运行器默认安全拒绝在日常账户和日常凭据上启动它们。请先使用低权限容器或独立系统账户，创建本轮专用、短期、可撤销的凭据文件，再设置：
+
+```bash
+export DSH_EVAL_ISOLATED=1
+export DSH_EVAL_CREDENTIALS_FILE=/secure/path/short-lived.credentials.yaml
+```
+
+PowerShell 对应 `$env:DSH_EVAL_ISOLATED = '1'` 与 `$env:DSH_EVAL_CREDENTIALS_FILE = 'D:\secure\short-lived.credentials.yaml'`。插件子进程只继承最小运行环境和名录 `requiredEnv` 明确列出的 Key。C0 可继续使用原生 DSH 凭据。
+
+`--all-memory` 只把远端榜单当作发现和排序数据：远端条目必须先进入本地 `fixtures/catalog.json`，固定版本、下载 URL 与完整性摘要后才可执行。未知条目会被跳过，不会把榜单里的安装命令交给 shell 或包管理器。
+
 完整双轨复测使用 `--protocol both`，运行器会串行跑完 `passive` 再跑 `guided`，不会同时安装两个插件或让两条轨争用 Host。
 
 完成双轨榜单后，用下面的命令生成网站读取的脱敏快照。它只导出排行、正确率、延迟、Token、工具调用与协议说明，不会导出逐题回答、本机路径或会话记录。

@@ -11,7 +11,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
-import { killProcess, spawnDsh } from "./host.mjs";
+import { dshEnv, killProcess, spawnDsh } from "./host.mjs";
 
 const SOURCE_REF_MARKER = ".dsh-source-ref";
 
@@ -63,7 +63,14 @@ export async function installPlugin(profile, target, options = {}) {
   if (!target.add) return { ok: true, skipped: true, output: "" };
   let addSpec = target.add;
   let sourceOutput = "";
-  if (target.sourceRepo && target.sourceSubdir) {
+  if (target.packageTarball || target.packageIntegrity) {
+    const prepared = await preparePackageTarball(target, options);
+    if (!prepared.ok) {
+      return { ok: false, skipped: false, output: prepared.output, reason: prepared.reason };
+    }
+    addSpec = `file:${prepared.path}`;
+    sourceOutput = prepared.output;
+  } else if (target.sourceRepo && target.sourceSubdir) {
     const prepared = await prepareSourceCheckout(target, options);
     if (!prepared.ok) return { ok: false, skipped: false, output: prepared.output, reason: prepared.reason };
     const sourceInstallMode = target.sourceInstallMode ?? "link";
@@ -86,6 +93,80 @@ export async function installPlugin(profile, target, options = {}) {
     output: `${sourceOutput}${result.output}`,
     reason: noBundle ? "安装包没有 dsh.bundle，只是普通依赖" : "",
   };
+}
+
+export async function preparePackageTarball(target, options = {}) {
+  if (!target.packageTarball || !target.packageIntegrity) {
+    return {
+      ok: false,
+      reason: "固定包安装必须同时提供 packageTarball 与 packageIntegrity",
+      output: "",
+    };
+  }
+  let url;
+  try {
+    url = new URL(target.packageTarball);
+  } catch {
+    return { ok: false, reason: "固定包 URL 无效", output: "" };
+  }
+  if (url.protocol !== "https:") {
+    return { ok: false, reason: "固定包只允许 HTTPS", output: "" };
+  }
+
+  const cacheRoot = options.sourceCacheRoot ?? join(dirname(dirname(options.env?.DSH_HOME ?? "")), "memory-eval-tools", "sources");
+  if (!options.sourceCacheRoot && !options.env?.DSH_HOME) {
+    return { ok: false, reason: "固定包缓存需要 sourceCacheRoot 或独立 DSH_HOME", output: "" };
+  }
+  const packageRoot = join(cacheRoot, "packages");
+  const safeId = String(target.id).replace(/[^A-Za-z0-9._-]+/g, "-");
+  if (!safeId) return { ok: false, reason: "固定包目标 id 为空", output: "" };
+  const archivePath = join(packageRoot, `${safeId}.tgz`);
+  assertCacheTarget(archivePath, packageRoot);
+  mkdirSync(packageRoot, { recursive: true });
+
+  if (existsSync(archivePath)) {
+    const cached = readFileSync(archivePath);
+    if (verifyPackageIntegrity(cached, target.packageIntegrity)) {
+      return { ok: true, path: archivePath, output: "Using verified cached package tarball.\n" };
+    }
+    rmSync(archivePath, { force: true });
+  }
+
+  try {
+    const fetchImpl = options.fetch ?? fetch;
+    const response = await fetchImpl(url, {
+      headers: { "user-agent": "dsh-memory-eval" },
+      signal: AbortSignal.timeout(options.sourceDownloadTimeoutMs ?? 120_000),
+    });
+    if (!response.ok) {
+      return {
+        ok: false,
+        reason: `固定包下载失败: ${response.status} ${response.statusText ?? ""}`.trim(),
+        output: "",
+      };
+    }
+    const archive = Buffer.from(await response.arrayBuffer());
+    if (!verifyPackageIntegrity(archive, target.packageIntegrity)) {
+      return { ok: false, reason: "固定包完整性校验失败", output: "" };
+    }
+    const tempPath = `${archivePath}.${process.pid}.tmp`;
+    writeFileSync(tempPath, archive);
+    renameSync(tempPath, archivePath);
+    return { ok: true, path: archivePath, output: "Downloaded and verified pinned package tarball.\n" };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: `固定包不可用: ${error instanceof Error ? error.message : String(error)}`,
+      output: "",
+    };
+  }
+}
+
+export function verifyPackageIntegrity(buffer, integrity) {
+  const match = /^(sha256|sha384|sha512)-([A-Za-z0-9+/=]+)$/.exec(String(integrity ?? ""));
+  if (!match) return false;
+  const actual = createHash(match[1]).update(buffer).digest("base64");
+  return actual === match[2];
 }
 
 export async function prepareSourceCheckout(target, options = {}) {
@@ -269,7 +350,7 @@ async function runProcess(command, args, options = {}) {
   return await new Promise((resolvePromise) => {
     const child = spawn(command, args, {
       cwd: options.cwd,
-      env: { ...process.env, ...(options.env ?? {}) },
+      env: dshEnv(options),
       windowsHide: true,
       stdio: ["ignore", "pipe", "pipe"],
     });

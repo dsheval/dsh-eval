@@ -5,6 +5,39 @@ import { createRequire } from "node:module";
 import { createConnection } from "node:net";
 import { join } from "node:path";
 
+const SAFE_INHERITED_ENV = [
+  "APPDATA",
+  "CI",
+  "ComSpec",
+  "HOME",
+  "HTTP_PROXY",
+  "HTTPS_PROXY",
+  "LANG",
+  "LC_ALL",
+  "LOCALAPPDATA",
+  "NODE_EXTRA_CA_CERTS",
+  "NO_COLOR",
+  "NO_PROXY",
+  "NPM_CONFIG_REGISTRY",
+  "Path",
+  "PATH",
+  "PATHEXT",
+  "PNPM_HOME",
+  "PROGRAMDATA",
+  "PROGRAMFILES",
+  "PROGRAMFILES(X86)",
+  "SSL_CERT_DIR",
+  "SSL_CERT_FILE",
+  "SystemRoot",
+  "SYSTEMROOT",
+  "TEMP",
+  "TERM",
+  "TMP",
+  "TMPDIR",
+  "USERPROFILE",
+  "WINDIR",
+];
+
 export function evalBaseUrl(port) {
   return `http://127.0.0.1:${port}`;
 }
@@ -231,7 +264,15 @@ export async function turn(host, sessionId, text, options = {}) {
 }
 
 export function dshEnv(options = {}) {
-  return { ...process.env, ...options.env };
+  const source = options.inheritEnv ?? process.env;
+  const env = {};
+  for (const name of SAFE_INHERITED_ENV) {
+    if (source[name] != null) env[name] = source[name];
+  }
+  for (const [name, value] of Object.entries(options.env ?? {})) {
+    if (value != null) env[name] = String(value);
+  }
+  return env;
 }
 
 export function resolveDshBin() {
@@ -246,27 +287,32 @@ export function resolveDshBin() {
   }
 }
 
-export function spawnDsh(args, options = {}) {
-  const env = dshEnv(options);
-  const bin = resolveDshBin();
+export function resolveDshInvocation(args, options = {}) {
+  const bin = options.binPath === undefined ? resolveDshBin() : options.binPath;
   if (bin) {
     const nodeArgs = options.exposeInternals
       ? ["--expose-internals", bin, ...args]
       : [bin, ...args];
-    return spawn(process.execPath, nodeArgs, {
-      stdio: options.stdio ?? ["ignore", "pipe", "pipe"],
-      env,
-      cwd: options.cwd,
-      windowsHide: true,
-    });
+    return {
+      file: options.execPath ?? process.execPath,
+      args: nodeArgs,
+    };
   }
   if (options.exposeInternals) {
     throw new Error("找不到 @deepseek-ai/dsh，无法带 --expose-internals 启动");
   }
-  const file = process.platform === "win32" ? "dsh.cmd" : "dsh";
-  return spawn(file, args, {
+  if ((options.platform ?? process.platform) === "win32") {
+    throw new Error("找不到 @deepseek-ai/dsh 的 JS 入口；为避免 cmd 注入，Windows 不使用 shell 回退");
+  }
+  return { file: "dsh", args: [...args] };
+}
+
+export function spawnDsh(args, options = {}) {
+  const env = dshEnv(options);
+  const invocation = resolveDshInvocation(args, options);
+  return spawn(invocation.file, invocation.args, {
     stdio: options.stdio ?? ["ignore", "pipe", "pipe"],
-    shell: process.platform === "win32",
+    shell: false,
     env,
     cwd: options.cwd,
     windowsHide: true,

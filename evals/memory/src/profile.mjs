@@ -59,10 +59,24 @@ export function prepareTargetHome(baseHome, targetId, options = {}) {
   const dir = targetHome(baseHome, targetId);
   if (options.fresh && existsSync(dir)) rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
-  for (const name of [".credentials.yaml", "settings.yaml", ".anonymous-user-id"]) {
+  for (const name of ["settings.yaml", ".anonymous-user-id"]) {
     const source = join(baseHome, name);
     const dest = join(dir, name);
     if (existsSync(source) && !existsSync(dest)) copyFileSync(source, dest);
+  }
+  const credentialsDest = join(dir, ".credentials.yaml");
+  if (options.credentialsPath) {
+    if (!existsSync(options.credentialsPath)) {
+      throw new Error(`专用评测凭据不存在: ${options.credentialsPath}`);
+    }
+    copyFileSync(options.credentialsPath, credentialsDest);
+  } else if (options.copyBaseCredentials !== false) {
+    const source = join(baseHome, ".credentials.yaml");
+    if (existsSync(source) && !existsSync(credentialsDest)) copyFileSync(source, credentialsDest);
+  } else if (existsSync(credentialsDest)) {
+    // A plugin target must never silently reuse credentials copied by an older,
+    // less isolated evaluator run.
+    rmSync(credentialsDest, { force: true });
   }
   return dir;
 }

@@ -32,6 +32,16 @@ npm run build
 npm run eval:memory -- --help
 ```
 
+运行第三方插件前必须使用低权限容器或独立系统账户，并准备只用于本轮、可随时撤销的 DSH 凭据文件：
+
+```bash
+export DSH_EVAL_ISOLATED=1
+export DSH_EVAL_CREDENTIALS_FILE=/secure/path/short-lived.credentials.yaml
+npm run eval:memory -- suite --plugins dsh-mnemon --fresh
+```
+
+PowerShell 使用 `$env:DSH_EVAL_ISOLATED = '1'` 和 `$env:DSH_EVAL_CREDENTIALS_FILE = 'D:\secure\short-lived.credentials.yaml'`。未满足这两个安全前置条件时，第三方插件会被记录为安装失败；C0 原生基线不受影响。
+
 评测完成后生成网站使用的脱敏快照：
 
 ```bash
@@ -210,6 +220,8 @@ dsh-eval/
 - `evals/memory/records/`、`~/.dsh/memory-eval-workspaces/`、插件数据库和 DSH 会话均为本机运行数据，不提交 Git。
 - `app/data/memory/` 与 `public/data/memory/` 只保存经 `export-site.mjs` 裁剪后的公开指标，不包含标准答案、逐题回答、会话 ID、本机路径或原始会话。
 - 第三方插件会执行代码。正式评测应在隔离、低权限、仅带专用短期凭据的环境运行，不能把个人开发机或长期密钥当作安全边界。
+- DSH 子进程只继承运行所需的最小环境变量；插件 API Key 只有在名录的 `requiredEnv` 中明确声明时才会传入。
+- 远端排行榜只用于从本地审核名录中选择和排序插件，不能提供安装命令；所有执行源都必须固定版本并通过 SHA-256 或 SRI 校验。
 
 ## 部署
 

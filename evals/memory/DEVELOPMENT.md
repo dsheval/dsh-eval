@@ -39,7 +39,7 @@
 3. 收尾：停 Host，卸插件，按该行的 wipe 表清数据。未知路径不盲删，记「未清干净」。
 4. 下一个。一次只装一个。C0 必须先跑；跨会话还全对就停。
 
-名录从哪来都可以：手写 `catalog.json`、或从总榜按「记忆向」筛。**第一批 8 个只是默认子集**，`suite --all-memory` 对筛出来的全部记忆插件跑同一流程（排除 skill，排除 `dsh-context` 等窗口插件）。未知插件默认 `passive`，正式出榜前必须核对其官方交互面并补 `defaultProtocol`。P3/P5 用名录上的 `conflictsWith` 声明，不要写进驱动 if/else。
+可执行名录只来自本地审核过的 `catalog.json`。`suite --all-memory` 会用远端总榜发现和排序记忆向条目（排除 skill，排除 `dsh-context` 等窗口插件），但只保留能与本地名录精确匹配的目标；远端 `install.commands` 永远不会转成执行命令。新插件必须先核对官方交互面、固定 commit/精确包版本、记录完整性摘要，并补齐 `defaultProtocol` 后才能进入评测。P3/P5 用名录上的 `conflictsWith` 声明，不要写进驱动 if/else。
 
 引导协议仍通过用户自然语言让模型调用插件，不由运行器直接调用某个厂商的 `remember` / `recall` 工具。这样保持端到端行为，同时不再把工具驱动插件错当作自动抽取插件。
 
@@ -58,7 +58,7 @@ node src/run.mjs suite --plugins none --tasks T1 --detach --tester 实测
 node src/run.mjs status
 ```
 
-人只准备：机器已登录、模型能出字、要 Key 的插件把 Key 配好。脚本会自己建 `memory-eval` profile（`dsh-base` + `dsh-web-app`），不要抄日常 web，也不要用日常 web 当评测机。扫码 / 填 Key / 充额度不能自动。
+人只准备：C0 所用 DSH 已登录、模型能出字。第三方插件必须在低权限容器或独立系统账户内运行，设置 `DSH_EVAL_ISOLATED=1`，并用 `DSH_EVAL_CREDENTIALS_FILE` 指向本轮专用、短期、可撤销的凭据文件；要 Key 的插件再把名录 `requiredEnv` 声明的 Key 配好。运行器不会复制日常 DSH 凭据，也不会把未声明的 GitHub、AWS 等环境密钥传给插件子进程。脚本会自己建 `memory-eval` profile（`dsh-base` + `dsh-web-app`），不要抄日常 web，也不要用日常 web 当评测机。扫码 / 填 Key / 充额度不能自动。
 
 评测 Host：`dsh --profile memory-eval --port 3180 --no-open`。
 

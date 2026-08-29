@@ -24,6 +24,8 @@
         "add": { "type": ["string", "null"], "description": "交给 dsh plugin add 的 spec；C0 为 null" },
         "removeName": { "type": "string", "description": "交给 dsh plugin remove 的实际包名；省略时使用 plugin" },
         "requiredEnv": { "type": "array", "items": { "type": "string" }, "description": "缺少任一变量时标记未配置，不进入质量评分" },
+        "packageTarball": { "type": "string", "pattern": "^https://", "description": "固定 npm/GitHub tarball；下载后校验 packageIntegrity，再从本地文件安装" },
+        "packageIntegrity": { "type": "string", "pattern": "^sha(256|384|512)-[A-Za-z0-9+/=]+$" },
         "sourceRepo": { "type": "string" },
         "sourceSubdir": { "type": "string" },
         "sourceRef": { "type": "string" },

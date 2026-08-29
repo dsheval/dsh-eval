@@ -57,3 +57,24 @@ test("每个插件使用独立 DSH_HOME，fresh 会清理本插件残留", () =>
   prepareTargetHome(base, "P1", { fresh: true });
   assert.equal(existsSync(join(first, "plugin-memory.db")), false);
 });
+
+test("第三方插件目标不复制日常凭据，只接受显式专用凭据", () => {
+  const base = mkdtempSync(join(tmpdir(), "memory-eval-credentials-"));
+  writeFileSync(join(base, ".credentials.yaml"), "credential: daily\n");
+  const isolated = prepareTargetHome(base, "P1", {
+    fresh: true,
+    copyBaseCredentials: false,
+  });
+  assert.equal(existsSync(join(isolated, ".credentials.yaml")), false);
+
+  const dedicated = join(base, "short-lived.credentials.yaml");
+  writeFileSync(dedicated, "credential: short-lived\n");
+  prepareTargetHome(base, "P1", {
+    credentialsPath: dedicated,
+    copyBaseCredentials: false,
+  });
+  assert.equal(
+    readFileSync(join(isolated, ".credentials.yaml"), "utf8"),
+    "credential: short-lived\n",
+  );
+});

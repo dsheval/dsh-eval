@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { join } from "node:path";
+import { existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { catalogTargets, fetchRankings, loadRankings, resolveTargets } from "./catalog.mjs";
 import {
   createHost,
@@ -152,11 +153,21 @@ export async function runSuite(options) {
 
   try {
     for (const target of targets) {
-      const targetRoot = prepareTargetHome(home, target.id, { fresh: Boolean(options.fresh) });
+      const isolationIssues = pluginIsolationIssues(target, process.env, { baseHome: home });
+      const credentialsPath = target.add && isolationIssues.length === 0
+        ? process.env.DSH_EVAL_CREDENTIALS_FILE
+        : undefined;
+      const targetRoot = prepareTargetHome(home, target.id, {
+        fresh: Boolean(options.fresh),
+        credentialsPath,
+        copyBaseCredentials: !target.add,
+      });
       const controlPort = options.controlPort ?? port + 10_000;
       const controlToken = randomUUID();
       const targetEnv = {
         ...expandTargetEnvironment(target.env, { baseHome: home, targetHome: targetRoot }),
+        ...requiredTargetEnvironment(target, process.env),
+        ...isolatedHomeEnvironment(targetRoot),
         DSH_HOME: targetRoot,
         DSH_EVAL_CONTROL_PORT: String(controlPort),
         DSH_EVAL_CONTROL_TOKEN: controlToken,
@@ -244,12 +255,14 @@ export async function runSuite(options) {
         return boot();
       };
 
-      const notes = [];
+      const notes = [...isolationIssues];
       let install = target.add ? null : "成功";
       if (target.add) {
         mark(opened, "install", `安装 ${target.add}`);
         const missingEnv = (target.requiredEnv ?? []).filter((name) => !targetEnv[name] && !process.env[name]);
-        if (missingEnv.length) {
+        if (isolationIssues.length) {
+          install = "失败";
+        } else if (missingEnv.length) {
           install = "失败";
           notes.push(`缺少环境变量: ${missingEnv.join(", ")}；未配置，不参与质量评分`);
         } else {
@@ -260,7 +273,9 @@ export async function runSuite(options) {
               sourceCacheRoot: join(home, "memory-eval-tools", "sources"),
             });
             install = installed.ok ? "成功" : "失败";
-            if (!installed.ok) notes.push(trimOutput(installed.output) || "安装失败");
+            if (!installed.ok) {
+              notes.push(trimOutput(installed.output) || installed.reason || "安装失败");
+            }
           } catch (error) {
             install = "失败";
             notes.push(error instanceof Error ? error.message : String(error));
@@ -271,13 +286,20 @@ export async function runSuite(options) {
       let host;
       let start = "失败";
       if (install !== "失败") {
-        host = await boot();
-        await smoke(
-          host,
-          target,
-          (wait) => mark(opened, "smoke", `探针等待模型 ${Math.round(wait.elapsedMs / 1000)}s`),
-        );
-        start = "成功";
+        const started = await startTarget({
+          boot,
+          smoke: (candidate) =>
+            smoke(
+              candidate,
+              target,
+              (wait) => mark(opened, "smoke", `探针等待模型 ${Math.round(wait.elapsedMs / 1000)}s`),
+            ),
+        });
+        host = started.host;
+        start = started.start;
+        if (started.error) {
+          notes.push(`Host 启动或探针失败: ${trimOutput(started.error.message)}`);
+        }
       }
 
       const run = await finishTarget({
@@ -306,8 +328,14 @@ export async function runSuite(options) {
       }
 
       if (target.add) {
-        const removed = await removePlugin(profile, target.removeName ?? target.plugin, { env: targetEnv });
-        if (!removed.ok) run.notes.push(`卸载失败: ${target.plugin}`);
+        if (install === "成功") {
+          try {
+            const removed = await removePlugin(profile, target.removeName ?? target.plugin, { env: targetEnv });
+            if (!removed.ok) run.notes.push(`卸载失败: ${target.plugin}`);
+          } catch (error) {
+            run.notes.push(`卸载失败: ${target.plugin} (${trimOutput(error instanceof Error ? error.message : error)})`);
+          }
+        }
         run.notes.push(...wipePlugin(target, wipeCtx).notes);
       }
 
@@ -347,6 +375,60 @@ export function expandTargetEnvironment(env = {}, ctx) {
         .replaceAll("{targetHome}", ctx.targetHome),
     ]),
   );
+}
+
+export function requiredTargetEnvironment(target, source = process.env) {
+  return Object.fromEntries(
+    (target.requiredEnv ?? [])
+      .filter((name) => source[name] != null && source[name] !== "")
+      .map((name) => [name, source[name]]),
+  );
+}
+
+export function isolatedHomeEnvironment(targetRoot) {
+  return {
+    HOME: targetRoot,
+    USERPROFILE: targetRoot,
+    APPDATA: join(targetRoot, ".appdata", "roaming"),
+    LOCALAPPDATA: join(targetRoot, ".appdata", "local"),
+    XDG_CACHE_HOME: join(targetRoot, ".cache"),
+    XDG_CONFIG_HOME: join(targetRoot, ".config"),
+    XDG_DATA_HOME: join(targetRoot, ".local", "share"),
+  };
+}
+
+export function pluginIsolationIssues(target, source = process.env, options = {}) {
+  if (!target.add) return [];
+  const issues = [];
+  if (source.DSH_EVAL_ISOLATED !== "1") {
+    issues.push("安全拒绝：第三方插件只能在低权限容器或独立系统账户中运行；确认隔离后设置 DSH_EVAL_ISOLATED=1");
+  }
+  const credentialsPath = source.DSH_EVAL_CREDENTIALS_FILE;
+  if (!credentialsPath) {
+    issues.push("安全拒绝：第三方插件必须使用 DSH_EVAL_CREDENTIALS_FILE 指定的短期专用凭据");
+  } else if (!existsSync(credentialsPath)) {
+    issues.push(`安全拒绝：专用评测凭据不存在: ${credentialsPath}`);
+  } else if (
+    options.baseHome &&
+    resolve(credentialsPath) === resolve(join(options.baseHome, ".credentials.yaml"))
+  ) {
+    issues.push("安全拒绝：DSH_EVAL_CREDENTIALS_FILE 不能指向日常 DSH_HOME 的凭据文件");
+  }
+  return issues;
+}
+
+export async function startTarget(options) {
+  try {
+    const host = await options.boot();
+    await options.smoke(host);
+    return { host, start: "成功", error: null };
+  } catch (error) {
+    return {
+      host: undefined,
+      start: "失败",
+      error: error instanceof Error ? error : new Error(String(error)),
+    };
+  }
 }
 
 export function isRetryableHandlerFailure(error) {
@@ -505,6 +587,7 @@ async function runTask(ctx) {
   const seedStarted = Date.now();
   let seeded;
   const seedEvents = [];
+  let previousSeedHistory = [];
 
   if (task.id === "T7") {
       seeded = await turn(
@@ -519,7 +602,9 @@ async function runTask(ctx) {
       seeded = await turn(host, seedSession, seedPromptForProtocol(line, target.protocol), {
         onWait: wait("seed"),
       });
-      seedEvents.push(...(seeded.events ?? []));
+      const history = seeded.events ?? [];
+      seedEvents.push(...newHistoryEvents(previousSeedHistory, history));
+      previousSeedHistory = history;
     }
   }
   const seedLatencyMs = Date.now() - seedStarted;
@@ -581,6 +666,30 @@ async function runTask(ctx) {
       suite: ctx.suite,
     }),
   };
+}
+
+export function newHistoryEvents(previous = [], current = []) {
+  let prefix = 0;
+  while (
+    prefix < previous.length &&
+    prefix < current.length &&
+    historyEventIdentity(previous[prefix]) === historyEventIdentity(current[prefix])
+  ) {
+    prefix += 1;
+  }
+  if (prefix === previous.length) return current.slice(prefix);
+
+  const lastPrevious = previous.length ? historyEventIdentity(previous[previous.length - 1]) : null;
+  if (lastPrevious) {
+    const overlap = current.findIndex((event) => historyEventIdentity(event) === lastPrevious);
+    if (overlap !== -1) return current.slice(overlap + 1);
+  }
+  return [...current];
+}
+
+function historyEventIdentity(item) {
+  const event = item?.event ?? item;
+  return String(event?.eventId ?? event?.id ?? item?.eventId ?? item?.id ?? JSON.stringify(event));
 }
 
 async function smoke(host, target, onWait) {

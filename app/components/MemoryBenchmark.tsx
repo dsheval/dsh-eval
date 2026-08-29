@@ -52,6 +52,10 @@ const pipeline = [
 
 const formatSeconds = (milliseconds: number) => `${(milliseconds / 1000).toFixed(1)}s`;
 const formatInt = (value: number) => Math.round(value).toLocaleString('zh-CN');
+const metricBarWidth = (value: number, config: (typeof metricConfig)[Metric]) => {
+  const ratio = Math.min(1, Math.max(0, value / config.max));
+  return (config.lowerIsBetter ? 1 - ratio : ratio) * 100;
+};
 
 function TrackCard({ protocol }: { protocol: Protocol }) {
   const isPassive = protocol === 'passive';
@@ -156,8 +160,8 @@ export default function MemoryBenchmark() {
             <div className="memory-chart-row" key={row.id}>
               <strong>{row.name}</strong>
               <div className="memory-bars">
-                <div><i className="passive" style={{ width: `${Math.min(100, passive / config.max * 100)}%` }} /></div>
-                <div><i className="guided" style={{ width: `${Math.min(100, guided / config.max * 100)}%` }} /></div>
+                <div><i className="passive" style={{ width: `${metricBarWidth(passive, config)}%` }} /></div>
+                <div><i className="guided" style={{ width: `${metricBarWidth(guided, config)}%` }} /></div>
               </div>
               <span>{config.format(passive)} <i>/</i> {config.format(guided)}</span>
             </div>

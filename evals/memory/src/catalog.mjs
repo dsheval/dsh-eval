@@ -16,7 +16,6 @@ const CONTEXT_ONLY = [
 const MEMORY_NAME_RE =
   /mem(?:ory|9|ento|oria)?|mnemon|noema|hermes-memory|memory-vault|memory-gate|memory-evolve|causal-memory/i;
 const MEMORY_TEXT_RE = /记忆|长期记忆|跨会话|remember|recall|mnemon|memory\b/i;
-const DSH_ADD_RE = /\bdsh\s+plugin\b(?:\s+--profile\s+\S+)?\s+add\s+(\S+)/i;
 
 export function defaultCatalogPath() {
   return join(evalRoot(), "fixtures", "catalog.json");
@@ -66,46 +65,18 @@ export function isMemoryPlugin(entry) {
   return MEMORY_TEXT_RE.test(hay);
 }
 
-export function addSpecFromEntry(entry) {
-  for (const command of entry.install?.commands ?? []) {
-    const match = command.match(DSH_ADD_RE);
-    if (match?.[1] && !match[1].startsWith("-")) return match[1];
-  }
-  if (entry.fullName && /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(entry.fullName)) {
-    return `github:${entry.fullName}`;
-  }
-  return null;
-}
-
 export function targetFromRanking(entry, catalog) {
   const known = catalog.plugins.find(
     (item) =>
       item.fullName === entry.fullName ||
       item.plugin.toLowerCase() === String(entry.name ?? "").toLowerCase(),
   );
+  // Rankings are discovery/ordering data, never an executable install manifest.
+  // Unknown entries must be reviewed and pinned in the local catalog first.
+  if (!known) return null;
   return {
-    id: known?.id ?? entry.name,
-    plugin: entry.name,
-    fullName: entry.fullName ?? null,
-    add: known?.add ?? addSpecFromEntry(entry),
-    removeName: known?.removeName,
-    sourceRepo: known?.sourceRepo,
-    sourceSubdir: known?.sourceSubdir,
-    sourceRef: known?.sourceRef,
-    sourceArchive: known?.sourceArchive,
-    sourceArchiveSha256: known?.sourceArchiveSha256,
-    compatTextOutput: known?.compatTextOutput,
-    env: known?.env,
-    wipe: known?.wipe ?? [],
-    conflictsWith: known?.conflictsWith ?? [],
-    needsKey: known?.needsKey ?? false,
-    needsApproval: known?.needsApproval ?? false,
-    defaultProtocol: known?.defaultProtocol ?? "passive",
-    supportedProtocols: known?.supportedProtocols,
-    protocols: known?.protocols,
-    patches: known?.patches,
-    focus: known?.focus ?? entry.descriptionZh ?? entry.description ?? "",
-    stars: entry.stars,
+    ...known,
+    stars: entry.stars ?? known.stars,
   };
 }
 
@@ -120,7 +91,8 @@ export function resolveTargets(catalog, options = {}) {
   if (options.allMemory && options.rankings) {
     const ranked = (options.rankings.rankings?.total ?? [])
       .filter(isMemoryPlugin)
-      .map((entry) => targetFromRanking(entry, catalog));
+      .map((entry) => targetFromRanking(entry, catalog))
+      .filter(Boolean);
     for (const item of ranked) pushUnique(selected, item);
   } else if (keys.length === 0) {
     for (const item of catalog.plugins) pushUnique(selected, item);

@@ -7,6 +7,7 @@ import {
   lastAssistantText,
   parseResponse,
   requestGracefulShutdown,
+  resolveDshInvocation,
   rpc,
   RpcHttpError,
   waitProcessExit,
@@ -113,9 +114,39 @@ test("rpc 非 JSON 响应保留 HTTP 状态和原始正文", async () => {
   );
 });
 
-test("expose-internals 只能当 node 参数，不能写进 NODE_OPTIONS", () => {
-  const env = dshEnv({ env: { NODE_OPTIONS: "--max-old-space-size=64" } });
-  assert.doesNotMatch(env.NODE_OPTIONS ?? "", /expose-internals/);
+test("DSH 子进程只继承最小环境，目标显式变量可以通过", () => {
+  const env = dshEnv({
+    inheritEnv: {
+      Path: "C:/bin",
+      GITHUB_TOKEN: "secret",
+      AWS_SECRET_ACCESS_KEY: "secret",
+      NODE_OPTIONS: "--require attacker.js",
+    },
+    env: { MEM9_API_KEY: "dedicated", DSH_HOME: "D:/eval" },
+  });
+  assert.equal(env.Path, "C:/bin");
+  assert.equal(env.MEM9_API_KEY, "dedicated");
+  assert.equal(env.DSH_HOME, "D:/eval");
+  assert.equal(env.GITHUB_TOKEN, undefined);
+  assert.equal(env.AWS_SECRET_ACCESS_KEY, undefined);
+  assert.equal(env.NODE_OPTIONS, undefined);
+});
+
+test("Windows 直接调用 JS bin，不启用可注入的 shell 回退", () => {
+  const invocation = resolveDshInvocation(["plugin", "add", "SAFE&echo INJECTED"], {
+    binPath: "C:/dsh/lib/bin.js",
+    execPath: "C:/node.exe",
+    platform: "win32",
+  });
+  assert.equal(invocation.file, "C:/node.exe");
+  assert.deepEqual(invocation.args, ["C:/dsh/lib/bin.js", "plugin", "add", "SAFE&echo INJECTED"]);
+  assert.throws(
+    () => resolveDshInvocation(["plugin", "add", "SAFE&echo INJECTED"], {
+      binPath: null,
+      platform: "win32",
+    }),
+    /不使用 shell 回退/,
+  );
 });
 
 test("优雅关闭只请求环回控制端点并携带一次性令牌", async () => {

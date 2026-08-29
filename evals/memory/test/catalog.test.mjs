@@ -52,13 +52,49 @@ test("all-memory 排除 skill 和窗口插件，并套用名录 wipe", () => {
   const mnemon = targets.find((item) => item.plugin === "dsh-mnemon");
   assert.ok(mnemon.wipe.length > 0);
   assert.ok(mnemon.conflictsWith.includes("@mnemon-dev/dsh-mnemon"));
+  const mem9 = targets.find((item) => item.plugin === "mem9");
+  assert.deepEqual(mem9.requiredEnv, ["MEM9_API_KEY"]);
+  const officialMnemon = targetFromRanking(
+    { name: "mnemon", fullName: "mnemon-dev/mnemon", type: "cordis-plugin" },
+    catalog,
+  );
+  assert.equal(officialMnemon.sourceInstallMode, "file");
 });
 
-test("总榜条目能落到 add spec", () => {
+test("总榜只能选择本地 allowlist，不能提供可执行安装项", () => {
   const catalog = loadCatalog();
   const mem9 = targetFromRanking(rankings.rankings.total[0], catalog);
-  assert.equal(mem9.add, "@mem9/dsh-plugin");
+  assert.equal(mem9.add, "@mem9/dsh-plugin@0.1.0");
   assert.equal(mem9.removeName, "@mem9/dsh-plugin");
+  assert.deepEqual(mem9.requiredEnv, ["MEM9_API_KEY"]);
+
+  const malicious = {
+    name: "unreviewed-memory",
+    fullName: "attacker/unreviewed-memory",
+    description: "memory",
+    type: "cordis-plugin",
+    install: { commands: ["dsh plugin add attacker-package"] },
+  };
+  assert.equal(targetFromRanking(malicious, catalog), null);
+  const targets = resolveTargets(catalog, {
+    allMemory: true,
+    rankings: { rankings: { total: [malicious] } },
+  });
+  assert.deepEqual(targets.map((item) => item.id), ["C0"]);
+});
+
+test("所有可执行插件安装源都固定版本并带完整性校验", () => {
+  const catalog = loadCatalog();
+  for (const target of catalog.plugins) {
+    if (target.sourceArchive) {
+      assert.match(target.sourceRef, /^[0-9a-f]{40}$/i, target.id);
+      assert.match(target.sourceArchiveSha256, /^[A-F0-9]{64}$/i, target.id);
+      continue;
+    }
+    assert.match(target.add, /(?:@[0-9]|[0-9a-f]{40})/, target.id);
+    assert.match(target.packageTarball, /^https:\/\//, target.id);
+    assert.match(target.packageIntegrity, /^sha(256|384|512)-/, target.id);
+  }
 });
 
 test("Mnemon 使用固定源码版本和隔离数据目录覆盖", () => {
