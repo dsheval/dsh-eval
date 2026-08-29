@@ -1,0 +1,18 @@
+{
+  "name": "@dsheval/deep-research-eval",
+  "private": true,
+  "type": "module",
+  "description": "DSH Deep Research plugin evaluation kit",
+  "scripts": {
+    "validate": "node src/run.mjs validate",
+    "plan": "node src/run.mjs plan",
+    "preflight": "node scripts/preflight-summary.mjs",
+    "admission:smoke": "node scripts/admission-smoke.mjs",
+    "run": "node src/run.mjs run",
+    "report": "node src/run.mjs report",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

@@ -1,0 +1,278 @@
+{
+  "id": "dsh-research-eval-v2",
+  "asOf": "2026-08-28",
+  "description": "基于 TrueEval 本地 benchmark 冻结的 8 个独立题面、10 个测评项：2 个 xbench、2 个 BrowseComp-ZH、4 个 DeepResearchEval，以及 R9/R10 产品诊断。",
+  "selection": {
+    "policy": "balanced-fixed-pilot-v1",
+    "shortFact": { "xbench-deepsearch.2505": 2, "browsecomp-zh.test": 2 },
+    "longForm": { "deepresearcheval.v1": 4 },
+    "productDiagnostics": 2,
+    "officialAndDiagnosticMetricsStaySeparate": true
+  },
+  "execution": {
+    "taskTimeoutMs": 1800000,
+    "interruptAfterMs": 45000,
+    "urlCheckLimit": 20,
+    "stabilityTasks": ["R2", "R6", "R8"],
+    "stabilityRepeats": 2
+  },
+  "judge": {
+    "enabledByDefault": true,
+    "provider": "openai-compatible",
+    "baseUrl": "https://api.deepseek.com/chat/completions",
+    "apiKeyEnv": "DEEPSEEK_API_KEY",
+    "modelEnv": "DSH_RESEARCH_JUDGE_MODEL",
+    "defaultModel": "deepseek-chat",
+    "timeoutMs": 180000
+  },
+  "tasks": [
+    {
+      "id": "R1",
+      "title": "黄金合约年度极差",
+      "track": "SF",
+      "mode": "normal",
+      "privateRef": "R1",
+      "requiresRetrieval": true,
+      "minSearchCalls": 2,
+      "officialMetric": "official.answer_accuracy",
+      "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality", "temporal_validity"],
+      "passRule": "最终短答案与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
+    },
+    {
+      "id": "R2",
+      "title": "GPU 单精度算力计算",
+      "track": "SF",
+      "mode": "normal",
+      "privateRef": "R2",
+      "requiresRetrieval": true,
+      "minSearchCalls": 2,
+      "officialMetric": "official.answer_accuracy",
+      "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality"],
+      "passRule": "最终答案与本地私有 gold 实质等价，且证据链包含至少两个检索或抓取步骤。"
+    },
+    {
+      "id": "R3",
+      "title": "历史文化地点识别",
+      "track": "SF",
+      "mode": "normal",
+      "privateRef": "R3",
+      "requiresRetrieval": true,
+      "minSearchCalls": 2,
+      "officialMetric": "official.answer_accuracy",
+      "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality"],
+      "passRule": "最终短答案与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
+    },
+    {
+      "id": "R4",
+      "title": "学术论文反向识别",
+      "track": "SF",
+      "mode": "normal",
+      "privateRef": "R4",
+      "requiresRetrieval": true,
+      "minSearchCalls": 2,
+      "officialMetric": "official.answer_accuracy",
+      "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality"],
+      "passRule": "最终论文题名与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
+    },
+    {
+      "id": "R5",
+      "title": "AI 生成视觉与科学传播信任",
+      "track": "LF",
+      "mode": "normal",
+      "domain": "Science & Technology",
+      "language": "en",
+      "asOf": "2025-08",
+      "minOpenUrls": 4,
+      "judgeRequired": true,
+      "prompt": "Between January 2024 and August 2025, how have AI-generated visuals affected public trust in science communication across US, EU, and China? Provide case studies, policy responses, sentiment metrics, and recommendations.",
+      "benchmarkSource": {
+        "benchmarkId": "deepresearcheval",
+        "split": "v1",
+        "taskId": "deepresearcheval.v1.000002",
+        "sourceHash": "sha256:d9eaf63b8fa2e06396177288904577e569a454de4dd2b3b266689d1ef26409a4"
+      },
+      "officialMetrics": ["official.quality_score", "official.fact_ratio"],
+      "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
+      "deliverables": [
+        {
+          "id": "case_studies",
+          "label": "覆盖美国、欧盟和中国的案例",
+          "critical": true,
+          "patterns": ["US|United States|美国", "EU|European Union|欧盟", "China|中国", "case|案例"]
+        },
+        {
+          "id": "policy_responses",
+          "label": "政策回应",
+          "critical": true,
+          "patterns": ["policy|regulat|政策|监管"]
+        },
+        {
+          "id": "sentiment_metrics",
+          "label": "信任或情绪指标",
+          "critical": true,
+          "patterns": ["sentiment|trust|survey|metric|信任|情绪|调查|指标"]
+        },
+        {
+          "id": "recommendations",
+          "label": "建议与可核验引用",
+          "critical": true,
+          "patterns": ["recommend|建议", "http"]
+        }
+      ]
+    },
+    {
+      "id": "R6",
+      "title": "植物肉营养与超加工分类",
+      "track": "LF",
+      "mode": "normal",
+      "domain": "Health",
+      "language": "en",
+      "asOf": "2025-08-15",
+      "minOpenUrls": 4,
+      "judgeRequired": true,
+      "prompt": "Assess nutritional quality, additive profiles, sodium levels, and 'ultra-processed' classification of top plant-based meat products across US and EU as of 2025-08-15; deliver comparative tables and public-health recommendations.",
+      "benchmarkSource": {
+        "benchmarkId": "deepresearcheval",
+        "split": "v1",
+        "taskId": "deepresearcheval.v1.000012",
+        "sourceHash": "sha256:c6dd8bf8887683f89bf2a41bd4af272f3389d99928b9bd844bc6fdb76a85d91b"
+      },
+      "officialMetrics": ["official.quality_score", "official.fact_ratio"],
+      "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
+      "deliverables": [
+        {
+          "id": "comparative_tables",
+          "label": "美国与欧盟产品对照表",
+          "critical": true,
+          "patterns": ["US|United States|美国", "EU|European Union|欧盟", "table|表"]
+        },
+        {
+          "id": "nutrition_profile",
+          "label": "营养、添加剂和钠含量",
+          "critical": true,
+          "patterns": ["nutrition|营养", "additive|添加剂", "sodium|钠"]
+        },
+        {
+          "id": "upf_classification",
+          "label": "超加工分类",
+          "critical": true,
+          "patterns": ["ultra-processed|UPF|超加工"]
+        },
+        {
+          "id": "recommendations",
+          "label": "公共卫生建议与引用",
+          "critical": true,
+          "patterns": ["recommend|建议", "http"]
+        }
+      ]
+    },
+    {
+      "id": "R7",
+      "title": "稳定币监管对零售银行影响",
+      "track": "LF",
+      "mode": "normal",
+      "domain": "Finance & Business",
+      "language": "en",
+      "asOf": "2025-08",
+      "minOpenUrls": 4,
+      "judgeRequired": true,
+      "prompt": "Assess impact of global stablecoin regulatory changes (US, EU, Hong Kong, Singapore) from Jan 2024 to Aug 2025 on retail banks' deposit flight, payments revenue, and regulatory capital; provide scenarios, quantitative estimates, and recommended strategy.",
+      "benchmarkSource": {
+        "benchmarkId": "deepresearcheval",
+        "split": "v1",
+        "taskId": "deepresearcheval.v1.000015",
+        "sourceHash": "sha256:54944d97568a9a633be97f92692ca21d168e4b415e81d2b62c8e9c74d91dd16e"
+      },
+      "officialMetrics": ["official.quality_score", "official.fact_ratio"],
+      "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
+      "deliverables": [
+        {
+          "id": "jurisdictions",
+          "label": "覆盖美国、欧盟、香港和新加坡",
+          "critical": true,
+          "patterns": ["US|United States|美国", "EU|European Union|欧盟", "Hong Kong|香港", "Singapore|新加坡"]
+        },
+        {
+          "id": "bank_impacts",
+          "label": "存款迁移、支付收入和监管资本",
+          "critical": true,
+          "patterns": ["deposit|存款", "payment|支付", "capital|资本"]
+        },
+        {
+          "id": "scenarios",
+          "label": "情景和定量估计",
+          "critical": true,
+          "patterns": ["scenario|情景", "estimate|%|估计"]
+        },
+        {
+          "id": "strategy",
+          "label": "推荐策略与引用",
+          "critical": true,
+          "patterns": ["strateg|recommend|策略|建议", "http"]
+        }
+      ]
+    },
+    {
+      "id": "R8",
+      "title": "电动与氢燃料公交全生命周期比较",
+      "track": "LF",
+      "mode": "normal",
+      "domain": "Transportation",
+      "language": "en",
+      "asOf": null,
+      "minOpenUrls": 4,
+      "judgeRequired": true,
+      "prompt": "Compare lifecycle total cost, operational performance, and emissions of battery-electric versus hydrogen fuel-cell buses for mid-sized transit agencies; produce a 10-year cost model, procurement decision matrix, and sensitivity analysis.",
+      "benchmarkSource": {
+        "benchmarkId": "deepresearcheval",
+        "split": "v1",
+        "taskId": "deepresearcheval.v1.000035",
+        "sourceHash": "sha256:1ff2d0895e609f74a3e1cac9a55e13c44a3a824bd1a307ee7ed4e68ebdae1309"
+      },
+      "officialMetrics": ["official.quality_score", "official.fact_ratio"],
+      "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
+      "deliverables": [
+        {
+          "id": "cost_model",
+          "label": "10 年成本模型",
+          "critical": true,
+          "patterns": ["10-year|10 year|十年|10 年", "cost|成本"]
+        },
+        {
+          "id": "performance_emissions",
+          "label": "运营性能和排放比较",
+          "critical": true,
+          "patterns": ["performance|性能", "emission|排放"]
+        },
+        {
+          "id": "decision_matrix",
+          "label": "采购决策矩阵",
+          "critical": true,
+          "patterns": ["decision matrix|procurement matrix|决策矩阵|采购矩阵"]
+        },
+        {
+          "id": "sensitivity",
+          "label": "敏感性分析与引用",
+          "critical": true,
+          "patterns": ["sensitivity|敏感性", "http"]
+        }
+      ]
+    },
+    {
+      "id": "R9",
+      "title": "中断恢复",
+      "track": "PRODUCT",
+      "mode": "interrupt",
+      "reusePromptFrom": "R5",
+      "passRule": "能说明中断点并从已有状态继续，不把空白或重头执行谎称为恢复成功。"
+    },
+    {
+      "id": "R10",
+      "title": "搜索不等于研究",
+      "track": "PRODUCT",
+      "mode": "derived",
+      "deriveFrom": "R5",
+      "passRule": "只有搜索结果而缺少强制交付物时，研究完成度必须记为 SEARCH_ONLY 或 INCOMPLETE。"
+    }
+  ]
+}

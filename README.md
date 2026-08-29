@@ -3,6 +3,7 @@
 DSH Eval 是 DSH 插件生态的独立评测与展示项目。仓库同时包含：
 
 - 可部署的网站前端；
+- DSH Deep Research 插件的隔离评测运行器；
 - DSH 记忆插件双轨评测运行器；
 - LoCoMo 20 题评测配置、插件名录、评分逻辑与自动化测试；
 - 从本地完整测评记录导出的脱敏公开榜单快照。
@@ -22,9 +23,19 @@ npm run dev -- --host 0.0.0.0 --port 3000
 
 ```bash
 npm run lint
+npm run test:deep-research
 npm run test:memory
 npm run build
 ```
+
+Deep Research 评测的只读入口：
+
+```bash
+npm run eval:deep-research -- validate
+npm run eval:deep-research -- plan
+```
+
+`validate`、`plan` 和单元测试不会启动 DSH 或调用模型。正式 `run` 另有命令参数与环境变量双重锁，详见 [`evals/deep-research/DEVELOPMENT.md`](./evals/deep-research/DEVELOPMENT.md)。
 
 记忆评测入口：
 
@@ -57,6 +68,8 @@ npm --prefix evals/memory run export:site -- --day YYYY-MM-DD
 
 基线 C0 是不安装第三方记忆插件的原生 DSH。每题经过埋点、优雅关闭旧 Host、冷启动、创建新会话、追问、评分与过程指标采集。完整协议、评分和运行方式分别见 [`benchmark.md`](./evals/memory/benchmark.md)、[`DEVELOPMENT.md`](./evals/memory/DEVELOPMENT.md) 和 [`evals/memory/README.md`](./evals/memory/README.md)。
 
+Deep Research 评测同样以不安装插件的 C0 为基线，每次只安装一个插件。题集由 8 个独立题面、10 个测评项组成，分别记录研究过程账与结果账；短事实准确率、长文质量、引用、恢复能力和资源消耗分栏报告，不压成一个不可解释的加权总分。完整规则见 [`evals/deep-research/benchmark.md`](./evals/deep-research/benchmark.md)。
+
 ## 完整文件树与职责
 
 以下列出仓库内全部受版本控制的项目文件；`node_modules/`、构建产物、本机缓存和评测原始记录不在其中。
@@ -65,6 +78,8 @@ npm --prefix evals/memory run export:site -- --day YYYY-MM-DD
 dsh-eval/
 ├── .dockerignore
 │   └── 控制 Docker 构建上下文，排除依赖、缓存和本机文件。
+├── .gitattributes
+│   └── 强制 Deep Research 的 WSL shell 脚本使用 LF，避免 Windows 换行导致执行失败。
 ├── .gitignore
 │   └── 忽略依赖、构建产物、环境变量和本地运行文件。
 ├── .openai/
@@ -91,6 +106,91 @@ dsh-eval/
 ├── docker/
 │   └── nginx.conf
 │       └── 容器内静态资源及 `/dsheval` 路径的 Nginx 配置。
+├── evals/deep-research/
+│   ├── fixtures/
+│   │   ├── catalog.json
+│   │   │   └── C0 与 P1–P8 的插件名录、安装方式、平台、凭证引用和准入约束。
+│   │   ├── private-tasks.example.json
+│   │   │   └── R1–R4 私有短事实题的本地配置模板，不含真实题面或答案。
+│   │   ├── source-lock.json
+│   │   │   └── 源码型插件与 DSH 的固定仓库、commit、归档名和 SHA-256。
+│   │   └── suite.json
+│   │       └── 8 个独立题面、10 个测评项及 Judge、交付物和来源门槛配置。
+│   ├── records/
+│   │   ├── .gitignore
+│   │   │   └── 忽略所有本地逐题记录和运行期榜单。
+│   │   └── .gitkeep
+│   │       └── 在没有本地结果时保留 records 目录。
+│   ├── schema/
+│   │   ├── catalog.schema.json
+│   │   │   └── Deep Research 插件名录的数据结构与字段约束。
+│   │   ├── record.schema.json
+│   │   │   └── 单题过程账、结果账、环境和 Judge 信息的数据结构。
+│   │   └── suite.schema.json
+│   │       └── 题集、任务模式、来源、交付物和 Judge 配置的数据结构。
+│   ├── scripts/
+│   │   ├── admission-smoke.mjs
+│   │   │   └── 对源码型目标做隔离 Profile 安装与组合配置冒烟检查。
+│   │   ├── preflight-summary.mjs
+│   │   │   └── 输出全部目标的只读准入预检摘要。
+│   │   ├── prepare-wsl.sh
+│   │   │   └── 在 WSL 准备固定 Node、pnpm、DSH、源码和 Docker 环境。
+│   │   └── research-eval-wsl.sh
+│   │       └── 使用固定 WSL 运行时调用 Deep Research 评测 CLI。
+│   ├── src/
+│   │   ├── artifacts.mjs
+│   │   │   └── 在限定工作区内收集报告、表格等产物并阻止符号链接越界。
+│   │   ├── config.mjs
+│   │   │   └── 加载、合并、校验题集、名录和本地私有短事实题。
+│   │   ├── host.mjs
+│   │   │   └── 在隔离 DSH_HOME 中启停 Host、调用 RPC 并管理工作区会话。
+│   │   ├── judge.mjs
+│   │   │   └── 构建匿名固定提示并调用 OpenAI-compatible 长文 Judge。
+│   │   ├── lib.mjs
+│   │   │   └── 提供路径、JSON、哈希、文本归一化、URL 和空账本等通用能力。
+│   │   ├── observe.mjs
+│   │   │   └── 从 history 折叠计划、工具、来源、异常、恢复、资源和产物过程账。
+│   │   ├── plugin.mjs
+│   │   │   └── 对不同安装类型执行准入检查、源码边界校验和插件安装。
+│   │   ├── profile.mjs
+│   │   │   └── 为每个条件准备独立 DSH_HOME、Profile、凭据和任务工作区。
+│   │   ├── report.mjs
+│   │   │   └── 聚合本地记录并按门槛和字典序生成多指标榜单。
+│   │   ├── run.mjs
+│   │   │   └── 提供 validate、plan、run、report 命令及正式运行安全锁入口。
+│   │   ├── runner.mjs
+│   │   │   └── 编排预检、R1–R10 执行、中断恢复、评分、Judge 和记录落盘。
+│   │   ├── score.mjs
+│   │   │   └── 执行短事实、长文确定性检查、派生题和 C0 增量判定。
+│   │   └── url-check.mjs
+│   │       └── 安全检查引用 URL 的可达性，并阻止本机或私网地址访问。
+│   ├── test/
+│   │   ├── artifacts.test.mjs
+│   │   │   └── 验证产物收集、目录限制和符号链接防越界行为。
+│   │   ├── config.test.mjs
+│   │   │   └── 覆盖私有题合并、严格校验、目标选择和计划生成。
+│   │   ├── judge.test.mjs
+│   │   │   └── 覆盖 Judge 提示、结构化结果和错误降级路径。
+│   │   ├── observe.test.mjs
+│   │   │   └── 覆盖 history 到研究步骤、工具、来源和产物过程账的折叠。
+│   │   ├── plugin.test.mjs
+│   │   │   └── 覆盖源码根目录解析、边界检查和目标准入逻辑。
+│   │   ├── report.test.mjs
+│   │   │   └── 验证结果聚合与多指标排序规则。
+│   │   ├── safety.test.mjs
+│   │   │   └── 验证双重执行锁和 Host 隔离启动目录。
+│   │   ├── score.test.mjs
+│   │   │   └── 覆盖事实、交付物、引用、风险、恢复和基线增量评分。
+│   │   └── url-check.test.mjs
+│   │       └── 覆盖 URL 协议、私网阻断与安全失败结果。
+│   ├── benchmark.md
+│   │   └── Deep Research V2 的对象、题集、双账、评分和榜单规则。
+│   ├── DEVELOPMENT.md
+│   │   └── 架构、执行锁、凭证、WSL 准入、私有题和正式运行说明。
+│   ├── package.json
+│   │   └── Deep Research 子包元数据及校验、计划、运行、报告和测试命令。
+│   └── README.md
+│       └── Deep Research 评测定位、安全边界、文件结构和只读命令入口。
 ├── evals/memory/
 │   ├── fixtures/
 │   │   ├── patches/
@@ -217,6 +317,7 @@ dsh-eval/
 
 ## 数据边界
 
+- `evals/deep-research/fixtures/private-tasks.local.json`、`evals/deep-research/records/` 和 `.research-eval-deps/` 只保存在本机，不提交 Git；示例模板不含真实题面或答案。
 - `evals/memory/records/`、`~/.dsh/memory-eval-workspaces/`、插件数据库和 DSH 会话均为本机运行数据，不提交 Git。
 - `app/data/memory/` 与 `public/data/memory/` 只保存经 `export-site.mjs` 裁剪后的公开指标，不包含标准答案、逐题回答、会话 ID、本机路径或原始会话。
 - 第三方插件会执行代码。正式评测应在隔离、低权限、仅带专用短期凭据的环境运行，不能把个人开发机或长期密钥当作安全边界。

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "execution", "judge", "tasks"],
+  "properties": {
+    "id": { "type": "string" },
+    "asOf": { "type": "string" },
+    "execution": {
+      "type": "object",
+      "required": ["taskTimeoutMs", "interruptAfterMs"],
+      "properties": {
+        "taskTimeoutMs": { "type": "integer", "minimum": 1000 },
+        "interruptAfterMs": { "type": "integer", "minimum": 1000 },
+        "urlCheckLimit": { "type": "integer", "minimum": 1 },
+        "stabilityTasks": { "type": "array", "items": { "type": "string" } },
+        "stabilityRepeats": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "judge": {
+      "type": "object",
+      "required": ["enabledByDefault", "baseUrl", "apiKeyEnv"],
+      "properties": {
+        "enabledByDefault": { "type": "boolean" },
+        "baseUrl": { "type": "string" },
+        "apiKeyEnv": { "type": "string" },
+        "modelEnv": { "type": "string" },
+        "defaultModel": { "type": "string" },
+        "timeoutMs": { "type": "integer" }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "track", "mode"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^R(?:[1-9]|10)$" },
+          "track": { "enum": ["SF", "LF", "PRODUCT"] },
+          "mode": { "enum": ["normal", "interrupt", "derived"] },
+          "prompt": { "type": "string" },
+          "privateRef": { "type": "string" },
+          "reusePromptFrom": { "type": "string" },
+          "deriveFrom": { "type": "string" },
+          "deliverables": { "type": "array" }
+        }
+      }
+    }
+  }
+}
