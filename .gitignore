@@ -36,3 +36,9 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# Local evaluation state and full per-task records
+/evals/*/.workspaces/
+/evals/*/records/*
+!/evals/*/records/.gitignore
+!/evals/*/records/.gitkeep

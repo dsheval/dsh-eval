@@ -1,0 +1,6 @@
+# The upstream default lives under the OS home and would leak across conditions.
+# Pin the database to this condition's isolated DSH_HOME instead.
+- id: causal-memory-plugin
+  config:
+    dbPath: !!js dshHomePath('causal-memory/causal.db')
+    failOnStartupError: true

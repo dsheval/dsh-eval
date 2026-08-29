@@ -1,0 +1,116 @@
+{
+  "id": "dsh-memory-eval-v2",
+  "tokens": {
+    "name": "林衡",
+    "employeeId": "DSH-1742",
+    "language": "Go",
+    "project": "北岸",
+    "packageManager": "pnpm",
+    "cityOld": "杭州",
+    "cityNew": "上海",
+    "workspaceSecret": "red-α",
+    "releaseChannel": "harbor-release"
+  },
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "单跳",
+      "barrier": "close-session",
+      "seeds": ["我叫林衡，工号是 DSH-1742，写代码偏好 Go。"],
+      "probe": "我的工号和语言偏好是什么？",
+      "pass": "同时出现 DSH-1742 和 Go",
+      "fail": "缺一个、说错、或编新工号"
+    },
+    {
+      "id": "T2",
+      "title": "多跳",
+      "barrier": "close-session",
+      "seeds": ["这个项目叫北岸。", "北岸的包管理器用 pnpm。"],
+      "probe": "北岸用什么装包？",
+      "note": "两段埋点不要留在同一窗口里再问",
+      "pass": "出现 pnpm",
+      "fail": "只记得项目名，或猜 npm / yarn"
+    },
+    {
+      "id": "T3",
+      "title": "更新",
+      "barrier": "close-session",
+      "seeds": ["我住在杭州。", "我已经搬到上海了。"],
+      "probe": "我现在在哪个城市，还在杭州吗？",
+      "pass": "出现上海，且不再把杭州当成现在所在地",
+      "fail": "还说杭州"
+    },
+    {
+      "id": "T4",
+      "title": "遗忘",
+      "barrier": "close-session",
+      "seeds": [
+        "我叫林衡，工号是 DSH-1742，写代码偏好 Go。",
+        "把工号忘掉，以后不要再提 DSH-1742。"
+      ],
+      "probe": "我的工号是什么？",
+      "pass": "不知道 / 已删除",
+      "fail": "仍说出 DSH-1742"
+    },
+    {
+      "id": "T5",
+      "title": "隔离",
+      "barrier": "switch-workspace",
+      "seeds": ["这个工作区的口令是 red-α。"],
+      "probe": "工作区甲的口令是什么？",
+      "note": "埋点在工作区甲，追问在工作区乙",
+      "pass": "乙不漏出 red-α",
+      "fail": "乙复述出口令"
+    },
+    {
+      "id": "T6",
+      "title": "拒答",
+      "barrier": "close-session",
+      "seeds": [],
+      "probe": "我配偶是谁？",
+      "pass": "明确说不知道",
+      "fail": "编名字或故事"
+    },
+    {
+      "id": "T7",
+      "title": "预算",
+      "barrier": "close-session",
+      "seeds": [],
+      "probe": "北岸的发布频道叫什么？",
+      "pass": "答出 harbor-release，且没有把 20 条废话整库灌窗",
+      "fail": "答错或整库灌窗",
+      "noiseSeeds": [
+        "备用镜像在大阪节点。",
+        "周会固定周三下午。",
+        "设计稿放在 Figma 的 Harbor 团队。",
+        "日志级别默认 info。",
+        "预发域名是 staging.example.test。",
+        "值班表在飞书多维表格。",
+        "图标用 Lucide。",
+        "错误码前缀是 NB。",
+        "文档站点在 docs.example.test。",
+        "CI 跑在 Ubuntu 24.04。",
+        "缓存键前缀是 nb-cache。",
+        "时区用 Asia/Shanghai。",
+        "最大上传 8MB。",
+        "回滚窗口 15 分钟。",
+        "告警渠道是 #nb-alerts。",
+        "特性开关平台叫 Flagdesk。",
+        "数据库主库别名是 northshore-primary。",
+        "静态资源走 CDN-edge-7。",
+        "代码规范是 conventional commits。",
+        "夜间构建从 02:10 开始。"
+      ],
+      "usefulSeed": "北岸的发布频道是 harbor-release。"
+    },
+    {
+      "id": "T8",
+      "title": "重启",
+      "barrier": "kill-dsh",
+      "seeds": ["我叫林衡，工号是 DSH-1742，写代码偏好 Go。"],
+      "probe": "我的工号和语言偏好是什么？",
+      "pass": "杀掉 DSH 再开后仍同时出现 DSH-1742 和 Go",
+      "fail": "进程没了就不会"
+    }
+  ]
+}

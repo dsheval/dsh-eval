@@ -1,0 +1,50 @@
+{
+  "id": "dsh-native-vs-causal-v1",
+  "profile": "memory-eval",
+  "port": 3184,
+  "baseline": {
+    "id": "B0",
+    "plugin": "dsh-native-reference",
+    "fullName": "DSH built-in session-reference with runtime context",
+    "add": null,
+    "wipe": [],
+    "conflictsWith": [],
+    "needsKey": false,
+    "needsApproval": false,
+    "defaultProtocol": "session-reference",
+    "supportedProtocols": ["session-reference"],
+    "agentPreset": "memory-eval",
+    "allowSessionReferences": true,
+    "referenceSeedSession": true,
+    "focus": "原生 DSH：runtime context 开启，显式引用埋点会话"
+  },
+  "plugins": [
+    {
+      "id": "B1",
+      "plugin": "causal-memory",
+      "fullName": "JingxuanC/causal-memory on native DSH",
+      "add": "source:JingxuanC/causal-memory/dsh-plugin",
+      "sourceRepo": "https://github.com/JingxuanC/causal-memory.git",
+      "sourceSubdir": "dsh-plugin",
+      "sourceRef": "e7dbaca8c7247a27040a7ca03540d0b7d3857c23",
+      "sourceArchive": "https://codeload.github.com/JingxuanC/causal-memory/zip/e7dbaca8c7247a27040a7ca03540d0b7d3857c23",
+      "sourceArchiveSha256": "A87902AA7C52E6EAAA0AD58D8FC2ECCC0F500C3238D8308DC337D0FB3C4FA310",
+      "compatTextOutput": true,
+      "removeName": "causal-memory-dsh-plugin",
+      "env": {
+        "CAUSAL_MEMORY_BIN": "{baseHome}/memory-eval-tools/causal-memory-venv/Scripts/causal-memory.exe"
+      },
+      "wipe": ["{home}/causal-memory"],
+      "conflictsWith": [],
+      "needsKey": false,
+      "needsApproval": false,
+      "defaultProtocol": "session-reference",
+      "supportedProtocols": ["session-reference"],
+      "patches": ["fixtures/patches/causal-memory-isolated.patch.yml"],
+      "agentPreset": "memory-eval",
+      "allowSessionReferences": true,
+      "referenceSeedSession": true,
+      "focus": "与 B0 相同的原生上下文和显式会话引用，只额外安装 causal-memory"
+    }
+  ]
+}

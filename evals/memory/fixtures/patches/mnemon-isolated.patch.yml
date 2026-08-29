@@ -1,0 +1,13 @@
+# Reproduce the official @mnemon-dev/dsh-mnemon bundle settings. The catalog's
+# MNEMON_DATA_DIR override keeps its data inside this condition's DSH_HOME.
+- id: mnemon
+  config:
+    routingGuidance: true
+    lifecycleEnabled: true
+    recallMode: guided
+    writebackMode: guided
+    idleReviewMs: 30000
+    tabEnabled: true
+    writeEnabled: true
+    timeoutMs: 10000
+    defaultRecallLimit: 10

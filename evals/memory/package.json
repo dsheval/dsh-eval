@@ -1,0 +1,14 @@
+{
+  "name": "@dsh-eval/memory-eval",
+  "private": true,
+  "type": "module",
+  "description": "DSH memory plugin evaluation kit",
+  "scripts": {
+    "start": "node src/run.mjs",
+    "test": "node --test test/*.test.mjs",
+    "export:site": "node src/export-site.mjs"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

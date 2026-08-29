@@ -1,0 +1,22 @@
+{
+  "id": "dsh-native-memory-v1",
+  "profile": "memory-eval",
+  "port": 3183,
+  "baseline": {
+    "id": "N0",
+    "plugin": "dsh-native-reference",
+    "fullName": "DSH 0.1.0-rc.7 built-in session-reference",
+    "add": null,
+    "wipe": [],
+    "conflictsWith": [],
+    "needsKey": false,
+    "needsApproval": false,
+    "defaultProtocol": "session-reference",
+    "supportedProtocols": ["session-reference"],
+    "agentPreset": "memory-eval",
+    "allowSessionReferences": true,
+    "referenceSeedSession": true,
+    "focus": "不安装或卸载第三方记忆插件；追问使用 DSH 自带 session-reference 显式引用埋点会话"
+  },
+  "plugins": []
+}

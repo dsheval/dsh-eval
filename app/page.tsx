@@ -1,4 +1,5 @@
 import RecommendationDemo from './components/RecommendationDemo';
+import MemoryBenchmark from './components/MemoryBenchmark';
 
 const TOP100_URL = 'https://dsheval.ai/';
 
@@ -34,6 +35,7 @@ function Arrow() {
 
 const navLinks = [
   { href: '#top', label: '问 Eval' },
+  { href: '#memory-benchmark', label: '记忆榜单' },
   { href: '#recommendation-anatomy', label: '评测报告' },
   { href: '#top100', label: 'Top100 热度榜' },
   { href: '#method', label: '评测方法' },
@@ -68,6 +70,8 @@ export default function Home() {
           <a href="#top100"><span>我想发现插件</span><b>浏览 Top100</b><Arrow /></a>
           <a href="#recommendation-anatomy"><span>我想验证插件</span><b>了解评测报告</b><Arrow /></a>
         </section>
+
+        <MemoryBenchmark />
 
         <section className="anatomy-section" id="recommendation-anatomy">
           <div className="section-heading compact-heading">

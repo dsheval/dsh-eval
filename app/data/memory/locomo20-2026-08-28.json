@@ -1,0 +1,238 @@
+{
+  "id": "dsh-memory-locomo20-dual-track",
+  "suiteId": "dsh-locomo-refined-20",
+  "evaluationDay": "2026-08-28",
+  "rerunCompletedAt": "2026-08-29",
+  "sampleSizePerTrack": 20,
+  "pluginCount": 7,
+  "totalPluginTaskRecords": 280,
+  "remainingHandlerFailures": 0,
+  "baseline": {
+    "passive": 0,
+    "guided": 0
+  },
+  "categories": {
+    "multi-hop": 3,
+    "temporal": 4,
+    "open-domain": 1,
+    "single-hop": 12
+  },
+  "protocols": {
+    "passive": {
+      "label": "零提示自动记忆",
+      "seedInstruction": null,
+      "probeInstruction": null,
+      "meaning": "不提示保存或检索，测自动识别、自动持久化与自动召回。"
+    },
+    "guided": {
+      "label": "显式持久记忆",
+      "seedInstruction": "评测操作要求：请使用当前环境中已安装的持久记忆能力，落实上面的信息、更新或遗忘请求；完成后只需简短确认。",
+      "probeInstruction": "评测操作要求：回答前请先使用当前环境中已安装的持久记忆检索能力查找相关历史；找不到就明确说不知道。",
+      "meaning": "仅增加通用记忆操作要求，测插件被正确触发后的端到端可达能力。"
+    }
+  },
+  "rankingRule": "只在相同协议内排名；同协议内先按答对数，再按多跳、时间题答对数；延迟只作过程指标；未配置或未启动者不参与质量排名",
+  "plugins": [
+    {
+      "id": "P8",
+      "plugin": "causal-memory",
+      "name": "Causal Memory",
+      "implementationOverlap": null,
+      "passive": {
+        "rank": 1,
+        "passed": 13,
+        "total": 20,
+        "accuracy": 0.65,
+        "meanEffectiveLatencyMs": 19425,
+        "p95EffectiveLatencyMs": 29144,
+        "meanPromptTokens": 29472,
+        "totalToolCalls": 98,
+        "timeoutCount": 0
+      },
+      "guided": {
+        "rank": 1,
+        "passed": 15,
+        "total": 20,
+        "accuracy": 0.75,
+        "meanEffectiveLatencyMs": 13824,
+        "p95EffectiveLatencyMs": 18476,
+        "meanPromptTokens": 30199,
+        "totalToolCalls": 118,
+        "timeoutCount": 0
+      }
+    },
+    {
+      "id": "P5",
+      "plugin": "dsh-mnemon",
+      "name": "dsh-mnemon",
+      "implementationOverlap": null,
+      "passive": {
+        "rank": 2,
+        "passed": 9,
+        "total": 20,
+        "accuracy": 0.45,
+        "meanEffectiveLatencyMs": 18152,
+        "p95EffectiveLatencyMs": 26374,
+        "meanPromptTokens": 17760,
+        "totalToolCalls": 16,
+        "timeoutCount": 0
+      },
+      "guided": {
+        "rank": 5,
+        "passed": 11,
+        "total": 20,
+        "accuracy": 0.55,
+        "meanEffectiveLatencyMs": 20132,
+        "p95EffectiveLatencyMs": 30182,
+        "meanPromptTokens": 27653,
+        "totalToolCalls": 47,
+        "timeoutCount": 0
+      }
+    },
+    {
+      "id": "P6",
+      "plugin": "dsh-noema",
+      "name": "dsh-noema",
+      "implementationOverlap": null,
+      "passive": {
+        "rank": 3,
+        "passed": 6,
+        "total": 20,
+        "accuracy": 0.3,
+        "meanEffectiveLatencyMs": 19146,
+        "p95EffectiveLatencyMs": 26001,
+        "meanPromptTokens": 23751,
+        "totalToolCalls": 99,
+        "timeoutCount": 0
+      },
+      "guided": {
+        "rank": 3,
+        "passed": 14,
+        "total": 20,
+        "accuracy": 0.7,
+        "meanEffectiveLatencyMs": 16361,
+        "p95EffectiveLatencyMs": 22827,
+        "meanPromptTokens": 25840,
+        "totalToolCalls": 119,
+        "timeoutCount": 0
+      }
+    },
+    {
+      "id": "P3",
+      "plugin": "mnemon",
+      "name": "Mnemon 官方 wrapper",
+      "implementationOverlap": "与 P5 共享 dsh-mnemon 核心实现",
+      "passive": {
+        "rank": 4,
+        "passed": 6,
+        "total": 20,
+        "accuracy": 0.3,
+        "meanEffectiveLatencyMs": 17504,
+        "p95EffectiveLatencyMs": 26622,
+        "meanPromptTokens": 16084,
+        "totalToolCalls": 12,
+        "timeoutCount": 0
+      },
+      "guided": {
+        "rank": 6,
+        "passed": 8,
+        "total": 20,
+        "accuracy": 0.4,
+        "meanEffectiveLatencyMs": 20535,
+        "p95EffectiveLatencyMs": 30397,
+        "meanPromptTokens": 26505,
+        "totalToolCalls": 62,
+        "timeoutCount": 0
+      }
+    },
+    {
+      "id": "P2",
+      "plugin": "graph-memory",
+      "name": "Graph Memory",
+      "implementationOverlap": null,
+      "passive": {
+        "rank": 5,
+        "passed": 4,
+        "total": 20,
+        "accuracy": 0.2,
+        "meanEffectiveLatencyMs": 18601,
+        "p95EffectiveLatencyMs": 24966,
+        "meanPromptTokens": 4878,
+        "totalToolCalls": 42,
+        "timeoutCount": 0
+      },
+      "guided": {
+        "rank": 2,
+        "passed": 15,
+        "total": 20,
+        "accuracy": 0.75,
+        "meanEffectiveLatencyMs": 23260,
+        "p95EffectiveLatencyMs": 26073,
+        "meanPromptTokens": 9034,
+        "totalToolCalls": 82,
+        "timeoutCount": 0
+      }
+    },
+    {
+      "id": "P4",
+      "plugin": "dsh-memory-evolve",
+      "name": "Memory Evolve",
+      "implementationOverlap": null,
+      "passive": {
+        "rank": 6,
+        "passed": 2,
+        "total": 20,
+        "accuracy": 0.1,
+        "meanEffectiveLatencyMs": 45586,
+        "p95EffectiveLatencyMs": 65761,
+        "meanPromptTokens": 63245,
+        "totalToolCalls": 178,
+        "timeoutCount": 0
+      },
+      "guided": {
+        "rank": 7,
+        "passed": 7,
+        "total": 20,
+        "accuracy": 0.35,
+        "meanEffectiveLatencyMs": 39993,
+        "p95EffectiveLatencyMs": 60000,
+        "meanPromptTokens": 60402,
+        "totalToolCalls": 168,
+        "timeoutCount": 1
+      }
+    },
+    {
+      "id": "P7",
+      "plugin": "dsh-memento",
+      "name": "dsh-memento",
+      "implementationOverlap": null,
+      "passive": {
+        "rank": 7,
+        "passed": 1,
+        "total": 20,
+        "accuracy": 0.05,
+        "meanEffectiveLatencyMs": 22102,
+        "p95EffectiveLatencyMs": 60000,
+        "meanPromptTokens": 9216,
+        "totalToolCalls": 57,
+        "timeoutCount": 3
+      },
+      "guided": {
+        "rank": 4,
+        "passed": 13,
+        "total": 20,
+        "accuracy": 0.65,
+        "meanEffectiveLatencyMs": 16547,
+        "p95EffectiveLatencyMs": 20560,
+        "meanPromptTokens": 12734,
+        "totalToolCalls": 89,
+        "timeoutCount": 0
+      }
+    }
+  ],
+  "disclosures": [
+    "两条轨道使用相同的 20 道题、答案、模型、生命周期屏障与确定性评分规则。",
+    "Guided 不提供工具名、正确答案或历史会话 ID，也不直接调用厂商 API。",
+    "Mem9 因缺少 MEM9_API_KEY 未参评；N/A 不等于 0 分。"
+  ]
+}
