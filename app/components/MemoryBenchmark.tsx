@@ -17,24 +17,24 @@ const metricConfig: Record<Metric, {
   format: (value: number) => string;
 }> = {
   accuracy: {
-    label: '严格正确率',
-    note: '命中标准答案或全部 must-include 记号；越高越好。',
+    label: '正确率',
+    note: '答案必须命中标准答案，或包含全部必需信息；越高越好。',
     lowerIsBetter: false,
     max: 100,
     value: (track) => track.accuracy * 100,
     format: (value) => `${Math.round(value)}%`,
   },
   latency: {
-    label: '有效延迟',
-    note: '每题平均有效总延迟，超时按 60 秒计入；越低越好。',
+    label: '平均耗时',
+    note: '每题平均耗时，超时按 60 秒计算；越低越好。',
     lowerIsBetter: true,
     max: 50,
     value: (track) => track.meanEffectiveLatencyMs / 1000,
     format: (value) => `${value.toFixed(1)}s`,
   },
   tokens: {
-    label: '提示 Token',
-    note: '题均 input + cache-read token；越低越好。',
+    label: '输入 Token',
+    note: '每题平均输入 Token（含缓存读取）；越低越好。',
     lowerIsBetter: true,
     max: 65000,
     value: (track) => track.meanPromptTokens,
@@ -43,18 +43,18 @@ const metricConfig: Record<Metric, {
 };
 
 const pipeline = [
-  ['01', '清理环境', '清空甲/乙工作区，移除上一题插件库与 DSH 会话。'],
-  ['02', '会话 A 埋点', '发送 LoCoMo 原始证据；两轨只在附加指令上不同。'],
-  ['03', '生命周期屏障', '优雅关闭 DSH，等待持久化完成后冷启动。'],
-  ['04', '会话 B 追问', '清除埋点工作区文件，在全新会话提出同一道问题。'],
-  ['05', '确定性评分', '只按答案与记号判分，不使用 LLM 裁判。'],
+  ['01', '清理测试环境', '清空两个测试工作区，删除上一题留下的文件和会话。'],
+  ['02', '会话 A：提供信息', '发送 LoCoMo 原始对话；两种模式只有附加提示不同。'],
+  ['03', '重启环境', '正常关闭 DSH，等待数据写入后重新启动。'],
+  ['04', '会话 B：提出问题', '删除会话 A 的工作区文件，在新会话提出同一道题。'],
+  ['05', '按标准答案评分', '只看答案和必需信息，不使用 LLM 评分。'],
 ];
 
 const formatSeconds = (milliseconds: number) => `${(milliseconds / 1000).toFixed(1)}s`;
 const formatInt = (value: number) => Math.round(value).toLocaleString('zh-CN');
 const metricBarWidth = (value: number, config: (typeof metricConfig)[Metric]) => {
   const ratio = Math.min(1, Math.max(0, value / config.max));
-  return (config.lowerIsBetter ? 1 - ratio : ratio) * 100;
+  return ratio * 100;
 };
 
 function TrackCard({ protocol }: { protocol: Protocol }) {
@@ -63,24 +63,24 @@ function TrackCard({ protocol }: { protocol: Protocol }) {
   return (
     <article className={`memory-protocol-card ${protocol}`}>
       <header>
-        <div><span>{isPassive ? '01' : '02'}</span><strong>{protocol}</strong></div>
-        <small>{definition.label}</small>
+        <div><span>{isPassive ? '01' : '02'}</span><strong>{isPassive ? '无提示' : '有提示'}</strong></div>
+        <small>{isPassive ? 'PASSIVE' : 'GUIDED'}</small>
       </header>
-      <h3>{isPassive ? '不提醒记忆，看插件会不会自己工作' : '明确记忆意图，看正确触发后的能力'}</h3>
-      <p>{definition.meaning}</p>
+      <h3>{isPassive ? '不提示记忆：测试默认表现' : '明确要求记忆：测试有提示时的表现'}</h3>
+      <p>{isPassive ? '不给出保存或检索提示，观察 Agent 是否会自动记住并在新会话找回信息。' : '只增加通用的记忆操作提示，观察 Agent 在明确要求下的表现。'}</p>
       <dl>
         <div>
-          <dt>会话 A · 埋点附加</dt>
-          <dd>{definition.seedInstruction ?? '无——完全使用原始 LoCoMo 对话。'}</dd>
+          <dt>会话 A · 附加指令</dt>
+          <dd>{definition.seedInstruction ?? '无；直接使用原始 LoCoMo 对话。'}</dd>
         </div>
         <div>
-          <dt>会话 B · 追问附加</dt>
-          <dd>{definition.probeInstruction ?? '无——完全使用原始测试问题。'}</dd>
+          <dt>会话 B · 附加指令</dt>
+          <dd>{definition.probeInstruction ?? '无；直接使用原始测试问题。'}</dd>
         </div>
       </dl>
       <div className="track-answer">
-        <span>这条轨道回答</span>
-        <strong>{isPassive ? '普通用户不提示时，实际有多好用？' : '用户明确要记忆时，最高能发挥多少？'}</strong>
+        <span>测试问题</span>
+        <strong>{isPassive ? '用户不主动提醒时，Agent 能记住多少？' : '用户明确要求记住时，Agent 表现如何？'}</strong>
       </div>
     </article>
   );
@@ -90,14 +90,14 @@ function Ranking({ protocol }: { protocol: Protocol }) {
   const rows = [...benchmark.plugins].sort((left, right) => left[protocol].rank - right[protocol].rank);
   return (
     <article className={`memory-ranking ${protocol}`}>
-      <header><div><span>{protocol}</span><strong>{benchmark.protocols[protocol].label}</strong></div><small>STRICT / 20</small></header>
+      <header><div><span>{protocol}</span><strong>{protocol === 'passive' ? '无提示' : '有提示'}</strong></div><small>得分 / 20</small></header>
       <ol>
         {rows.map((row) => {
           const result = row[protocol];
           return (
             <li key={row.id} className={result.rank === 1 ? 'is-first' : undefined}>
               <span>{String(result.rank).padStart(2, '0')}</span>
-              <div><strong>{row.name}</strong><small>{formatSeconds(result.meanEffectiveLatencyMs)} 均值 · {formatInt(result.meanPromptTokens)} tok</small></div>
+              <div><strong>{row.name}</strong><small>平均 {formatSeconds(result.meanEffectiveLatencyMs)} · {formatInt(result.meanPromptTokens)} Token</small></div>
               <b>{result.passed}<i>/20</i></b>
             </li>
           );
@@ -115,33 +115,17 @@ export default function MemoryBenchmark() {
     <section className="memory-benchmark" id="memory-benchmark" aria-labelledby="memory-benchmark-title">
       <div className="memory-benchmark-hero">
         <div>
-          <p className="section-label light-label">MEMORY BENCHMARK / LOCO­MO 20</p>
-          <h2 id="memory-benchmark-title">同样的问题，<br />两种记忆触发方式。</h2>
+          <p className="section-label light-label">MEMORY / CROSS-SESSION</p>
+          <h2 id="memory-benchmark-title">同一组题，<br />两种提示方式。</h2>
         </div>
         <div className="memory-benchmark-intro">
-          <p>7 个可运行插件各完成 Passive 与 Guided 两轮相同的 20 道题。基础设施失败已原位补跑，当前公开快照不含 handler failure。</p>
-          <div><span><b>{benchmark.pluginCount}</b> 插件</span><span><b>{benchmark.totalPluginTaskRecords}</b> 答题记录</span><span><b>{benchmark.remainingHandlerFailures}</b> Handler failure</span></div>
+          <p>首批公开结果：7 个 Agent 分别在无提示和有提示两种模式下完成相同的 20 道题。因评测程序故障中断的任务已按原条件补测，当前公开结果不含此类失败。</p>
+          <div><span><b>{benchmark.pluginCount}</b> 个 Agent</span><span><b>{benchmark.totalPluginTaskRecords}</b> 条答题记录</span><span><b>{benchmark.remainingHandlerFailures}</b> 次评测故障</span></div>
         </div>
-      </div>
-
-      <div className="memory-protocol-grid" aria-label="双轨协议说明">
-        <TrackCard protocol="passive" />
-        <TrackCard protocol="guided" />
-      </div>
-
-      <div className="memory-constant">
-        <div><span>CONTROLLED VARIABLE</span><strong>唯一变化：是否添加通用记忆提示</strong></div>
-        <p>题目、证据、模型、评分、工作区隔离和真实 DSH 生命周期屏障均保持一致。Guided 不泄露工具名、答案或历史会话 ID。</p>
-      </div>
-
-      <div className="memory-pipeline" aria-label="单题执行流程">
-        {pipeline.map(([number, title, copy]) => (
-          <article key={number}><span>{number}</span><strong>{title}</strong><p>{copy}</p></article>
-        ))}
       </div>
 
       <div className="memory-results-heading">
-        <div><p className="section-label light-label">RESULTS / 2026-08-28</p><h3>双轨结果</h3><p>先在同一轨道内看正确率排名，再用延迟、Token 和工具调用解释成本。</p></div>
+        <div><p className="section-label light-label">RESULTS / 2026-08-28</p><p>切换正确率、平均耗时和输入 Token，对比两种提示方式。</p></div>
         <div className="memory-metric-switch" role="group" aria-label="选择对比指标">
           {(Object.keys(metricConfig) as Metric[]).map((name) => (
             <button key={name} type="button" className={metric === name ? 'active' : undefined} aria-pressed={metric === name} onClick={() => setMetric(name)}>
@@ -151,58 +135,96 @@ export default function MemoryBenchmark() {
         </div>
       </div>
 
-      <div className="memory-chart" aria-label={`${config.label}双轨对比`}>
+      <div className="memory-chart" aria-label={`${config.label}两种提示方式对比`}>
         <header><span>{config.label}</span><small>{config.note}</small></header>
         {benchmark.plugins.map((row) => {
           const passive = config.value(row.passive);
           const guided = config.value(row.guided);
+          const passivePosition = metricBarWidth(passive, config);
+          const guidedPosition = metricBarWidth(guided, config);
+          const connectorStart = Math.min(passivePosition, guidedPosition);
+          const connectorWidth = Math.abs(guidedPosition - passivePosition);
           return (
             <div className="memory-chart-row" key={row.id}>
               <strong>{row.name}</strong>
-              <div className="memory-bars">
-                <div><i className="passive" style={{ width: `${metricBarWidth(passive, config)}%` }} /></div>
-                <div><i className="guided" style={{ width: `${metricBarWidth(guided, config)}%` }} /></div>
+              <div className="memory-bars" aria-hidden="true">
+                <i className="memory-range-line" style={{ left: `${connectorStart}%`, width: `${connectorWidth}%` }} />
+                <i className="memory-point passive" style={{ left: `${passivePosition}%` }} />
+                <i className="memory-point guided" style={{ left: `${guidedPosition}%` }} />
               </div>
               <span>{config.format(passive)} <i>/</i> {config.format(guided)}</span>
             </div>
           );
         })}
-        <footer><span><i className="passive" />Passive</span><span><i className="guided" />Guided</span><small>{config.lowerIsBetter ? '数值越低越好' : '数值越高越好'}</small></footer>
+        <footer><span><i className="passive" />无提示</span><span><i className="guided" />有提示</span><small>{config.lowerIsBetter ? '数值越低越好' : '数值越高越好'}</small></footer>
       </div>
 
-      <div className="memory-ranking-grid">
-        <Ranking protocol="passive" />
-        <Ranking protocol="guided" />
-      </div>
+      <details className="memory-details">
+        <summary>
+          <span>FULL RESULTS &amp; METHOD</span>
+          <b>查看完整排名、评测方法和原始数据</b>
+          <i aria-hidden="true">+</i>
+        </summary>
+        <div className="memory-details-content">
+          <div className="memory-ranking-grid">
+            <Ranking protocol="passive" />
+            <Ranking protocol="guided" />
+          </div>
 
-      <div className="memory-table-wrap">
-        <table>
-          <thead><tr><th>插件</th><th>Passive</th><th>Guided</th><th>引导增益</th><th>P 延迟</th><th>G 延迟</th><th>P Token</th><th>G Token</th><th>P / G 工具</th></tr></thead>
-          <tbody>
-            {[...benchmark.plugins].sort((left, right) => left.guided.rank - right.guided.rank).map((row) => (
-              <tr key={row.id}>
-                <td><strong>{row.name}</strong>{row.implementationOverlap && <small>{row.implementationOverlap}</small>}</td>
-                <td>{row.passive.passed}/20</td><td>{row.guided.passed}/20</td>
-                <td><b>+{row.guided.passed - row.passive.passed}</b></td>
-                <td>{formatSeconds(row.passive.meanEffectiveLatencyMs)}{row.passive.timeoutCount ? <small>{row.passive.timeoutCount} 超时</small> : null}</td>
-                <td>{formatSeconds(row.guided.meanEffectiveLatencyMs)}{row.guided.timeoutCount ? <small>{row.guided.timeoutCount} 超时</small> : null}</td>
-                <td>{formatInt(row.passive.meanPromptTokens)}</td><td>{formatInt(row.guided.meanPromptTokens)}</td>
-                <td>{row.passive.totalToolCalls} / {row.guided.totalToolCalls}</td>
-              </tr>
+          <div className="memory-method-heading">
+            <p className="section-label">METHOD / HOW RESULTS ARE CALCULATED</p>
+            <h3>评测方法</h3>
+            <p>两组测试使用相同问题和环境，仅改变是否明确提示记忆。以下记录用于复查排名。</p>
+          </div>
+
+          <div className="memory-protocol-grid" aria-label="两种提示方式说明">
+            <TrackCard protocol="passive" />
+            <TrackCard protocol="guided" />
+          </div>
+
+          <div className="memory-constant">
+            <div><span>唯一变量</span><strong>是否明确提示 Agent 使用记忆</strong></div>
+            <p>除是否添加通用记忆提示外，题目、提供的信息、模型、评分方式和运行环境均相同。有提示模式不会透露工具名、答案或历史会话 ID。</p>
+          </div>
+
+          <div className="memory-pipeline" aria-label="单题执行流程">
+            {pipeline.map(([number, title, copy]) => (
+              <article key={number}><span>{number}</span><strong>{title}</strong><p>{copy}</p></article>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
 
-      <div className="memory-reading-grid">
-        <article><span>01</span><strong>两轨都高</strong><p>自动触发与显式调用都可靠，默认体验和能力上限一致。</p></article>
-        <article><span>02</span><strong>Guided 高、Passive 低</strong><p>核心能力存在，但默认自动调用策略尚未把能力释放出来。</p></article>
-        <article><span>03</span><strong>两轨都低</strong><p>缺口更可能在写入、持久化、检索质量或答案整合。</p></article>
-      </div>
+          <div className="memory-table-wrap">
+            <table>
+              <thead><tr><th>Agent</th><th>无提示</th><th>有提示</th><th>提示后提升</th><th>无提示耗时</th><th>有提示耗时</th><th>无提示 Token</th><th>有提示 Token</th><th>工具调用数（无 / 有）</th></tr></thead>
+              <tbody>
+                {[...benchmark.plugins].sort((left, right) => left.guided.rank - right.guided.rank).map((row) => (
+                  <tr key={row.id}>
+                    <td><strong>{row.name}</strong>{row.implementationOverlap && <small>{row.implementationOverlap}</small>}</td>
+                    <td>{row.passive.passed}/20</td><td>{row.guided.passed}/20</td>
+                    <td><b>+{row.guided.passed - row.passive.passed}</b></td>
+                    <td>{formatSeconds(row.passive.meanEffectiveLatencyMs)}{row.passive.timeoutCount ? <small>{row.passive.timeoutCount} 超时</small> : null}</td>
+                    <td>{formatSeconds(row.guided.meanEffectiveLatencyMs)}{row.guided.timeoutCount ? <small>{row.guided.timeoutCount} 超时</small> : null}</td>
+                    <td>{formatInt(row.passive.meanPromptTokens)}</td><td>{formatInt(row.guided.meanPromptTokens)}</td>
+                    <td>{row.passive.totalToolCalls} / {row.guided.totalToolCalls}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="memory-reading-grid">
+            <article><span>01</span><strong>两种模式都高</strong><p>不提示也能稳定记忆，提示后表现同样可靠。</p></article>
+            <article><span>02</span><strong>有提示高、无提示低</strong><p>Agent 具备记忆能力，但通常需要用户明确提醒。</p></article>
+            <article><span>03</span><strong>两种模式都低</strong><p>问题可能出在信息写入、保存、检索或答案组织。</p></article>
+          </div>
+
+          <p className="memory-technical-note">Mem9 未配置 API Key，本次未评测；Mnemon 官方版本与 dsh-mnemon 使用相同核心实现。</p>
+        </div>
+      </details>
 
       <footer className="memory-evidence-footer">
-        <div><span>公开数据快照</span><strong>LoCoMo refined · 20 题 · C0 双轨 0/20</strong><p>Mem9 缺少 API Key，记为 N/A；Mnemon 官方 wrapper 与 dsh-mnemon 共享核心实现。</p></div>
-        <div><a href="/dsheval/data/memory/locomo20-2026-08-28.json" download>下载精简 JSON <span aria-hidden="true">↓</span></a><a href="https://github.com/dsheval/dsh-eval/tree/main/evals/memory" target="_blank" rel="noreferrer">查看评测代码 <span aria-hidden="true">↗</span></a></div>
+        <div><span>TEST RESULTS / 2026-08-28</span><strong>LoCoMo 精选集 · 20 题 · C0 对照组两种模式均为 0/20</strong></div>
+        <div><a href="/dsheval/data/memory/locomo20-2026-08-28.json" download>下载结果数据（JSON） <span aria-hidden="true">↓</span></a><a href="https://github.com/dsheval/dsh-eval/tree/main/evals/memory" target="_blank" rel="noreferrer">查看评测代码 <span aria-hidden="true">↗</span></a></div>
       </footer>
     </section>
   );
