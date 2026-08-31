@@ -1,0 +1,66 @@
+{
+  "id": "dsh-search-hard12-v2",
+  "title": "DSH Search Hard-12 (isolated search-only v2)",
+  "taskSource": {
+    "path": "fixtures/deepresearch-bench-hard12.jsonl",
+    "format": "jsonl",
+    "hashPolicy": "utf8-lf-normalized",
+    "sha256": "212755ef041b2c71867abe8c05549ac6bb11ccbb962203e296a254cb07a1c060",
+    "count": 12,
+    "languageCounts": { "zh": 6, "en": 6 },
+    "selectionPolicy": "top-6 hardest tasks per language from the frozen Hard-20, ordered by official GPT-5.5 mean RACE ascending",
+    "ids": [39, 22, 23, 19, 9, 17, 74, 53, 91, 95, 86, 84],
+    "promptPolicy": "verbatim-no-wrapper",
+    "upstream": "Ayanami0730/deep_research_bench data/prompt_data/query.jsonl"
+  },
+  "execution": {
+    "profile": "search-eval",
+    "agentPreset": "search-eval",
+    "port": 3380,
+    "taskTimeoutMs": 1800000,
+    "hostIsolation": "per-task",
+    "maxAgentSteps": 24,
+    "maxToolCalls": 48,
+    "forbiddenToolNames": ["skill", "pwsh", "bash", "read", "write", "edit", "glob", "grep", "str_replace_editor", "persistent_bash", "terminal"],
+    "monitorPollMs": 2500,
+    "monitorHistoryMaxMessages": 4,
+    "cancelTimeoutMs": 10000,
+    "cancelGraceMs": 10000,
+    "cleanupHistoryTimeoutMs": 20000,
+    "historyMaxMessages": 5000,
+    "urlCheckLimit": 30,
+    "freshProfilePerCondition": true,
+    "freshSessionPerTask": true,
+    "defaultAttempts": 1,
+    "baselineBrackets": 2,
+    "conditionOrderSeed": "dsh-search-hard12-v2"
+  },
+  "admission": {
+    "requiredModelLabelEnv": "DSH_SEARCH_EVAL_MODEL_LABEL",
+    "requiredBatchIdEnv": "DSH_SEARCH_EVAL_BATCH_ID",
+    "maxBatchHours": 48,
+    "requireAllTasks": true
+  },
+  "judge": {
+    "enabledByDefault": true,
+    "provider": "deepseek-compatible",
+    "baseUrl": "https://api.deepseek.com/chat/completions",
+    "apiKeyEnv": "DEEPSEEK_API_KEY",
+    "modelEnv": "DSH_SEARCH_EVAL_JUDGE_MODEL",
+    "defaultModel": "deepseek-chat",
+    "timeoutMs": 180000,
+    "temperature": 0
+  },
+  "thresholds": {
+    "minimumRetrievalCalls": 1,
+    "minimumRetrievedUrls": 1,
+    "minimumOpenUrls": 1,
+    "minimumToolSuccessRate": 0.5,
+    "minimumStructuredCompleteness": 0.5,
+    "minimumClaimSupport": 0.6,
+    "minimumCitationCorrectness": 0.5,
+    "pairedMeaningfulDelta": 0.05,
+    "baselineMaxMeanAbsoluteDrift": 0.15,
+    "baselineMaxStatusMismatchRate": 0.25
+  }
+}

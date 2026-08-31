@@ -10,6 +10,8 @@
     "build": "vinext build",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "test:search": "npm --prefix evals/search test",
+    "eval:search": "npm --prefix evals/search start --",
     "test:memory": "npm --prefix evals/memory test",
     "eval:memory": "npm --prefix evals/memory start --"
   },
