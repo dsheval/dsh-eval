@@ -4,6 +4,7 @@
   "taskSource": {
     "path": "fixtures/deepresearch-bench-hard12.jsonl",
     "format": "jsonl",
+    "hashPolicy": "utf8-lf-normalized",
     "sha256": "212755ef041b2c71867abe8c05549ac6bb11ccbb962203e296a254cb07a1c060",
     "count": 12,
     "languageCounts": { "zh": 6, "en": 6 },

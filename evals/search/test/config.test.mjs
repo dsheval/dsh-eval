@@ -11,6 +11,7 @@ test("loads the hash-frozen upstream Hard-12 without prompt wrappers", () => {
   assert.deepEqual(config.suite.tasks.map((task) => task.id), [39, 22, 23, 19, 9, 17, 74, 53, 91, 95, 86, 84]);
   assert.deepEqual(config.suite.tasks.map((task) => task.id), config.suite.taskSource.ids);
   assert.equal(config.taskFileSha256, config.suite.taskSource.sha256);
+  assert.equal(config.suite.taskSource.hashPolicy, "utf8-lf-normalized");
   assert.equal(config.suite.taskSource.promptPolicy, "verbatim-no-wrapper");
   assert.equal(config.suite.id, "dsh-search-hard12-v2");
   assert.equal(config.suite.execution.agentPreset, "search-eval");

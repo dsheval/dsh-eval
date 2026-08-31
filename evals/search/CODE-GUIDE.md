@@ -64,7 +64,7 @@ C0 尾轮（12 题）
 ## 文件树
 
 ```text
-docs/search-eval/
+evals/search/
 |-- .gitignore
 |-- README.md
 |-- CODE-GUIDE.md
@@ -113,7 +113,7 @@ docs/search-eval/
 
 ## fixtures：冻结的实验输入
 
-- `fixtures/deepresearch-bench-hard12.jsonl`：12 道原始任务。它是从 DeepResearch Bench 冻结出的困难子集，不是本项目生成题；哈希、任务 ID、顺序和中英文数量都会校验。
+- `fixtures/deepresearch-bench-hard12.jsonl`：12 道原始任务。它是从 DeepResearch Bench 冻结出的困难子集，不是本项目生成题；UTF-8 文本在统一为 LF 换行后校验哈希，任务 ID、顺序和中英文数量也会校验。
 - `fixtures/suite.json`：实验总开关。包含题集哈希、Host 隔离方式、30 分钟单题墙钟、24 step/48 tool call 预算、禁用工具、Judge 配置和发布门槛。
 - `fixtures/catalog.json`：条件名录。冻结 C0、可选 C1、S1—S8 的包版本或 Git commit、安装方式、所需凭据和默认 provider。
 
@@ -149,7 +149,7 @@ docs/search-eval/
 
 ## 哪些命令可以安全运行
 
-在 `docs/search-eval` 中：
+在 `evals/search` 中：
 
 ```powershell
 npm test

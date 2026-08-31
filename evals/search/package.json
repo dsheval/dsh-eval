@@ -1,9 +1,10 @@
 {
-  "name": "@dsh-top100/search-eval",
+  "name": "@dsh-eval/search",
   "private": true,
   "type": "module",
   "description": "Isolated search-only DSH plugin evaluation harness over the official DeepResearch Bench Hard-12 slice",
   "scripts": {
+    "start": "node src/run.mjs",
     "validate": "node src/run.mjs validate",
     "plan": "node src/run.mjs plan",
     "preflight": "node src/run.mjs preflight",

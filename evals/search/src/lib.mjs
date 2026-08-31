@@ -36,6 +36,11 @@ export function fileSha256(path) {
   return sha256(readFileSync(path));
 }
 
+export function textFileSha256(path) {
+  const normalized = readFileSync(path, "utf8").replace(/\r\n?/gu, "\n");
+  return sha256(normalized);
+}
+
 export function extractUrls(value) {
   const matches = String(value ?? "").match(/https?:\/\/[^\s<>{}\[\]"'`]+/giu) ?? [];
   return [...new Set(matches.map((url) => url.replace(/[)\]}>）,.;:!?，。；：！？】》」』]+$/u, "")))];

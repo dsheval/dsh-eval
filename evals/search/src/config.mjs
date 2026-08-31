@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { EVAL_ROOT, fileSha256, readJson, readJsonl, stableHash } from "./lib.mjs";
+import { EVAL_ROOT, readJson, readJsonl, stableHash, textFileSha256 } from "./lib.mjs";
 
 export const DEFAULT_SUITE = resolve(EVAL_ROOT, "fixtures", "suite.json");
 export const DEFAULT_CATALOG = resolve(EVAL_ROOT, "fixtures", "catalog.json");
@@ -15,7 +15,7 @@ export function loadConfiguration(options = {}) {
     suite: { ...suite, tasks },
     catalog,
     paths: { suitePath, catalogPath, taskPath },
-    taskFileSha256: fileSha256(taskPath),
+    taskFileSha256: textFileSha256(taskPath),
   };
 }
 
@@ -26,6 +26,9 @@ export function validateConfiguration(config, options = {}) {
   if (!suite?.id) issue(issues, "error", "suite.id", "缺少 suite id");
   if (config.taskFileSha256 !== suite?.taskSource?.sha256) {
     issue(issues, "error", "suite.taskSource.sha256", "Hard-12 文件哈希与冻结值不一致");
+  }
+  if (suite?.taskSource?.hashPolicy !== "utf8-lf-normalized") {
+    issue(issues, "error", "suite.taskSource.hashPolicy", "Hard-12 必须使用跨平台 UTF-8/LF 规范化哈希");
   }
   if (suite?.taskSource?.promptPolicy !== "verbatim-no-wrapper") {
     issue(issues, "error", "suite.taskSource.promptPolicy", "正式题面必须逐字发送且不得添加 wrapper");

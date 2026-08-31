@@ -10,6 +10,8 @@
 
 `212755ef041b2c71867abe8c05549ac6bb11ccbb962203e296a254cb07a1c060`
 
+哈希按 UTF-8 文本并将 CRLF/CR 换行规范化为 LF 后计算，因此 Windows 与 Linux checkout 会得到相同结果；题面字符本身仍逐字校验和发送。
+
 加载器同时核验哈希、12 个任务 id、顺序、6 中/6 英以及官方难度字段；测试还逐题比对原 Hard-20，防止题面被改写。任何一项变化都会拒绝正式运行。任务来自 [DeepResearch Bench 官方 query.jsonl](https://github.com/Ayanami0730/deep_research_bench/blob/main/data/prompt_data/query.jsonl)，难度来自其官方 GPT-5.5 leaderboard 的九系统逐题 RACE 数据。
 
 ## 八个条件

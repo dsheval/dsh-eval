@@ -5,7 +5,7 @@
 以下入口不安装插件、不启动 DSH、不调用模型或联网搜索：
 
 ```powershell
-cd D:\dsh-top100\docs\search-eval
+cd D:\dsh-eval\evals\search
 npm run validate
 npm run plan
 npm run preflight
