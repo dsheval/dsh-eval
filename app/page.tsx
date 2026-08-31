@@ -4,10 +4,10 @@ import MemoryBenchmark from './components/MemoryBenchmark';
 const TOP100_URL = 'https://dsheval.ai/';
 
 const evaluationSteps = [
-  ['01', 'SETUP', '准备测试', '确认 Agent 版本和运行环境，再选定测试集与评分方式。'],
-  ['02', 'RUN', '完成真实任务', '让 Agent 在统一环境中完成任务，并记录操作过程、状态变化和最终输出。'],
-  ['03', 'CHECK', '按同一规则评分', '核对运行记录，再按预先公开的标准计算结果。'],
-  ['04', 'PUBLISH', '发布结果', '公布得分、限制和复查信息；记录不足的项目标为“无法评测”。'],
+  ['01', '固定测试条件', 'Agent 版本、运行环境、题集和评分规则，都在测试开始前锁定。'],
+  ['02', '执行并记录', '让 Agent 完成真实任务，保留操作过程、状态变化和最终输出。'],
+  ['03', '复查并评分', '按照预先公开的规则核对完整记录，再计算测试结果。'],
+  ['04', '公开可复查', '发布得分、限制和复查材料；证据不足则明确标记“无法评测”。'],
 ];
 
 const trustLevels = [
@@ -20,9 +20,10 @@ const trustLevels = [
 
 function Brand() {
   return (
-    <span className="brand-lockup">
-      <span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>
-      <span className="brand-name"><strong>DSH</strong><b>Eval</b></span>
+    <span className="brand-lockup" translate="no">
+      <strong className="brand-dsh">DSH</strong>
+      <span className="brand-slash" aria-hidden="true">/</span>
+      <b className="brand-eval">EVAL</b>
     </span>
   );
 }
@@ -32,10 +33,9 @@ function Arrow() {
 }
 
 const navLinks = [
-  { href: '#memory-benchmark', label: '测试结果' },
-  { href: '#evaluation-pipeline', label: '评测方法' },
-  { href: '#agent-pool', label: '参评 Agent' },
-  { href: '#trust-levels', label: '验证等级' },
+  { href: '#memory-benchmark', label: '最新结果', external: false },
+  { href: '#result-evidence', label: '评测说明', external: false },
+  { href: TOP100_URL, label: 'Top100 候选', external: true },
 ];
 
 export default function Home() {
@@ -46,7 +46,17 @@ export default function Home() {
         <a href="#top" className="brand-link" aria-label="DSHEval 首页"><Brand /></a>
 
         <nav className="desktop-nav" aria-label="主导航">
-          {navLinks.map((link) => <a href={link.href} key={link.href}>{link.label}</a>)}
+          {navLinks.map((link) => (
+            <a
+              aria-label={link.external ? `${link.label}（新窗口打开）` : undefined}
+              href={link.href}
+              key={link.href}
+              rel={link.external ? 'noreferrer' : undefined}
+              target={link.external ? '_blank' : undefined}
+            >
+              {link.label}{link.external ? <span aria-hidden="true"> ↗</span> : null}
+            </a>
+          ))}
         </nav>
 
         <a className="nav-action" href="#memory-benchmark">查看测试结果 <Arrow /></a>
@@ -54,7 +64,17 @@ export default function Home() {
         <details className="mobile-nav">
           <summary><span>菜单</span><i aria-hidden="true" /></summary>
           <nav aria-label="移动端导航">
-            {navLinks.map((link) => <a href={link.href} key={link.href}>{link.label}</a>)}
+            {navLinks.map((link) => (
+              <a
+                aria-label={link.external ? `${link.label}（新窗口打开）` : undefined}
+                href={link.href}
+                key={link.href}
+                rel={link.external ? 'noreferrer' : undefined}
+                target={link.external ? '_blank' : undefined}
+              >
+                {link.label}{link.external ? <span aria-hidden="true"> ↗</span> : null}
+              </a>
+            ))}
           </nav>
         </details>
       </header>
@@ -63,62 +83,78 @@ export default function Home() {
         <EvaluationDemo />
         <MemoryBenchmark />
 
-        <section className="method-section" id="evaluation-pipeline">
-          <div className="method-intro">
-            <p className="section-label light-label">EVALUATION METHOD / V1</p>
-            <h2>评测怎么做？</h2>
-            <p>DSHEval 固定测试条件，让每个 Agent 按同一方案完成真实任务，再根据运行记录评分。</p>
+        <section className="proof-section" id="result-evidence">
+          <div className="proof-summary">
+            <div>
+              <p className="section-label">RESULT / VERIFICATION</p>
+              <h2>结果可复查，<br />尚待独立复测。</h2>
+            </div>
+            <dl className="proof-facts">
+              <div><dt>证据等级</dt><dd><b>03</b><span>已完成测试</span></dd></div>
+              <div><dt>运行状态</dt><dd><b>0</b><span>次评测故障</span></dd></div>
+              <div><dt>公开材料</dt><dd><b>2</b><span>结果数据 · 评测代码</span></dd></div>
+            </dl>
           </div>
 
-          <ol className="method-steps evaluation-steps">
-            {evaluationSteps.map(([number, code, title, copy]) => (
-              <li key={number}><span>{number}</span><div><small>{code}</small><h3>{title}</h3><p>{copy}</p></div></li>
-            ))}
-          </ol>
+          <div className="proof-details" id="evaluation-pipeline" aria-label="评测方法">
+            <details className="proof-detail-group">
+              <summary>
+                <div><span>METHOD / 01—04</span><b>查看四步评测流程</b></div>
+                <small>从固定条件到公开结果</small>
+                <i aria-hidden="true">+</i>
+              </summary>
+              <section className="proof-method proof-detail-content">
+                <header><span>METHOD / 01—04</span><h3>一份结果，四次确认。</h3></header>
+                <ol>
+                  {evaluationSteps.map(([number, title, copy]) => (
+                    <li key={number}><span>{number}</span><div><strong>{title}</strong><p>{copy}</p></div></li>
+                  ))}
+                </ol>
+              </section>
+            </details>
+
+            <details className="proof-detail-group">
+              <summary>
+                <div><span>LEVELS / 01—05</span><b>查看五级验证标准</b></div>
+                <small>当前结果位于 Level 03</small>
+                <i aria-hidden="true">+</i>
+              </summary>
+              <section className="proof-levels proof-detail-content">
+                <header><span>VERIFICATION LEVELS</span><h3>证据走到哪一步，结果就标到哪一级。</h3></header>
+                <ol>
+                  {trustLevels.map(([number, name, label, copy]) => (
+                    <li className={number === '03' ? 'is-current' : undefined} key={name}>
+                      <span>{number}</span><div><small>{name}</small><strong>{label}</strong><p>{copy}</p></div>
+                    </li>
+                  ))}
+                </ol>
+                <div className="proof-notes">
+                  <p><b>证据不足</b> 缺少关键记录时标记“无法评测”，不把它当作零分。</p>
+                  <p><b>安全边界</b> 评测通过不等于可以安全使用；权限与高风险操作需单独检查。</p>
+                </div>
+              </section>
+            </details>
+          </div>
         </section>
 
         <section className="top100-section top100-compact" id="agent-pool">
           <div className="top100-copy">
             <div>
-              <p className="section-label light-label">TOP100 / CANDIDATES</p>
-              <h2>Top100 提供候选，<br />测试决定结果。</h2>
+              <p className="section-label light-label">CANDIDATES / NEXT</p>
+              <h2>想看更多 Agent？</h2>
               <p>Top100 反映关注度，不代表能力排名。入选 Agent 仍需在统一环境和规则下完成测试。</p>
             </div>
             <div className="top100-actions">
-              <div className="top100-equation"><span>TOP100</span><i aria-hidden="true">→</i><span>参评列表</span><i aria-hidden="true">→</i><span>统一评测</span></div>
-              <a className="button button-outline-light" href={TOP100_URL} target="_blank" rel="noreferrer">查看 Top100 <Arrow /></a>
+              <a className="top100-direct-link" href={TOP100_URL} target="_blank" rel="noreferrer"><span>打开 Top100 候选列表</span><Arrow /></a>
             </div>
           </div>
-        </section>
-
-        <section className="principles-section" id="trust-levels">
-          <div className="principles-heading">
-            <p className="section-label">VERIFICATION LEVELS</p>
-            <h2>结果确认到哪一步？</h2>
-          </div>
-
-          <div className="trust-level-list">
-            {trustLevels.map(([number, name, label, copy]) => (
-              <article key={name}>
-                <span>{number}</span>
-                <div><small>{name}</small><h3>{label}</h3><p>{copy}</p></div>
-              </article>
-            ))}
-          </div>
-
-          <div className="trust-note-grid compact-trust-notes">
-            <article><span>证据不足</span><h3>缺少关键记录时，不给出结论。</h3><p>“无法评测”不是零分，而是现有资料不足以支持判断。</p></article>
-            <article><span>安全检查</span><h3>评测通过，不等于可以安全使用。</h3><p>权限、数据访问和高风险操作需要单独检查。</p></article>
-          </div>
-
-          <p className="independence-note">当前 V1 提供统一评测、结果记录和初版结果库；更多公开结果、MCP 接口和推荐功能将在后续开放。</p>
         </section>
       </main>
 
       <footer className="site-footer">
         <a href="#top" aria-label="返回顶部"><Brand /></a>
         <p>在统一条件下评测 Agent，结果可复查、可复现</p>
-        <div><a href="#memory-benchmark">测试结果</a><a href="#evaluation-pipeline">评测方法</a><a href="#trust-levels">验证等级</a></div>
+        <div><a href="#memory-benchmark">最新结果</a><a href="#result-evidence">评测说明</a><a href={TOP100_URL} target="_blank" rel="noreferrer">Top100 候选 ↗</a></div>
         <span>© 2026 DSHEval</span>
       </footer>
     </>
