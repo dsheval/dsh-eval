@@ -120,8 +120,8 @@
     {
       "id": "P3",
       "plugin": "mnemon",
-      "name": "Mnemon 官方 wrapper",
-      "implementationOverlap": "与 P5 共享 dsh-mnemon 核心实现",
+      "name": "Mnemon（官方版）",
+      "implementationOverlap": "与 dsh-mnemon 共享核心实现",
       "passive": {
         "rank": 4,
         "passed": 6,

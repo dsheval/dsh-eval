@@ -7,7 +7,7 @@ import { PROTOCOLS } from "./protocol.mjs";
 
 const DISPLAY_NAMES = {
   P2: "Graph Memory",
-  P3: "Mnemon 官方 wrapper",
+  P3: "Mnemon（官方版）",
   P4: "Memory Evolve",
   P5: "dsh-mnemon",
   P6: "dsh-noema",
@@ -33,7 +33,7 @@ export function buildSiteSnapshot({ passive, guided, day }) {
       id,
       plugin: rows.passive.plugin,
       name: DISPLAY_NAMES[id] ?? rows.passive.plugin,
-      implementationOverlap: id === "P3" ? "与 P5 共享 dsh-mnemon 核心实现" : null,
+      implementationOverlap: id === "P3" ? "与 dsh-mnemon 共享核心实现" : null,
       passive: summarizeRow(rows.passive),
       guided: summarizeRow(rows.guided),
     };
