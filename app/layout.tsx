@@ -3,33 +3,43 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://dsheval.ai'),
-  title: 'DSHEval · Agent 真实任务评测',
-  description: '在统一运行环境中测试 Agent 的真实任务表现，公开结果、评测方法和可复查记录。',
+  title: {
+    default: 'DSHEval · DSH Agent 与插件自动化评测基础设施',
+    template: '%s',
+  },
+  description: 'DSHEval 在可恢复测试环境中执行真实任务，采集运行与环境证据，输出可解释、可复现的 DSH Agent 与插件评测结果。',
   alternates: {
     canonical: '/dsheval',
+  },
+  creator: 'DSHEval',
+  publisher: 'DSHEval',
+  robots: {
+    index: true,
+    follow: true,
   },
   icons: {
     icon: '/dsheval/favicon.svg',
   },
   openGraph: {
     url: '/dsheval',
-    title: 'DSHEval · Agent 真实任务评测',
-    description: '固定版本和运行环境，执行真实任务，并公开可复查、可复现的评测结果。',
+    title: 'DSHEval · DSH Agent 与插件自动化评测基础设施',
+    description: '让每一项能力结论都建立在真实任务、闭合证据和可复现结果之上。',
     siteName: 'DSHEval',
     type: 'website',
+    locale: 'zh_CN',
     images: [
       {
         url: '/dsheval/og.png',
         width: 1731,
         height: 909,
-        alt: 'DSHEval：在统一条件下测试 Agent 的真实任务表现。',
+        alt: 'DSHEval：DSH Agent 与插件自动化评测基础设施。',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DSHEval · Agent 真实任务评测',
-    description: '在统一条件下测试 Agent 的真实任务表现，结果可复查、可复现。',
+    title: 'DSHEval · DSH Agent 与插件自动化评测基础设施',
+    description: '让每一项能力结论都建立在真实任务、闭合证据和可复现结果之上。',
     images: ['/dsheval/og.png'],
   },
 };
