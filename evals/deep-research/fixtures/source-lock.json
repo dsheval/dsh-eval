@@ -1,0 +1,26 @@
+{
+  "id": "dsh-research-eval-source-lock-v1",
+  "sources": [
+    {
+      "target": "P1",
+      "repository": "https://github.com/hancao97/hanai-investment-dsh",
+      "commit": "79fdfc12acf19902213f082ccb7b7ad522ff6ccb",
+      "archive": "worth-dsh.tar.gz",
+      "sha256": "f1dc5276bdea615d4253de527beadd646ba932862e9b339202dd66ba5fe8726e"
+    },
+    {
+      "target": "P3",
+      "repository": "https://github.com/lzszq/dsh-scholar",
+      "commit": "db9239cbd29e8726487de639cb7d3fdb0ed46b4e",
+      "archive": "dsh-scholar.tar.gz",
+      "sha256": "41c364e11e0c52a54421f901ef96e45543264e9172161ceb168f8bb2154b0530"
+    },
+    {
+      "target": "DSH",
+      "repository": "https://github.com/deepseek-ai/deepseek-harness",
+      "commit": "cd5ef8148158c3a752a658978873241fdf8e2bbc",
+      "archive": "deepseek-harness.tar.gz",
+      "sha256": "1507dab8f0d8fe91babb9bbf082591d3c1e6d505251ddeb8aa7dec292e137ac7"
+    }
+  ]
+}

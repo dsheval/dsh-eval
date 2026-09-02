@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["runId", "condition", "taskId", "attempt", "processLedger", "resultLedger"],
+  "properties": {
+    "runId": { "type": "string" },
+    "condition": { "type": "string" },
+    "taskId": { "type": "string", "pattern": "^R(?:[1-9]|10)$" },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "answer": { "type": "string" },
+    "processLedger": {
+      "type": "object",
+      "required": ["environment", "research", "tools", "sources", "anomalies", "recovery", "resources", "artifacts"]
+    },
+    "resultLedger": {
+      "type": "object",
+      "required": ["status", "facts", "deliverables", "citations", "researchCompletion", "risks", "recovery", "uplift"],
+      "properties": {
+        "status": { "enum": ["PASS", "PARTIAL", "FAIL", "SYSTEM_ERROR", "OUT_OF_SCOPE", "GRADER_ERROR", "NOT_SCORED"] },
+        "researchCompletion": { "enum": ["COMPLETE", "SEARCH_ONLY", "INCOMPLETE", "NOT_APPLICABLE"] },
+        "recovery": { "enum": ["PASS", "FAIL", "NOT_TESTED"] },
+        "uplift": { "enum": ["POSITIVE", "NO_CLEAR", "NEGATIVE", "NOT_COMPARABLE"] }
+      }
+    },
+    "judge": { "type": ["object", "null"] }
+  }
+}

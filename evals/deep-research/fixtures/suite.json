@@ -1,0 +1,198 @@
+{
+  "id": "dsh-research-eval-v12-r3-refresh",
+  "asOf": "2026-08-31",
+  "description": "校准版：5 个测评项保持短事实、长报告、产品诊断 2:2:1 分布；按轨限制搜索扩张和研究型工具调用，为长文保留综合阶段，并自动重试可识别的模型基础设施错误。",
+  "selection": {
+    "policy": "balanced-compact-no-search-cap-v1",
+    "shortFact": { "xbench-deepsearch.2505": 1, "browsecomp-zh.test": 1 },
+    "longForm": { "deepresearcheval.v1": 2 },
+    "productDiagnostics": 1,
+    "officialAndDiagnosticMetricsStaySeparate": true
+  },
+  "execution": {
+    "taskTimeoutMs": null,
+    "installTimeoutMs": 600000,
+    "interruptAfterMs": 45000,
+    "urlCheckLimit": 20,
+    "budgetPollIntervalMs": 10000,
+    "infrastructureRetries": 2,
+    "infrastructureRetryDelayMs": 5000,
+    "researchProtocol": {
+      "id": "bounded-evidence-v1",
+      "maxSubagents": 4,
+      "sourcesPerDeliverable": 2,
+      "maxSearchCalls": 20,
+      "synthesisReserveCalls": 12,
+      "instructions": [
+        "Before searching, map every required deliverable to a bounded evidence question.",
+        "Create at most four subagents and partition their scopes so they do not run the same searches.",
+        "Do not submit the same normalized search query more than twice across the parent and child sessions.",
+        "Stop expanding a deliverable after it has two credible independent sources, unless those sources materially conflict.",
+        "Use automatic subagent completion notifications; do not repeatedly call list_agents while work is still running.",
+        "Write the final report and supporting artifacts inside the current working directory, then always provide a final chat answer."
+      ]
+    },
+    "budgets": {
+      "SF": {
+        "maxSearchCalls": 12,
+        "maxToolCalls": null,
+        "maxBudgetedCalls": 40,
+        "maxQueryRepeats": 2,
+        "noProgressMs": 120000
+      },
+      "LF": {
+        "maxSearchCalls": 24,
+        "maxToolCalls": null,
+        "maxBudgetedCalls": 72,
+        "maxQueryRepeats": 2,
+        "noProgressMs": 240000
+      },
+      "PRODUCT": {
+        "maxSearchCalls": null,
+        "maxToolCalls": null,
+        "maxBudgetedCalls": 60,
+        "maxQueryRepeats": 2,
+        "noProgressMs": 600000
+      }
+    },
+    "stabilityTasks": ["R1", "R6", "R7"],
+    "stabilityRepeats": 2
+  },
+  "judge": {
+    "enabledByDefault": true,
+    "provider": "openai-compatible",
+    "baseUrl": "https://api.deepseek.com/chat/completions",
+    "apiKeyEnv": "DEEPSEEK_API_KEY",
+    "modelEnv": "DSH_RESEARCH_JUDGE_MODEL",
+    "defaultModel": "deepseek-chat",
+    "timeoutMs": 180000
+  },
+  "tasks": [
+    {
+      "id": "R1",
+      "title": "黄金合约年度极差",
+      "track": "SF",
+      "mode": "normal",
+      "privateRef": "R1",
+      "requiresRetrieval": true,
+      "minSearchCalls": 2,
+      "officialMetric": "official.answer_accuracy",
+      "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality", "temporal_validity"],
+      "passRule": "最终短答案与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
+    },
+    {
+      "id": "R3",
+      "title": "历史文化地点识别",
+      "track": "SF",
+      "mode": "normal",
+      "privateRef": "R4",
+      "requiresRetrieval": true,
+      "minSearchCalls": 2,
+      "officialMetric": "official.answer_accuracy",
+      "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality"],
+      "passRule": "最终短答案与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
+    },
+    {
+      "id": "R6",
+      "title": "社区行为健康中的测量式照护与 AI 分诊",
+      "track": "LF",
+      "mode": "normal",
+      "domain": "Health",
+      "language": "en",
+      "asOf": null,
+      "minOpenUrls": 4,
+      "judgeRequired": true,
+      "timeoutMs": 2400000,
+      "prompt": "Evaluate integrating measurement-based care with AI triage tools in community behavioral health settings: cost-benefit, workflow changes, data governance, clinician acceptance, evidence from pilots and online clinician forums; provide implementation roadmap.",
+      "benchmarkSource": {
+        "benchmarkId": "deepresearcheval",
+        "split": "v1",
+        "taskId": "deepresearcheval.v1.000097",
+        "sourceHash": "sha256:8d6d6ee3d4e58eafdeccb26e2f8e1e0e69bb8103896fbc7aa6eaf65304712419"
+      },
+      "officialMetrics": ["official.quality_score", "official.fact_ratio"],
+      "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
+      "deliverables": [
+        {
+          "id": "cost_benefit",
+          "label": "成本收益分析",
+          "critical": true,
+          "patterns": ["cost|成本", "benefit|收益"]
+        },
+        {
+          "id": "workflow_changes",
+          "label": "工作流变化",
+          "critical": true,
+          "patterns": ["workflow|工作流|流程"]
+        },
+        {
+          "id": "governance_acceptance",
+          "label": "数据治理与临床医生接受度",
+          "critical": true,
+          "patterns": ["data governance|privacy|数据治理|隐私", "clinician|临床医生", "accept|adoption|接受|采纳"]
+        },
+        {
+          "id": "implementation_roadmap",
+          "label": "实施路线图",
+          "critical": true,
+          "patterns": ["roadmap|implementation plan|实施路线图|实施计划"]
+        }
+      ]
+    },
+    {
+      "id": "R7",
+      "title": "稳定币监管对零售银行影响",
+      "track": "LF",
+      "mode": "normal",
+      "domain": "Finance & Business",
+      "language": "en",
+      "asOf": "2025-08",
+      "minOpenUrls": 4,
+      "judgeRequired": true,
+      "timeoutMs": 2400000,
+      "prompt": "Assess impact of global stablecoin regulatory changes (US, EU, Hong Kong, Singapore) from Jan 2024 to Aug 2025 on retail banks' deposit flight, payments revenue, and regulatory capital; provide scenarios, quantitative estimates, and recommended strategy.",
+      "benchmarkSource": {
+        "benchmarkId": "deepresearcheval",
+        "split": "v1",
+        "taskId": "deepresearcheval.v1.000015",
+        "sourceHash": "sha256:54944d97568a9a633be97f92692ca21d168e4b415e81d2b62c8e9c74d91dd16e"
+      },
+      "officialMetrics": ["official.quality_score", "official.fact_ratio"],
+      "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
+      "deliverables": [
+        {
+          "id": "jurisdictions",
+          "label": "覆盖美国、欧盟、香港和新加坡",
+          "critical": true,
+          "patterns": ["US|United States|美国", "EU|European Union|欧盟", "Hong Kong|香港", "Singapore|新加坡"]
+        },
+        {
+          "id": "bank_impacts",
+          "label": "存款迁移、支付收入和监管资本",
+          "critical": true,
+          "patterns": ["deposit|存款", "payment|支付", "capital|资本"]
+        },
+        {
+          "id": "scenarios",
+          "label": "情景和定量估计",
+          "critical": true,
+          "patterns": ["scenario|情景", "estimate|%|估计"]
+        },
+        {
+          "id": "strategy",
+          "label": "推荐策略",
+          "critical": true,
+          "patterns": ["strateg|recommend|策略|建议"]
+        }
+      ]
+    },
+    {
+      "id": "R10",
+      "title": "搜索不等于研究",
+      "track": "PRODUCT",
+      "mode": "derived",
+      "deriveFrom": "R6",
+      "passRule": "只有搜索结果而缺少强制交付物时，研究完成度必须记为 SEARCH_ONLY 或 INCOMPLETE。"
+    }
+  ]
+}
