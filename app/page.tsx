@@ -1,5 +1,6 @@
 import EvaluationDemo from './components/EvaluationDemo';
 import MemoryBenchmark from './components/MemoryBenchmark';
+import memoryBenchmark from './data/memory/locomo20-2026-08-28.json';
 
 const TOP100_URL = 'https://dsheval.ai/';
 
@@ -16,6 +17,14 @@ const trustLevels = [
   ['03', 'EVALUATED', '已完成测试', '已经按统一方案完成测试，并生成完整记录。'],
   ['04', 'SELF-TESTED', '已提交自测', '开发者已经提交注明测试环境、可复现的自测结果。'],
   ['05', 'VERIFIED', '已独立复测', '关键结果已经在独立环境中复测确认。'],
+];
+
+const currentTestSteps = [
+  ['01', '清理测试环境', '清空测试工作区，删除上一题留下的文件和会话。'],
+  ['02', '会话 A：提供信息', '发送原始对话，两种模式只有附加提示不同。'],
+  ['03', '重启环境', '正常关闭 DSH，等待数据写入后重新启动。'],
+  ['04', '会话 B：提出问题', '在新会话中提出同一道题。'],
+  ['05', '按标准答案评分', '只核对答案和必需信息，不使用 LLM 评分。'],
 ];
 
 function Brand() {
@@ -35,7 +44,7 @@ function Arrow() {
 const navLinks = [
   { href: '#memory-benchmark', label: '最新结果', external: false },
   { href: '#result-evidence', label: '评测说明', external: false },
-  { href: TOP100_URL, label: 'Top100 候选', external: true },
+  { href: TOP100_URL, label: '插件市场', external: true },
 ];
 
 export default function Home() {
@@ -84,42 +93,42 @@ export default function Home() {
         <MemoryBenchmark />
 
         <section className="proof-section" id="result-evidence">
-          <div className="proof-summary">
+          <div className="proof-summary-compact">
             <div>
-              <p className="section-label">RESULT / VERIFICATION</p>
-              <h2>结果可复查，<br />尚待独立复测。</h2>
+              <h2>Level 03 · 已完成测试</h2>
             </div>
-            <dl className="proof-facts">
-              <div><dt>证据等级</dt><dd><b>03</b><span>已完成测试</span></dd></div>
-              <div><dt>运行状态</dt><dd><b>0</b><span>次评测故障</span></dd></div>
-              <div><dt>公开材料</dt><dd><b>2</b><span>结果数据 · 评测代码</span></dd></div>
-            </dl>
+            <p>0 次评测故障，结果数据与评测代码已公开；关键结果尚待独立环境复测。</p>
           </div>
 
-          <div className="proof-details" id="evaluation-pipeline" aria-label="评测方法">
-            <details className="proof-detail-group">
-              <summary>
-                <div><span>METHOD / 01—04</span><b>查看四步评测流程</b></div>
-                <small>从固定条件到公开结果</small>
-                <i aria-hidden="true">+</i>
-              </summary>
-              <section className="proof-method proof-detail-content">
-                <header><span>METHOD / 01—04</span><h3>一份结果，四次确认。</h3></header>
+          <details className="verification-disclosure" id="evaluation-pipeline">
+            <summary>
+              <div><span>评测与验证说明</span><b>查看测试如何执行、复查与分级</b></div>
+              <i aria-hidden="true">+</i>
+            </summary>
+            <div className="verification-content">
+              <section className="verification-block verification-current">
+                <header><span>CURRENT TEST</span><h3>唯一变量：是否提醒 Agent 使用记忆。</h3><p>两组使用同一组 {memoryBenchmark.sampleSizePerTrack} 道题、同一模型和运行环境；提示不会透露工具名、答案或历史会话 ID。</p></header>
+                <div className="verification-track-grid" aria-label="两种提示方式说明">
+                  <article><span>无提示</span><strong>观察默认表现</strong><p>直接提供原始对话和问题，不要求保存或检索记忆。</p></article>
+                  <article><span>有提示</span><strong>观察提醒后的表现</strong><p>只增加通用记忆提示，不改变题目、答案和评分方式。</p></article>
+                </div>
+                <ol className="verification-step-list">
+                  {currentTestSteps.map(([number, title, copy]) => (
+                    <li key={number}><span>{number}</span><div><strong>{title}</strong><p>{copy}</p></div></li>
+                  ))}
+                </ol>
+              </section>
+
+              <section className="verification-block proof-method">
+                <header><span>REVIEW METHOD</span><h3>一份结果，四次确认。</h3></header>
                 <ol>
                   {evaluationSteps.map(([number, title, copy]) => (
                     <li key={number}><span>{number}</span><div><strong>{title}</strong><p>{copy}</p></div></li>
                   ))}
                 </ol>
               </section>
-            </details>
 
-            <details className="proof-detail-group">
-              <summary>
-                <div><span>LEVELS / 01—05</span><b>查看五级验证标准</b></div>
-                <small>当前结果位于 Level 03</small>
-                <i aria-hidden="true">+</i>
-              </summary>
-              <section className="proof-levels proof-detail-content">
+              <section className="verification-block proof-levels">
                 <header><span>VERIFICATION LEVELS</span><h3>证据走到哪一步，结果就标到哪一级。</h3></header>
                 <ol>
                   {trustLevels.map(([number, name, label, copy]) => (
@@ -133,20 +142,15 @@ export default function Home() {
                   <p><b>安全边界</b> 评测通过不等于可以安全使用；权限与高风险操作需单独检查。</p>
                 </div>
               </section>
-            </details>
-          </div>
+            </div>
+          </details>
         </section>
 
         <section className="top100-section top100-compact" id="agent-pool">
           <div className="top100-copy">
-            <div>
-              <p className="section-label light-label">CANDIDATES / NEXT</p>
-              <h2>想看更多 Agent？</h2>
-              <p>Top100 反映关注度，不代表能力排名。入选 Agent 仍需在统一环境和规则下完成测试。</p>
-            </div>
-            <div className="top100-actions">
-              <a className="top100-direct-link" href={TOP100_URL} target="_blank" rel="noreferrer"><span>打开 Top100 候选列表</span><Arrow /></a>
-            </div>
+            <h2>发现值得安装的 DSH 插件</h2>
+            <p>按热度、增长、活跃度与安装证据持续更新；排行不等于能力评测。</p>
+            <a className="top100-direct-link" href={TOP100_URL} target="_blank" rel="noreferrer"><span>打开插件市场</span><Arrow /></a>
           </div>
         </section>
       </main>
@@ -154,7 +158,7 @@ export default function Home() {
       <footer className="site-footer">
         <a href="#top" aria-label="返回顶部"><Brand /></a>
         <p>在统一条件下评测 Agent，结果可复查、可复现</p>
-        <div><a href="#memory-benchmark">最新结果</a><a href="#result-evidence">评测说明</a><a href={TOP100_URL} target="_blank" rel="noreferrer">Top100 候选 ↗</a></div>
+        <div><a href="#memory-benchmark">最新结果</a><a href="#result-evidence">评测说明</a><a href={TOP100_URL} target="_blank" rel="noreferrer">插件市场 ↗</a></div>
         <span>© 2026 DSHEval</span>
       </footer>
     </>
