@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "profile", "port", "baseline", "plugins"],
+  "properties": {
+    "id": { "type": "string" },
+    "profile": { "type": "string" },
+    "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+    "baseline": { "$ref": "#/$defs/target" },
+    "plugins": {
+      "type": "array",
+      "minItems": 8,
+      "items": { "$ref": "#/$defs/target" }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "required": ["id", "plugin", "install", "requiredCredentialRefs", "platforms"],
+      "properties": {
+        "id": { "type": "string" },
+        "plugin": { "type": "string" },
+        "fullName": { "type": ["string", "null"] },
+        "install": {
+          "type": "object",
+          "required": ["kind"],
+          "properties": {
+            "kind": { "enum": ["none", "dsh-add", "source-add", "source-profile", "manual-source-profile"] },
+            "spec": { "type": "string" },
+            "reason": { "type": "string" },
+            "rootEnv": { "type": "string" },
+            "relativePath": { "type": "string" },
+            "artifact": { "type": "string" },
+            "verifyPlugin": { "type": "string" }
+          }
+        },
+        "requiredCredentialRefs": { "type": "array", "items": { "type": "string" } },
+        "optionalCredentialRefs": { "type": "array", "items": { "type": "string" } },
+        "runtimeChecks": {
+          "type": "array",
+          "items": { "enum": ["node-24", "dsh-0.1.1-rc.2", "docker-engine"] }
+        },
+        "platforms": { "type": "array", "items": { "enum": ["win32", "linux", "darwin"] } }
+      }
+    }
+  }
+}

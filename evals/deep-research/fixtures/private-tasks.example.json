@@ -1,0 +1,60 @@
+{
+  "R1": {
+    "prompt": "填写从受保护 benchmark 抽取的短事实题面",
+    "gold": ["填写 reference_answer 和可接受同义答案"],
+    "evidenceUrls": ["https://example.com/official-source"],
+    "language": "zh-CN",
+    "asOf": null,
+    "benchmarkSource": {
+      "benchmarkId": "xbench-deepsearch",
+      "split": "2505",
+      "taskId": "填写上游 task_id",
+      "sourceHash": "sha256:填写来源哈希"
+    }
+  },
+  "R2": {
+    "prompt": "填写冻结后的多跳短事实题面；不要在题面暴露中间答案",
+    "gold": ["填写最终唯一答案"],
+    "evidenceUrls": [
+      "https://example.com/hop-1",
+      "https://example.com/hop-2"
+    ],
+    "language": "zh-CN",
+    "asOf": null,
+    "benchmarkSource": {
+      "benchmarkId": "xbench-deepsearch",
+      "split": "2505",
+      "taskId": "填写上游 task_id",
+      "sourceHash": "sha256:填写来源哈希"
+    }
+  },
+  "R3": {
+    "prompt": "填写经检索确认应当找不到可靠结果的题面",
+    "gold": [],
+    "evidenceUrls": [],
+    "language": "zh-CN",
+    "asOf": null,
+    "benchmarkSource": {
+      "benchmarkId": "browsecomp-zh",
+      "split": "test",
+      "taskId": "填写上游 task_id",
+      "sourceHash": "sha256:填写来源哈希"
+    }
+  },
+  "R4": {
+    "prompt": "填写存在公开口径冲突的题面",
+    "gold": [],
+    "evidenceUrls": [
+      "https://example.com/source-a",
+      "https://example.com/source-b"
+    ],
+    "language": "zh-CN",
+    "asOf": null,
+    "benchmarkSource": {
+      "benchmarkId": "browsecomp-zh",
+      "split": "test",
+      "taskId": "填写上游 task_id",
+      "sourceHash": "sha256:填写来源哈希"
+    }
+  }
+}

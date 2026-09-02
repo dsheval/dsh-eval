@@ -3,6 +3,7 @@
 DSH Eval 是 DSH 插件生态的独立评测与展示项目。仓库同时包含：
 
 - 可部署的网站前端；
+- DSH Deep Research 插件的隔离评测运行器；
 - DSH 搜索插件 Hard-12 隔离测评运行器；
 - DSH 记忆插件双轨评测运行器；
 - LoCoMo 20 题评测配置、插件名录、评分逻辑与自动化测试；
@@ -23,10 +24,20 @@ npm run dev -- --host 0.0.0.0 --port 3000
 
 ```bash
 npm run lint
+npm run test:deep-research
 npm run test:search
 npm run test:memory
 npm run build
 ```
+
+Deep Research 评测的只读入口：
+
+```bash
+npm run eval:deep-research -- validate
+npm run eval:deep-research -- plan
+```
+
+`validate`、`plan` 和单元测试不会启动 DSH 或调用模型。正式 `run` 另有命令参数与环境变量双重锁，详见 [`evals/deep-research/DEVELOPMENT.md`](./evals/deep-research/DEVELOPMENT.md)。
 
 搜索插件测评的只读入口：
 
@@ -68,6 +79,8 @@ npm --prefix evals/memory run export:site -- --day YYYY-MM-DD
 
 基线 C0 是不安装第三方记忆插件的原生 DSH。每题经过埋点、优雅关闭旧 Host、冷启动、创建新会话、追问、评分与过程指标采集。完整协议、评分和运行方式分别见 [`benchmark.md`](./evals/memory/benchmark.md)、[`DEVELOPMENT.md`](./evals/memory/DEVELOPMENT.md) 和 [`evals/memory/README.md`](./evals/memory/README.md)。
 
+Deep Research 评测同样以不安装插件的 C0 为基线，每次只安装一个插件。当前 V12 紧凑题集由 4 个独立题面、5 个测评项组成，按 `2:2:1` 覆盖短事实、长文和产品诊断；分别记录研究过程账与结果账，不压成一个不可解释的加权总分。完整规则见 [`evals/deep-research/benchmark.md`](./evals/deep-research/benchmark.md)。
+
 搜索插件使用 DeepResearch Bench 冻结 Hard-12，在完全相同的 search-only preset 中逐题比较 8 个插件与原生 C0。正式批次用 C0 首尾 bracket 检测环境漂移；工具过程、URL 可达性、证据 Judge 和系统故障分开记录，不压成一个不可解释的总分。完整规则见 [`evals/search/benchmark.md`](./evals/search/benchmark.md)。
 
 ## 完整文件树与职责
@@ -78,6 +91,8 @@ npm --prefix evals/memory run export:site -- --day YYYY-MM-DD
 dsh-eval/
 ├── .dockerignore
 │   └── 控制 Docker 构建上下文，排除依赖、缓存和本机文件。
+├── .gitattributes
+│   └── 强制 Deep Research 的 WSL shell 脚本使用 LF，避免 Windows 换行导致执行失败。
 ├── .gitignore
 │   └── 忽略依赖、构建产物、环境变量和本地运行文件。
 ├── .openai/
@@ -87,8 +102,8 @@ dsh-eval/
 │   ├── components/
 │   │   ├── MemoryBenchmark.tsx
 │   │   │   └── 读取真实快照并展示 passive/guided 双轨排名、准确率、延迟、Token 与方法说明。
-│   │   └── RecommendationDemo.tsx
-│   │       └── 首页插件推荐报告的交互演示组件。
+│   │   └── EvaluationDemo.tsx
+│   │       └── 首页评测流程、证据与结果的交互演示组件。
 │   ├── data/memory/
 │   │   └── locomo20-2026-08-28.json
 │   │       └── 构建期读取的脱敏 LoCoMo 20 双轨榜单快照。
@@ -97,13 +112,108 @@ dsh-eval/
 │   ├── layout.tsx
 │   │   └── 根布局以及标题、canonical、Open Graph 等站点元数据。
 │   └── page.tsx
-│       └── 官网首页结构，组合介绍、推荐演示和记忆评测区域。
+│       └── 官网首页结构，组合介绍、评测演示和记忆评测区域。
 ├── deploy/
 │   └── Caddyfile
 │       └── 生产入口的 HTTPS、反向代理与路径转发配置。
 ├── docker/
 │   └── nginx.conf
 │       └── 容器内静态资源及 `/dsheval` 路径的 Nginx 配置。
+├── evals/deep-research/
+│   ├── fixtures/
+│   │   ├── catalog.json
+│   │   │   └── C0 与 P1–P8 的插件名录、安装方式、平台、凭证引用和准入约束。
+│   │   ├── private-tasks.example.json
+│   │   │   └── R1–R4 私有短事实题的本地配置模板，不含真实题面或答案。
+│   │   ├── source-lock.json
+│   │   │   └── 源码型插件与 DSH 的固定仓库、commit、归档名和 SHA-256。
+│   │   └── suite.json
+│   │       └── V12 的 4 个独立题面、5 个测评项及 Judge、预算、交付物和来源门槛配置。
+│   ├── records/
+│   │   ├── .gitignore
+│   │   │   └── 忽略所有本地逐题记录和运行期榜单。
+│   │   └── .gitkeep
+│   │       └── 在没有本地结果时保留 records 目录。
+│   ├── schema/
+│   │   ├── catalog.schema.json
+│   │   │   └── Deep Research 插件名录的数据结构与字段约束。
+│   │   ├── record.schema.json
+│   │   │   └── 单题过程账、结果账、环境和 Judge 信息的数据结构。
+│   │   └── suite.schema.json
+│   │       └── 题集、任务模式、来源、交付物和 Judge 配置的数据结构。
+│   ├── scripts/
+│   │   ├── admission-smoke.mjs
+│   │   │   └── 对源码型目标做隔离 Profile 安装与组合配置冒烟检查。
+│   │   ├── compose-v12-refresh.mjs
+│   │   │   └── 将统一补跑的 R3 与已验证 V11 记录组合为带来源追踪的 V12 条件记录。
+│   │   ├── generate-v12-html-report.mjs
+│   │   │   └── 从本机脱敏汇总生成离线 HTML 可视化报告；产物保留在忽略的 records 目录。
+│   │   ├── preflight-summary.mjs
+│   │   │   └── 输出全部目标的只读准入预检摘要。
+│   │   ├── prepare-wsl.sh
+│   │   │   └── 在 WSL 准备固定 Node、pnpm、DSH、源码和 Docker 环境。
+│   │   ├── research-eval-wsl.sh
+│   │   │   └── 使用固定 WSL 运行时调用 Deep Research 评测 CLI。
+│   │   ├── session-workspace-smoke.mjs
+│   │   │   └── 检查题目会话是否绑定到隔离工作区而非评测源码目录。
+│   │   └── validate-condition-run.mjs
+│   │       └── 严格验证条件运行状态、五题可评分性、Judge 与组合来源追踪。
+│   ├── src/
+│   │   ├── artifacts.mjs
+│   │   │   └── 在限定工作区内收集报告、表格等产物并阻止符号链接越界。
+│   │   ├── config.mjs
+│   │   │   └── 加载、合并、校验题集、名录和本地私有短事实题。
+│   │   ├── host.mjs
+│   │   │   └── 在隔离 DSH_HOME 中启停 Host、调用 RPC 并管理工作区会话。
+│   │   ├── judge.mjs
+│   │   │   └── 构建匿名固定提示并调用 OpenAI-compatible 长文 Judge。
+│   │   ├── lib.mjs
+│   │   │   └── 提供路径、JSON、哈希、文本归一化、URL 和空账本等通用能力。
+│   │   ├── observe.mjs
+│   │   │   └── 从 history 折叠计划、工具、来源、异常、恢复、资源和产物过程账。
+│   │   ├── plugin.mjs
+│   │   │   └── 对不同安装类型执行准入检查、源码边界校验和插件安装。
+│   │   ├── profile.mjs
+│   │   │   └── 为每个条件准备独立 DSH_HOME、Profile、凭据和任务工作区。
+│   │   ├── report.mjs
+│   │   │   └── 聚合本地记录并按门槛和字典序生成多指标榜单。
+│   │   ├── run.mjs
+│   │   │   └── 提供 validate、plan、run、report 命令及正式运行安全锁入口。
+│   │   ├── runner.mjs
+│   │   │   └── 编排预检、R1–R10 执行、中断恢复、评分、Judge 和记录落盘。
+│   │   ├── score.mjs
+│   │   │   └── 执行短事实、长文确定性检查、派生题和 C0 增量判定。
+│   │   └── url-check.mjs
+│   │       └── 安全检查引用 URL 的可达性，并阻止本机或私网地址访问。
+│   ├── test/
+│   │   ├── artifacts.test.mjs
+│   │   │   └── 验证产物收集、目录限制和符号链接防越界行为。
+│   │   ├── config.test.mjs
+│   │   │   └── 覆盖私有题合并、严格校验、目标选择和计划生成。
+│   │   ├── host.test.mjs
+│   │   │   └── 覆盖 Host 生命周期、父子会话聚合、工具预算和无进展熔断。
+│   │   ├── judge.test.mjs
+│   │   │   └── 覆盖 Judge 提示、结构化结果和错误降级路径。
+│   │   ├── observe.test.mjs
+│   │   │   └── 覆盖 history 到研究步骤、工具、来源和产物过程账的折叠。
+│   │   ├── plugin.test.mjs
+│   │   │   └── 覆盖源码根目录解析、边界检查和目标准入逻辑。
+│   │   ├── report.test.mjs
+│   │   │   └── 验证结果聚合与多指标排序规则。
+│   │   ├── safety.test.mjs
+│   │   │   └── 验证双重执行锁和 Host 隔离启动目录。
+│   │   ├── score.test.mjs
+│   │   │   └── 覆盖事实、交付物、引用、风险、恢复和基线增量评分。
+│   │   └── url-check.test.mjs
+│   │       └── 覆盖 URL 协议、私网阻断与安全失败结果。
+│   ├── benchmark.md
+│   │   └── Deep Research V12 的对象、紧凑题集、双账、评分和榜单规则。
+│   ├── DEVELOPMENT.md
+│   │   └── 架构、执行锁、凭证、WSL 准入、私有题和正式运行说明。
+│   ├── package.json
+│   │   └── Deep Research 子包元数据及校验、计划、运行、报告和测试命令。
+│   └── README.md
+│       └── Deep Research 评测定位、安全边界、文件结构和只读命令入口。
 ├── evals/search/
 │   ├── fixtures/
 │   │   └── 冻结 Hard-12、C0/C1 和 S1–S8 插件名录及执行参数。
@@ -247,6 +357,7 @@ dsh-eval/
 
 ## 数据边界
 
+- `evals/deep-research/fixtures/private-tasks.local.json`、`evals/deep-research/records/` 和 `.research-eval-deps/` 只保存在本机，不提交 Git；示例模板不含真实题面或答案。
 - `evals/search/records/`、隔离 DSH_HOME、逐题回答和 Judge 结果只保存在本机，不提交 Git。
 - `evals/memory/records/`、`~/.dsh/memory-eval-workspaces/`、插件数据库和 DSH 会话均为本机运行数据，不提交 Git。
 - `app/data/memory/` 与 `public/data/memory/` 只保存经 `export-site.mjs` 裁剪后的公开指标，不包含标准答案、逐题回答、会话 ID、本机路径或原始会话。
