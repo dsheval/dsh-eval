@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { createConnection } from "node:net";
 import { join } from "node:path";
+import { countToolCalls } from "./observe.mjs";
 
 export function evalBaseUrl(port) {
   return `http://127.0.0.1:${port}`;
@@ -53,8 +54,11 @@ export async function waitReady(baseUrl, options = {}) {
   const started = Date.now();
   let lastError = "";
   while (Date.now() - started < (options.timeoutMs ?? 90_000)) {
+    if (options.child?.exitCode != null) {
+      throw new Error(`DSH Host 在就绪前退出，exitCode=${options.child.exitCode}`);
+    }
     try {
-      await rpc(baseUrl, "session.list", {}, { timeoutMs: 3_000 });
+      await rpc(baseUrl, "session.list", {}, { timeoutMs: 3_000, fetch: options.fetch });
       return;
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error);
@@ -65,26 +69,207 @@ export async function waitReady(baseUrl, options = {}) {
 }
 
 export async function waitIdle(host, sessionId, options = {}) {
-  const started = Date.now();
-  const timeoutMs = options.timeoutMs ?? 1_800_000;
+  const now = options.now ?? Date.now;
+  const sleep = options.delay ?? delay;
+  const started = now();
+  const timeoutMs = options.timeoutMs === null ? Number.POSITIVE_INFINITY : (options.timeoutMs ?? 1_800_000);
+  const initialResponseGraceMs = options.initialResponseGraceMs ?? 2_500;
+  const finalAnswerSettleMs = options.finalAnswerSettleMs ?? 5_000;
+  const pollIntervalMs = options.pollIntervalMs ?? 750;
+  const budget = options.budget ?? null;
+  const budgetPollIntervalMs = budget?.pollIntervalMs ?? 15_000;
   let seenRunning = false;
-  while (Date.now() - started < timeoutMs) {
+  let candidateAnswer = "";
+  let candidateSince = null;
+  let lastProgressAt = started;
+  let lastSessionMarker = null;
+  let lastHistoryMarker = null;
+  let nextBudgetPollAt = started;
+  let relatedEvents = [];
+  while (!Number.isFinite(timeoutMs) || now() - started < timeoutMs) {
     const list = await host.listSessions();
-    const row = (list.items ?? list.sessions ?? []).find((item) => item.sessionId === sessionId || item.id === sessionId);
-    if (row?.running) seenRunning = true;
-    if ((seenRunning && row && !row.running) || (!seenRunning && Date.now() - started > 2_500)) {
-      const page = await host.history(sessionId);
-      if (lastAssistantText(page.events ?? [])) return page;
+    const rows = list.items ?? list.sessions ?? [];
+    const treeRows = sessionTreeRows(rows, sessionId);
+    const row = treeRows.find((item) => sessionIdOf(item) === sessionId);
+    const treeRunning = treeRows.some((item) => item?.running);
+    const sessionMarker = sessionProgressMarker(treeRows);
+    if (sessionMarker && sessionMarker !== lastSessionMarker) {
+      lastSessionMarker = sessionMarker;
+      lastProgressAt = now();
     }
-    await delay(750);
+    if (treeRunning) {
+      seenRunning = true;
+      candidateAnswer = "";
+      candidateSince = null;
+    }
+    let page = null;
+    if (budget && now() >= nextBudgetPollAt) {
+      [page, relatedEvents] = await Promise.all([
+        host.history(sessionId),
+        collectSessionEvents(host, sessionId, rows),
+      ]);
+      const historyMarker = historyProgressMarker(relatedEvents);
+      if (historyMarker && historyMarker !== lastHistoryMarker) {
+        lastHistoryMarker = historyMarker;
+        lastProgressAt = now();
+      }
+      enforceBudget(countToolCalls(relatedEvents), budget);
+      nextBudgetPollAt = now() + budgetPollIntervalMs;
+    }
+    if (budget?.noProgressMs && now() - lastProgressAt >= budget.noProgressMs) {
+      throw new EvaluationBudgetError(
+        "NO_PROGRESS_TIMEOUT",
+        `连续 ${budget.noProgressMs}ms 没有观察到会话进展`,
+        { observed: now() - lastProgressAt, limit: budget.noProgressMs },
+      );
+    }
+    if (
+      !treeRunning &&
+      ((seenRunning && row) || (!seenRunning && now() - started > initialResponseGraceMs))
+    ) {
+      page ??= await host.history(sessionId);
+      const answer = lastAssistantText(page.events ?? []);
+      if (!answer || isInterimAssistantText(answer)) {
+        candidateAnswer = "";
+        candidateSince = null;
+      } else {
+        if (answer !== candidateAnswer) {
+          candidateAnswer = answer;
+          candidateSince = now();
+        } else if (candidateSince != null && now() - candidateSince >= finalAnswerSettleMs) {
+          relatedEvents = await collectSessionEvents(host, sessionId);
+          return { ...page, allEvents: relatedEvents };
+        }
+      }
+    }
+    await sleep(pollIntervalMs);
   }
-  throw new Error(`研究会话超时: ${sessionId}`);
+  throw new EvaluationBudgetError(
+    "TASK_TIME_BUDGET_EXCEEDED",
+    `研究会话 ${sessionId} 达到题级时间上限 ${timeoutMs}ms`,
+    { observed: now() - started, limit: timeoutMs },
+  );
+}
+
+export class EvaluationBudgetError extends Error {
+  constructor(code, message, details = {}) {
+    super(`${code}: ${message}`);
+    this.name = "EvaluationBudgetError";
+    this.code = code;
+    this.observed = details.observed ?? null;
+    this.limit = details.limit ?? null;
+  }
+}
+
+function enforceBudget(counts, budget) {
+  if (Number.isFinite(budget.maxSearchCalls) && counts.searchCalls > budget.maxSearchCalls) {
+    throw new EvaluationBudgetError(
+      "SEARCH_BUDGET_EXCEEDED",
+      `搜索调用 ${counts.searchCalls} 次，超过上限 ${budget.maxSearchCalls} 次`,
+      { observed: counts.searchCalls, limit: budget.maxSearchCalls },
+    );
+  }
+  if (Number.isFinite(budget.maxToolCalls) && counts.totalCalls > budget.maxToolCalls) {
+    throw new EvaluationBudgetError(
+      "TOOL_BUDGET_EXCEEDED",
+      `工具调用 ${counts.totalCalls} 次，超过上限 ${budget.maxToolCalls} 次`,
+      { observed: counts.totalCalls, limit: budget.maxToolCalls },
+    );
+  }
+  if (Number.isFinite(budget.maxBudgetedCalls) && counts.budgetedCalls > budget.maxBudgetedCalls) {
+    throw new EvaluationBudgetError(
+      "RESEARCH_TOOL_BUDGET_EXCEEDED",
+      `外部读取与计算型工具调用 ${counts.budgetedCalls} 次，超过上限 ${budget.maxBudgetedCalls} 次`,
+      { observed: counts.budgetedCalls, limit: budget.maxBudgetedCalls },
+    );
+  }
+  if (Number.isFinite(budget.maxQueryRepeats) && counts.queryStats.maxRepeat > budget.maxQueryRepeats) {
+    throw new EvaluationBudgetError(
+      "DUPLICATE_QUERY_BUDGET_EXCEEDED",
+      `同一归一化查询最多重复 ${counts.queryStats.maxRepeat} 次，超过上限 ${budget.maxQueryRepeats} 次`,
+      { observed: counts.queryStats.maxRepeat, limit: budget.maxQueryRepeats },
+    );
+  }
+}
+
+function sessionProgressMarker(rows) {
+  return (Array.isArray(rows) ? rows : [rows])
+    .filter(Boolean)
+    .map((row) => {
+      const updatedAt = row.updatedAt ?? row.lastUpdatedAt ?? row.modifiedAt ?? row.projections?.updatedAt ?? "";
+      return `${sessionIdOf(row)}:${row.running ? "1" : "0"}:${updatedAt}`;
+    })
+    .sort()
+    .join("|");
+}
+
+function historyProgressMarker(events) {
+  if (!events?.length) return "";
+  const raw = events.at(-1);
+  const event = raw?.event ?? raw;
+  const stamp = event?.timestamp ?? event?.createdAt ?? event?.updatedAt ?? event?.id ?? "";
+  const type = event?.type ?? event?.name ?? "";
+  const text = contentText(event?.data?.message?.content ?? event?.data?.content ?? event?.content ?? event?.data?.text);
+  return `${events.length}:${stamp}:${type}:${text.length}:${text.slice(-80)}`;
+}
+
+export function isInterimAssistantText(text) {
+  return /(?:subagents?|child agents?|background (?:agents?|jobs?)).{0,80}(?:still|remain|running|pending|working)|(?:still|remain).{0,80}(?:subagents?|child agents?|background (?:agents?|jobs?))|synthesis.{0,50}(?:pending|remain|not (?:yet )?complete)|(?:子代理|子任务|后台任务).{0,40}(?:仍|还|正在|尚未|等待|运行中)|(?:等待|待).{0,30}(?:子代理|子任务|后台任务|综合|汇总)/iu.test(
+    String(text ?? ""),
+  );
 }
 
 export async function turn(host, sessionId, prompt, options = {}) {
   await host.prompt(sessionId, prompt);
   const page = await waitIdle(host, sessionId, options);
-  return { events: page.events ?? [], answer: lastAssistantText(page.events ?? []) };
+  return {
+    events: page.allEvents ?? page.events ?? [],
+    answer: lastAssistantText(page.events ?? []),
+  };
+}
+
+export async function collectSessionEvents(host, rootSessionId, providedRows = null) {
+  const listed = providedRows == null ? await host.listSessions() : null;
+  const rows = providedRows ?? listed?.items ?? listed?.sessions ?? [];
+  const ids = sessionTreeRows(rows, rootSessionId).map(sessionIdOf).filter(Boolean);
+  if (!ids.includes(rootSessionId)) ids.unshift(rootSessionId);
+  const pages = await Promise.all(ids.map((id) => host.history(id).catch(() => ({ events: [] }))));
+  return pages
+    .flatMap((page, index) =>
+      (page.events ?? []).map((entry) =>
+        entry && typeof entry === "object" ? { ...entry, sessionId: ids[index] } : { event: entry, sessionId: ids[index] },
+      ),
+    )
+    .sort(compareHistoryEntries);
+}
+
+export function sessionTreeRows(rows, rootSessionId) {
+  const selected = new Set([rootSessionId]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const row of rows ?? []) {
+      const id = sessionIdOf(row);
+      const parentId = row?.parentSessionId ?? row?.parentId ?? row?.projections?.parentSessionId;
+      if (id && !selected.has(id) && parentId && selected.has(parentId)) {
+        selected.add(id);
+        changed = true;
+      }
+    }
+  }
+  return (rows ?? []).filter((row) => selected.has(sessionIdOf(row)));
+}
+
+function sessionIdOf(row) {
+  return row?.sessionId ?? row?.id ?? "";
+}
+
+function compareHistoryEntries(left, right) {
+  const a = left?.event ?? left;
+  const b = right?.event ?? right;
+  const aStamp = Date.parse(a?.timestamp ?? a?.createdAt ?? a?.updatedAt ?? "") || 0;
+  const bStamp = Date.parse(b?.timestamp ?? b?.createdAt ?? b?.updatedAt ?? "") || 0;
+  return aStamp - bStamp;
 }
 
 export function lastAssistantText(events) {

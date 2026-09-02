@@ -1,12 +1,12 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
-import { buildPlan, selectTargets, validateConfiguration } from "./config.mjs";
+import { buildPlan, selectTargets, selectTasks, validateConfiguration } from "./config.mjs";
 import { applyArtifactCollection, collectWorkspaceArtifacts } from "./artifacts.mjs";
-import { createHost, delay, ensureWorkspace, startHost, stopHost, turn, waitReady } from "./host.mjs";
-import { applyUrlChecks, foldHistory } from "./observe.mjs";
+import { EvaluationBudgetError, collectSessionEvents, createHost, delay, startHost, stopHost, turn, waitReady } from "./host.mjs";
+import { applyUrlChecks, detectInfrastructureFailure, foldHistory } from "./observe.mjs";
 import { installTarget, preflightTarget } from "./plugin.mjs";
 import { baseDshHome, credentialValue, ensureProfile, ensureTaskWorkspace, prepareTargetHome } from "./profile.mjs";
-import { deriveTaskRecord, compareWithBaseline, scoreTask } from "./score.mjs";
+import { deriveTaskRecord, compareWithBaseline, isBudgetFailure, scoreTask } from "./score.mjs";
 import { checkUrls } from "./url-check.mjs";
 import { runJudge } from "./judge.mjs";
 import { EVAL_ROOT, createRunId, emptyProcessLedger, isoNow, safeError, writeJson } from "./lib.mjs";
@@ -45,12 +45,17 @@ export async function runSuite(config, options = {}) {
   const runOptions = { ...options, judge: options.judge ?? config.suite.judge.enabledByDefault };
   const preflight = preflightExecution(config, runOptions);
   if (!preflight.validation.ok) throw new Error(formatValidationErrors(preflight.validation));
+  if (!preflight.ok) {
+    const blocked = preflight.targets.filter((target) => !target.ok).map((target) => `${target.id}:${target.missingRequired.join(",") || target.sourceState}`);
+    throw new Error(`正式运行准入失败: ${blocked.join("; ") || "unknown"}`);
+  }
   if (runOptions.judge && preflight.judge.keyState !== "present") throw new Error(`缺少 Judge Key: ${preflight.judge.keyRef}`);
 
   const targets = selectTargets(config.catalog, runOptions.targets ?? []);
+  const tasks = selectTasks(config.suite, runOptions.tasks ?? []);
   const results = [];
   for (const target of targets) {
-    results.push(await runTarget(config, target, runOptions));
+    results.push(await runTarget(config, target, { ...runOptions, tasks }));
   }
   return { plan: buildPlan(config, runOptions), preflight, results };
 }
@@ -73,6 +78,7 @@ async function runTarget(config, target, options) {
     port: config.catalog.port,
     createdAt: isoNow(),
     judgeEnabled: Boolean(options.judge),
+    taskSelection: options.tasks.map((task) => task.id),
     admission,
     status: "PREFLIGHT",
   };
@@ -85,10 +91,21 @@ async function runTarget(config, target, options) {
   }
 
   const profile = ensureProfile(home, config.catalog.profile);
-  const install = await installTarget(profile.name, target, {
-    cwd: EVAL_ROOT,
-    env: { DSH_HOME: home },
-  });
+  let install;
+  try {
+    install = await installTarget(profile.name, target, {
+      cwd: EVAL_ROOT,
+      env: targetProcessEnv(home),
+      timeoutMs: config.suite.execution.installTimeoutMs,
+    });
+  } catch (error) {
+    meta.status = "INSTALL_FAILED";
+    meta.install = { ok: false, code: "INSTALL_EXCEPTION", skipped: false, output: safeError(error) };
+    meta.completedAt = isoNow();
+    meta.recordCount = 0;
+    writeJson(join(runDir, "meta.json"), meta);
+    return { runId, runDir, status: meta.status, records: [] };
+  }
   meta.install = { ok: install.ok, code: install.code ?? "OK", skipped: install.skipped };
   if (!install.ok) {
     meta.status = "INSTALL_FAILED";
@@ -101,15 +118,25 @@ async function runTarget(config, target, options) {
   let handle;
   let host;
   const boot = async () => {
-    handle = startHost({
-      profile: profile.name,
-      port: config.catalog.port,
-      cwd: home,
-      env: { DSH_HOME: home },
-    });
-    await waitReady(handle.baseUrl, { timeoutMs: 120_000 });
-    host = createHost(handle.baseUrl, { promptTimeoutMs: 30_000 });
-    return { host, handle };
+    let lastError;
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      handle = startHost({
+        profile: profile.name,
+        port: config.catalog.port,
+        cwd: home,
+        env: { DSH_HOME: home },
+      });
+      try {
+        await waitReady(handle.baseUrl, { timeoutMs: 120_000, child: handle.child });
+        host = createHost(handle.baseUrl, { promptTimeoutMs: 30_000 });
+        return { host, handle };
+      } catch (error) {
+        lastError = error;
+        await stopHost(handle).catch(() => {});
+        if (attempt < 2) await delay(1_000);
+      }
+    }
+    throw lastError;
   };
 
   const records = [];
@@ -117,7 +144,7 @@ async function runTarget(config, target, options) {
     ({ host, handle } = await boot());
     meta.status = "RUNNING";
     writeJson(join(runDir, "meta.json"), meta);
-    for (const task of config.suite.tasks) {
+    for (const task of options.tasks) {
       if (task.mode === "derived") {
         const source = records.find((record) => record.taskId === task.deriveFrom && record.attempt === 1);
         const record = makeDerivedRecord(meta, target, task, source);
@@ -132,14 +159,29 @@ async function runTarget(config, target, options) {
           ? config.suite.execution.stabilityRepeats
           : 1;
       for (let attempt = 1; attempt <= repeats; attempt += 1) {
-        const record =
-          task.mode === "interrupt"
-            ? await runInterruptedTask({ config, target, task, attempt, meta, home, host, handle, boot })
-            : await runNormalTask({ config, target, task, attempt, meta, home, host, options });
-        host = record.__host ?? host;
-        handle = record.__handle ?? handle;
-        delete record.__host;
-        delete record.__handle;
+        let record;
+        const discardedInfrastructureErrors = [];
+        const maxInfrastructureAttempts = 1 + config.suite.execution.infrastructureRetries;
+        for (let infrastructureAttempt = 1; infrastructureAttempt <= maxInfrastructureAttempts; infrastructureAttempt += 1) {
+          record =
+            task.mode === "interrupt"
+              ? await runInterruptedTask({ config, target, task, attempt, meta, home, host, handle, boot })
+              : await runNormalTask({ config, target, task, attempt, meta, home, host, options });
+          host = record.__host ?? host;
+          handle = record.__handle ?? handle;
+          delete record.__host;
+          delete record.__handle;
+          if (!retryableInfrastructureRecord(record) || infrastructureAttempt >= maxInfrastructureAttempts) {
+            record.infrastructureAttempts = infrastructureAttempt;
+            record.discardedInfrastructureErrors = discardedInfrastructureErrors;
+            break;
+          }
+          discardedInfrastructureErrors.push(record.resultLedger.reasons[0] ?? record.resultLedger.status);
+          await stopHost(handle).catch(() => {});
+          resetSessionStore(home);
+          await delay(config.suite.execution.infrastructureRetryDelayMs);
+          ({ host, handle } = await boot());
+        }
         applyBaselineUplift(record, findLatestBaselineRecord(task.id, meta.suiteId));
         records.push(record);
         writeJson(join(runDir, recordFileName(record)), record);
@@ -164,59 +206,93 @@ async function runTarget(config, target, options) {
   return { runId, runDir, status: meta.status, records };
 }
 
+function retryableInfrastructureRecord(record) {
+  return (
+    record?.resultLedger?.status === "SYSTEM_ERROR" &&
+    record.resultLedger.reasons.some((reason) => /^MODEL_PROVIDER_/u.test(String(reason)))
+  );
+}
+
+export function targetProcessEnv(home, env = process.env) {
+  return { ...env, DSH_HOME: home };
+}
+
+export function taskSessionPayload(workspacePath) {
+  return { cwd: workspacePath };
+}
+
 async function runNormalTask(ctx) {
   const { config, target, task, attempt, meta, home, host, options } = ctx;
   const workspacePath = ensureTaskWorkspace(home, task.id, attempt, { fresh: true });
-  const workspaceId = await ensureWorkspace(host, workspacePath);
-  const session = await host.createSession({ workspaceId });
+  const session = await host.createSession(taskSessionPayload(workspacePath));
   const sessionId = session.sessionId ?? session.id;
   const startedAt = Date.now();
   let answer = "";
   let events = [];
   let systemError = null;
+  const budget = taskBudget(config, task);
   try {
-    const response = await turn(host, sessionId, task.prompt, { timeoutMs: config.suite.execution.taskTimeoutMs });
+    const response = await turn(host, sessionId, taskPrompt(config, task), {
+      timeoutMs: taskTimeoutMs(config, task),
+      budget,
+    });
     answer = response.answer;
     events = response.events;
   } catch (error) {
     systemError = safeError(error);
-    events = await host.history(sessionId).then((page) => page.events ?? []).catch(() => []);
+    events = await collectSessionEvents(host, sessionId).catch(() => []);
+    systemError = detectInfrastructureFailure(events) ?? systemError;
   }
   const endedAt = Date.now();
   const artifacts = collectWorkspaceArtifacts(workspacePath);
-  const scorableAnswer = `${answer}${artifacts.text}`;
+  const scorableAnswer = `${answer}${artifacts.scoringText}`;
   let processLedger = foldHistory(events, {
     answer: scorableAnswer,
     startedAt,
     endedAt,
-    environment: environment(meta, target, task, attempt),
+    environment: taskEnvironment(config, meta, target, task, attempt),
   });
   processLedger = applyArtifactCollection(processLedger, artifacts);
-  const urlChecks = await checkUrls(urlCheckCandidates(processLedger), {
-    limit: config.suite.execution.urlCheckLimit,
-  });
+  processLedger.resources.budget = budgetLedger(budget, systemError);
+  const scorableBudgetResult = isBudgetFailure(systemError) && scorableAnswer.trim();
+  const urlChecks = systemError && !scorableBudgetResult
+    ? []
+    : await checkUrls(urlCheckCandidates(processLedger), {
+        limit: config.suite.execution.urlCheckLimit,
+      });
   processLedger = applyUrlChecks(processLedger, urlChecks);
-  const judge = options.judge && task.track === "LF"
-    ? await runJudge(
+  const judge = options.judge && task.track === "LF" && (!systemError || scorableBudgetResult) && scorableAnswer.trim()
+    ? await runJudgeWithRetries(
         { task, answer: scorableAnswer, processLedger, config: config.suite.judge },
         { apiKey: credentialValue(home, config.suite.judge.apiKeyEnv) },
+        config.suite.execution,
       )
     : null;
   const resultLedger = scoreTask({ task, answer: scorableAnswer, processLedger, judge, systemError });
   return baseRecord(meta, target, task, attempt, answer, processLedger, resultLedger, judge, artifacts.text);
 }
 
+async function runJudgeWithRetries(input, options, execution) {
+  const maxAttempts = 1 + execution.infrastructureRetries;
+  let result = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    result = await runJudge(input, options);
+    if (result.ok || attempt >= maxAttempts) return result;
+    await delay(execution.infrastructureRetryDelayMs);
+  }
+  return result;
+}
+
 async function runInterruptedTask(ctx) {
   const { config, target, task, attempt, meta, home, boot } = ctx;
   let { host, handle } = ctx;
   const workspacePath = ensureTaskWorkspace(home, task.id, attempt, { fresh: true });
-  const workspaceId = await ensureWorkspace(host, workspacePath);
-  const session = await host.createSession({ workspaceId });
+  const session = await host.createSession(taskSessionPayload(workspacePath));
   const sessionId = session.sessionId ?? session.id;
   const startedAt = Date.now();
-  await host.prompt(sessionId, task.prompt);
+  await host.prompt(sessionId, taskPrompt(config, task));
   await delay(config.suite.execution.interruptAfterMs);
-  const before = await host.history(sessionId).then((page) => page.events ?? []).catch(() => []);
+  const before = await collectSessionEvents(host, sessionId).catch(() => []);
   await stopHost(handle);
   resetSessionStore(home, { preserve: true });
   ({ host, handle } = await boot());
@@ -225,41 +301,50 @@ async function runInterruptedTask(ctx) {
   let answer = "";
   let after = [];
   let systemError = null;
+  const budget = taskBudget(config, task);
   try {
     const response = await turn(
       host,
       resumedSessionId,
       "刚才的研究进程被中断。请先说明中断前已完成到哪一步，再从已有有效进度继续；不要从头重做，也不要谎称已经完成。",
-      { timeoutMs: config.suite.execution.taskTimeoutMs },
+      { timeoutMs: taskTimeoutMs(config, task), budget },
     );
     answer = response.answer;
     after = response.events;
-  } catch {
-    const fresh = await host.createSession({ workspaceId: await ensureWorkspace(host, workspacePath) });
-    resumedSessionId = fresh.sessionId ?? fresh.id;
-    checkpointVisible = false;
-    try {
-      const response = await turn(
-        host,
-        resumedSessionId,
-        "上一个研究会话被中断。请检查工作区中可恢复的中间产物，说明能恢复到哪一步并继续；若没有状态，明确说明无法恢复。",
-        { timeoutMs: config.suite.execution.taskTimeoutMs },
-      );
-      answer = response.answer;
-      after = response.events;
-    } catch (error) {
+  } catch (error) {
+    if (error instanceof EvaluationBudgetError) {
       systemError = safeError(error);
+      after = await collectSessionEvents(host, resumedSessionId).catch(() => []);
+      systemError = detectInfrastructureFailure(after) ?? systemError;
+    } else {
+      const fresh = await host.createSession(taskSessionPayload(workspacePath));
+      resumedSessionId = fresh.sessionId ?? fresh.id;
+      checkpointVisible = false;
+      try {
+        const response = await turn(
+          host,
+          resumedSessionId,
+          "上一个研究会话被中断。请检查工作区中可恢复的中间产物，说明能恢复到哪一步并继续；若没有状态，明确说明无法恢复。",
+          { timeoutMs: taskTimeoutMs(config, task), budget },
+        );
+        answer = response.answer;
+        after = response.events;
+      } catch (error) {
+        systemError = safeError(error);
+        after = await collectSessionEvents(host, resumedSessionId).catch(() => after);
+        systemError = detectInfrastructureFailure(after) ?? systemError;
+      }
     }
   }
   const endedAt = Date.now();
   const restartedFromBeginning = /从头|重新开始|重新检索全部/i.test(answer);
   const artifacts = collectWorkspaceArtifacts(workspacePath);
-  const scorableAnswer = `${answer}${artifacts.text}`;
+  const scorableAnswer = `${answer}${artifacts.scoringText}`;
   let processLedger = foldHistory([...before, ...after], {
     answer: scorableAnswer,
     startedAt,
     endedAt,
-    environment: environment(meta, target, task, attempt),
+    environment: taskEnvironment(config, meta, target, task, attempt),
     recovery: {
       interrupted: true,
       resumed: after.length > 0,
@@ -268,9 +353,12 @@ async function runInterruptedTask(ctx) {
     },
   });
   processLedger = applyArtifactCollection(processLedger, artifacts);
-  const urlChecks = await checkUrls(urlCheckCandidates(processLedger), {
-    limit: config.suite.execution.urlCheckLimit,
-  });
+  processLedger.resources.budget = budgetLedger(budget, systemError);
+  const urlChecks = systemError
+    ? []
+    : await checkUrls(urlCheckCandidates(processLedger), {
+        limit: config.suite.execution.urlCheckLimit,
+      });
   processLedger = applyUrlChecks(processLedger, urlChecks);
   const resultLedger = scoreTask({ task, answer: scorableAnswer, processLedger, systemError });
   const record = baseRecord(meta, target, task, attempt, answer, processLedger, resultLedger, null, artifacts.text);
@@ -284,6 +372,19 @@ function makeDerivedRecord(meta, target, task, source) {
   processLedger.environment.derivedFrom = task.deriveFrom;
   const resultLedger = deriveTaskRecord(task, source);
   return baseRecord(meta, target, task, 1, "", processLedger, resultLedger, null);
+}
+
+function taskEnvironment(config, meta, target, task, attempt) {
+  const value = environment(meta, target, task, attempt);
+  value.researchProtocol = task.track === "LF" ? config.suite.execution.researchProtocol?.id ?? null : null;
+  return value;
+}
+
+export function taskPrompt(config, task) {
+  const protocol = task.track === "LF" ? config.suite.execution.researchProtocol : null;
+  if (!protocol?.instructions?.length) return task.prompt;
+  const instructions = protocol.instructions.map((line) => `- ${line}`).join("\n");
+  return `${task.prompt}\n\nResearch execution protocol (${protocol.id}; mandatory for this evaluation):\nLimits: at most ${protocol.maxSubagents} subagents and ${protocol.maxSearchCalls} search calls; stop at ${protocol.sourcesPerDeliverable} credible independent sources per deliverable unless they materially conflict; reserve at least ${protocol.synthesisReserveCalls} tool calls for synthesis, citation checks, and the final report.\n${instructions}`;
 }
 
 function baseRecord(meta, target, task, attempt, answer, processLedger, resultLedger, judge, artifactText = "") {
@@ -378,4 +479,31 @@ function credentialFileHas(home, ref) {
 
 function formatValidationErrors(validation) {
   return validation.issues.filter((issue) => issue.level === "error").map((issue) => `${issue.path}: ${issue.message}`).join("; ");
+}
+
+function taskTimeoutMs(config, task) {
+  return task.timeoutMs ?? config.suite.execution.taskTimeoutMs;
+}
+
+function taskBudget(config, task) {
+  const configured = config.suite.execution.budgets?.[task.track];
+  if (!configured) return null;
+  return {
+    ...configured,
+    pollIntervalMs: config.suite.execution.budgetPollIntervalMs,
+  };
+}
+
+function budgetLedger(budget, systemError) {
+  if (!budget) return null;
+  const code = String(systemError ?? "").match(/^(SEARCH_BUDGET_EXCEEDED|TOOL_BUDGET_EXCEEDED|RESEARCH_TOOL_BUDGET_EXCEEDED|DUPLICATE_QUERY_BUDGET_EXCEEDED|NO_PROGRESS_TIMEOUT|TASK_TIME_BUDGET_EXCEEDED)/)?.[1] ?? null;
+  return {
+    maxSearchCalls: budget.maxSearchCalls,
+    maxToolCalls: budget.maxToolCalls,
+    maxBudgetedCalls: budget.maxBudgetedCalls,
+    maxQueryRepeats: budget.maxQueryRepeats,
+    noProgressMs: budget.noProgressMs,
+    pollIntervalMs: budget.pollIntervalMs,
+    triggered: code,
+  };
 }

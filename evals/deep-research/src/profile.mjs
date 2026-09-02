@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve, sep } from "node:path";
 
@@ -24,7 +24,10 @@ export function prepareTargetHome(baseHome, targetId, options = {}) {
   for (const name of [".credentials.yaml", "settings.yaml", ".anonymous-user-id"]) {
     const source = join(baseHome, name);
     const destination = join(dir, name);
-    if (existsSync(source) && !existsSync(destination)) copyFileSync(source, destination);
+    if (existsSync(source) && !existsSync(destination)) {
+      copyFileSync(source, destination);
+      if (name === ".credentials.yaml" && process.platform !== "win32") chmodSync(destination, 0o600);
+    }
   }
   return dir;
 }
@@ -65,8 +68,11 @@ export function ensureTaskWorkspace(home, taskId, attempt = 1, options = {}) {
 export function credentialState(home, refs, env = process.env) {
   const credentialPath = join(home, ".credentials.yaml");
   const raw = existsSync(credentialPath) ? readFileSync(credentialPath, "utf8") : "";
+  const insecurePermissions =
+    process.platform !== "win32" && existsSync(credentialPath) && (statSync(credentialPath).mode & 0o077) !== 0;
   return Object.fromEntries(
     refs.map((ref) => {
+      if (insecurePermissions) return [ref, "insecure-permissions"];
       const inEnv = Boolean(env[ref]);
       const inFile = new RegExp(`^\\s*${escapeRegExp(ref)}\\s*:`, "m").test(raw);
       return [ref, inEnv || inFile ? "present" : "missing"];

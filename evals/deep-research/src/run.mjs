@@ -16,14 +16,16 @@ try {
   } else if (command === "plan") {
     const config = loadFromArgs(args);
     const targets = values(args, "--target");
+    const tasks = values(args, "--task");
     const judge = judgeOption(args);
-    const plan = buildPlan(config, { targets, judge });
-    const preflight = preflightExecution(config, { targets, judge });
+    const plan = buildPlan(config, { targets, tasks, judge });
+    const preflight = preflightExecution(config, { targets, tasks, judge });
     console.log(JSON.stringify({ plan, preflight }, null, 2));
   } else if (command === "run") {
     const config = loadFromArgs(args);
     const result = await runSuite(config, {
       targets: values(args, "--target"),
+      tasks: values(args, "--task"),
       judge: judgeOption(args),
       stability: has(args, "--stability"),
       fresh: !has(args, "--no-fresh"),
@@ -83,5 +85,5 @@ function printIssues(result) {
 }
 
 function printHelp() {
-  console.log(`DSH Deep Research evaluation\n\nSafe commands:\n  node src/run.mjs validate\n  node src/run.mjs plan\n  node src/run.mjs report\n\nLong-form Judge is enabled by default; use --no-judge only for an explicit ungraded diagnostic run.\nFormal execution is locked. See DEVELOPMENT.md.`);
+  console.log(`DSH Deep Research evaluation\n\nSafe commands:\n  node src/run.mjs validate\n  node src/run.mjs plan\n  node src/run.mjs report\n\nSelectors:\n  --target P1   select one condition (repeatable)\n  --task R3     select one task (repeatable; intended for audited refresh runs)\n\nLong-form Judge is enabled by default; use --no-judge only for an explicit ungraded diagnostic run.\nFormal execution is locked. See DEVELOPMENT.md.`);
 }

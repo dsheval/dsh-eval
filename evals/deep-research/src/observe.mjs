@@ -9,28 +9,22 @@ const TIMEOUT_RE = /timeout|timed out|超时/i;
 const RETRY_RE = /retry|重试/i;
 const FALLBACK_RE = /fallback|degrad|降级|备用/i;
 const MANUAL_RE = /approval|required confirmation|human gate|人工|审批|确认后继续/i;
+const MANAGEMENT_RE = /^(?:list_agents|todo_write|subagent|interrupt_agent|send_message|send_input|wait_agent|wait_threads?|agent_status)$/i;
+const FILE_RE = /^(?:read|write|edit|apply_patch|glob|ls|list_files?|mkdir|save|artifact_write)$/i;
+const COMPUTE_RE = /(?:^|[_-])(?:bash|shell|exec|command|python|node|compute|calculator)(?:$|[_-])/i;
 
 export function foldHistory(events, options = {}) {
   const ledger = emptyProcessLedger(options.environment ?? {});
+  const toolSummary = countToolCalls(events);
   const allText = [];
   const evidenceExcerpts = [];
-  const tokenValues = { input: [], output: [], total: [] };
+  const tokenValuesBySession = new Map();
 
   for (const raw of events ?? []) {
     const event = raw?.event ?? raw;
     const type = String(event?.type ?? event?.name ?? "").toLowerCase();
     const text = eventText(event);
     if (text) allText.push(text);
-
-    const toolName = findToolName(event);
-    if (toolName && isToolCall(event, type)) {
-      ledger.tools.totalCalls += 1;
-      ledger.tools.names[toolName] = (ledger.tools.names[toolName] ?? 0) + 1;
-      if (SEARCH_RE.test(toolName)) ledger.tools.searchCalls += 1;
-      else if (FETCH_RE.test(toolName)) ledger.tools.fetchCalls += 1;
-      else if (WRITE_RE.test(toolName)) ledger.tools.writeCalls += 1;
-      else if (ANALYSIS_RE.test(toolName)) ledger.tools.analysisCalls += 1;
-    }
 
     if ((type.includes("tool") || type.includes("result")) && text && extractUrls(text).length) {
       evidenceExcerpts.push(text.slice(0, 1200));
@@ -43,7 +37,9 @@ export function foldHistory(events, options = {}) {
     if (RETRY_RE.test(text)) ledger.anomalies.retries += 1;
     if (FALLBACK_RE.test(text)) ledger.anomalies.fallbacks += 1;
     if (MANUAL_RE.test(text)) ledger.anomalies.manualInterventions += 1;
-    collectTokens(event, tokenValues);
+    const sessionKey = raw?.sessionId ?? "__root__";
+    if (!tokenValuesBySession.has(sessionKey)) tokenValuesBySession.set(sessionKey, { input: [], output: [], total: [] });
+    collectTokens(event, tokenValuesBySession.get(sessionKey));
   }
 
   const answer = String(options.answer ?? "");
@@ -68,18 +64,120 @@ export function foldHistory(events, options = {}) {
   ledger.artifacts.paths = artifacts;
   ledger.artifacts.versioned = /version|版本|v\d+(?:\.\d+)+/i.test(joined);
 
-  ledger.resources.inputTokens = maxOrNull(tokenValues.input);
-  ledger.resources.outputTokens = maxOrNull(tokenValues.output);
-  ledger.resources.totalTokens =
-    maxOrNull(tokenValues.total) ??
-    sumNullable(ledger.resources.inputTokens, ledger.resources.outputTokens);
+  const tokenUsage = aggregateSessionTokens(tokenValuesBySession);
+  ledger.resources.inputTokens = tokenUsage.input;
+  ledger.resources.outputTokens = tokenUsage.output;
+  ledger.resources.totalTokens = tokenUsage.total;
   if (Number.isFinite(options.startedAt) && Number.isFinite(options.endedAt)) {
     ledger.resources.latencyMs = Math.max(0, options.endedAt - options.startedAt);
   }
 
   if (options.recovery) ledger.recovery = { ...ledger.recovery, ...options.recovery };
+  ledger.tools = { ...ledger.tools, ...toolSummary };
   ledger.evidenceExcerpts = [...new Set(evidenceExcerpts)].slice(0, 20);
   return ledger;
+}
+
+export function countToolCalls(events) {
+  const counts = {
+    totalCalls: 0,
+    budgetedCalls: 0,
+    searchCalls: 0,
+    fetchCalls: 0,
+    analysisCalls: 0,
+    writeCalls: 0,
+    managementCalls: 0,
+    fileCalls: 0,
+    names: {},
+    queryStats: { total: 0, unique: 0, duplicate: 0, maxRepeat: 0 },
+  };
+  const queryCounts = new Map();
+  for (const raw of events ?? []) {
+    const event = raw?.event ?? raw;
+    const type = String(event?.type ?? event?.name ?? "").toLowerCase();
+    const toolName = findToolName(event);
+    if (!toolName || !isToolCall(event, type)) continue;
+    counts.totalCalls += 1;
+    counts.names[toolName] = (counts.names[toolName] ?? 0) + 1;
+    const category = toolCategory(toolName);
+    if (category === "search") {
+      counts.searchCalls += 1;
+      for (const query of extractSearchQueries(event)) {
+        queryCounts.set(query, (queryCounts.get(query) ?? 0) + 1);
+      }
+    } else if (category === "management") {
+      counts.managementCalls += 1;
+    } else if (category === "file") {
+      counts.fileCalls += 1;
+      if (WRITE_RE.test(toolName)) counts.writeCalls += 1;
+    } else {
+      counts.budgetedCalls += 1;
+      if (category === "fetch") counts.fetchCalls += 1;
+      if (category === "analysis") counts.analysisCalls += 1;
+    }
+  }
+  const repetitions = [...queryCounts.values()];
+  counts.queryStats = {
+    total: repetitions.reduce((sum, value) => sum + value, 0),
+    unique: queryCounts.size,
+    duplicate: repetitions.reduce((sum, value) => sum + Math.max(0, value - 1), 0),
+    maxRepeat: repetitions.length ? Math.max(...repetitions) : 0,
+  };
+  return counts;
+}
+
+export function detectInfrastructureFailure(events) {
+  for (const raw of events ?? []) {
+    const event = raw?.event ?? raw;
+    const text = eventText(event);
+    const match = text.match(/DeepSeek API (?:request|stream)[^\n]{0,300}?failed\s+(TRANSPORT|TIMEOUT|SERVER|RATE_LIMIT|EMPTY_RESPONSE)/iu);
+    if (match) return `MODEL_PROVIDER_${match[1].toUpperCase()}: DeepSeek API ${match[1].toLowerCase()} failure`;
+    if (/Insufficient Balance\s+QUOTA/iu.test(text)) {
+      return "MODEL_PROVIDER_QUOTA: DeepSeek account balance is insufficient";
+    }
+    if (/WEB_PROVIDER_ERROR/iu.test(text) && /unprocessable response body|terminated|web search failed/iu.test(text)) {
+      return "MODEL_PROVIDER_WEB: DeepSeek web provider failure";
+    }
+  }
+  return null;
+}
+
+function toolCategory(toolName) {
+  if (SEARCH_RE.test(toolName)) return "search";
+  if (MANAGEMENT_RE.test(toolName)) return "management";
+  if (FILE_RE.test(toolName)) return "file";
+  if (FETCH_RE.test(toolName)) return "fetch";
+  if (ANALYSIS_RE.test(toolName) || COMPUTE_RE.test(toolName)) return "analysis";
+  return "other";
+}
+
+function extractSearchQueries(event) {
+  const input = event?.data?.arguments ?? event?.data?.input ?? event?.arguments ?? event?.input;
+  const output = [];
+  collectQueryValues(input, output, new Set(), 0, true);
+  return [...new Set(output.map(normalizeQuery).filter(Boolean))];
+}
+
+function collectQueryValues(value, output, seen, depth, direct = false) {
+  if (depth > 6 || value == null) return;
+  if (typeof value === "string") {
+    if (direct) output.push(value);
+    return;
+  }
+  if (typeof value !== "object" || seen.has(value)) return;
+  seen.add(value);
+  if (Array.isArray(value)) {
+    for (const item of value) collectQueryValues(item, output, seen, depth + 1, direct);
+    return;
+  }
+  for (const [key, item] of Object.entries(value)) {
+    const isQuery = /^(?:q|query|queries|searchQuery|search_query|searchTerm|search_term)$/i.test(key);
+    collectQueryValues(item, output, seen, depth + 1, isQuery);
+  }
+}
+
+function normalizeQuery(value) {
+  return String(value ?? "").normalize("NFKC").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 export function applyUrlChecks(processLedger, checks = []) {
@@ -178,6 +276,25 @@ function maxOrNull(values) {
   return values.length ? Math.max(...values) : null;
 }
 
+function aggregateSessionTokens(valuesBySession) {
+  const sessions = [...valuesBySession.values()].map((values) => {
+    const input = maxOrNull(values.input);
+    const output = maxOrNull(values.output);
+    return { input, output, total: reconcileTokenTotal(maxOrNull(values.total), input, output) };
+  });
+  const sum = (field) => {
+    const values = sessions.map((session) => session[field]).filter(Number.isFinite);
+    return values.length ? values.reduce((total, value) => total + value, 0) : null;
+  };
+  return { input: sum("input"), output: sum("output"), total: sum("total") };
+}
+
 function sumNullable(left, right) {
   return Number.isFinite(left) || Number.isFinite(right) ? (left ?? 0) + (right ?? 0) : null;
+}
+
+export function reconcileTokenTotal(observedTotal, inputTokens, outputTokens) {
+  const componentTotal = sumNullable(inputTokens, outputTokens);
+  const candidates = [observedTotal, componentTotal].filter((value) => Number.isFinite(value) && value >= 0);
+  return candidates.length ? Math.max(...candidates) : null;
 }

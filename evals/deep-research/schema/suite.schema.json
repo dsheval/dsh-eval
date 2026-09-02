@@ -7,11 +7,38 @@
     "asOf": { "type": "string" },
     "execution": {
       "type": "object",
-      "required": ["taskTimeoutMs", "interruptAfterMs"],
+      "required": ["taskTimeoutMs", "installTimeoutMs", "interruptAfterMs", "budgetPollIntervalMs", "infrastructureRetries", "infrastructureRetryDelayMs", "researchProtocol", "budgets"],
       "properties": {
-        "taskTimeoutMs": { "type": "integer", "minimum": 1000 },
+        "taskTimeoutMs": { "type": ["integer", "null"], "minimum": 1000 },
+        "installTimeoutMs": { "type": "integer", "minimum": 1000 },
         "interruptAfterMs": { "type": "integer", "minimum": 1000 },
         "urlCheckLimit": { "type": "integer", "minimum": 1 },
+        "budgetPollIntervalMs": { "type": "integer", "minimum": 1000 },
+        "infrastructureRetries": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "infrastructureRetryDelayMs": { "type": "integer", "minimum": 0 },
+        "researchProtocol": {
+          "type": "object",
+          "required": ["id", "maxSubagents", "sourcesPerDeliverable", "maxSearchCalls", "synthesisReserveCalls", "instructions"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "maxSubagents": { "type": "integer", "minimum": 1, "maximum": 8 },
+            "sourcesPerDeliverable": { "type": "integer", "minimum": 1 },
+            "maxSearchCalls": { "type": "integer", "minimum": 1 },
+            "synthesisReserveCalls": { "type": "integer", "minimum": 1 },
+            "instructions": { "type": "array", "minItems": 4, "items": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "budgets": {
+          "type": "object",
+          "required": ["SF", "LF", "PRODUCT"],
+          "additionalProperties": false,
+          "properties": {
+            "SF": { "$ref": "#/$defs/budget" },
+            "LF": { "$ref": "#/$defs/budget" },
+            "PRODUCT": { "$ref": "#/$defs/budget" }
+          }
+        },
         "stabilityTasks": { "type": "array", "items": { "type": "string" } },
         "stabilityRepeats": { "type": "integer", "minimum": 1 }
       }
@@ -30,7 +57,7 @@
     },
     "tasks": {
       "type": "array",
-      "minItems": 10,
+      "minItems": 5,
       "items": {
         "type": "object",
         "required": ["id", "title", "track", "mode"],
@@ -42,8 +69,23 @@
           "privateRef": { "type": "string" },
           "reusePromptFrom": { "type": "string" },
           "deriveFrom": { "type": "string" },
+          "timeoutMs": { "type": "integer", "minimum": 1000 },
           "deliverables": { "type": "array" }
         }
+      }
+    }
+  },
+  "$defs": {
+    "budget": {
+      "type": "object",
+      "required": ["maxSearchCalls", "maxToolCalls", "maxBudgetedCalls", "maxQueryRepeats", "noProgressMs"],
+      "additionalProperties": false,
+      "properties": {
+        "maxSearchCalls": { "type": ["integer", "null"], "minimum": 1 },
+        "maxToolCalls": { "type": ["integer", "null"], "minimum": 1 },
+        "maxBudgetedCalls": { "type": "integer", "minimum": 1 },
+        "maxQueryRepeats": { "type": "integer", "minimum": 1 },
+        "noProgressMs": { "type": "integer", "minimum": 1000 }
       }
     }
   }

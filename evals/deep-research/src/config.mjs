@@ -72,7 +72,7 @@ function validateSuite(suite, issues, options) {
     add(issues, "error", "suite.tasks", "题集缺少 tasks");
     return;
   }
-  const expected = Array.from({ length: 10 }, (_, index) => `R${index + 1}`);
+  const expected = ["R1", "R3", "R6", "R7", "R10"];
   const ids = suite.tasks.map((task) => task.id);
   for (const id of expected) {
     if (!ids.includes(id)) add(issues, "error", `suite.tasks.${id}`, `缺少 ${id}`);
@@ -82,9 +82,13 @@ function validateSuite(suite, issues, options) {
   const normal = suite.tasks.filter((task) => task.mode === "normal");
   const interrupted = suite.tasks.filter((task) => task.mode === "interrupt");
   const derived = suite.tasks.filter((task) => task.mode === "derived");
-  if (normal.length !== 8) add(issues, "error", "suite.tasks", `normal 题应为 8，实际 ${normal.length}`);
-  if (interrupted.length !== 1) add(issues, "error", "suite.tasks", "中断题应为 1");
+  if (normal.length !== 4) add(issues, "error", "suite.tasks", `normal 题应为 4，实际 ${normal.length}`);
+  if (interrupted.length !== 0) add(issues, "error", "suite.tasks", "四小时紧凑版不应包含中断题");
   if (derived.length !== 1) add(issues, "error", "suite.tasks", "派生题应为 1");
+  const trackCounts = Object.fromEntries(["SF", "LF", "PRODUCT"].map((track) => [track, suite.tasks.filter((task) => task.track === track).length]));
+  if (trackCounts.SF !== 2 || trackCounts.LF !== 2 || trackCounts.PRODUCT !== 1) {
+    add(issues, "error", "suite.tasks", `题型必须保持 2:2:1，实际 ${trackCounts.SF}:${trackCounts.LF}:${trackCounts.PRODUCT}`);
+  }
 
   for (const task of suite.tasks) {
     if (!task.title || !task.track || !task.mode) {
@@ -113,11 +117,73 @@ function validateSuite(suite, issues, options) {
     if (task.track === "LF" && !(task.deliverables?.length > 0)) {
       add(issues, "error", `suite.tasks.${task.id}.deliverables`, "长文缺少强制交付物");
     }
+    if (task.timeoutMs != null && (!Number.isInteger(task.timeoutMs) || task.timeoutMs < 1000)) {
+      add(issues, "error", `suite.tasks.${task.id}.timeoutMs`, "题级超时必须是至少 1000ms 的整数");
+    }
+    const sourceId = task.reusePromptFrom ?? task.deriveFrom;
+    if (sourceId && !ids.includes(sourceId)) {
+      add(issues, "error", `suite.tasks.${task.id}.source`, `引用了不存在的来源题 ${sourceId}`);
+    }
   }
+  validateBudgets(suite.execution, issues);
   if (suite.judge?.enabledByDefault !== true) {
     add(issues, "error", "suite.judge.enabledByDefault", "正式长文评测必须默认启用 Judge");
   }
   if (!suite.judge?.apiKeyEnv) add(issues, "error", "suite.judge.apiKeyEnv", "缺少 Judge Key 引用");
+}
+
+function validateBudgets(execution, issues) {
+  if (execution?.taskTimeoutMs != null && (!Number.isInteger(execution.taskTimeoutMs) || execution.taskTimeoutMs < 1000)) {
+    add(issues, "error", "suite.execution.taskTimeoutMs", "题级超时必须为 null 或至少 1000ms 的整数");
+  }
+  if (!Number.isInteger(execution?.installTimeoutMs) || execution.installTimeoutMs < 1000) {
+    add(issues, "error", "suite.execution.installTimeoutMs", "安装超时必须是至少 1000ms 的整数");
+  }
+  if (!Number.isInteger(execution?.budgetPollIntervalMs) || execution.budgetPollIntervalMs < 1000) {
+    add(issues, "error", "suite.execution.budgetPollIntervalMs", "预算轮询间隔必须是至少 1000ms 的整数");
+  }
+  if (!Number.isInteger(execution?.infrastructureRetries) || execution.infrastructureRetries < 0 || execution.infrastructureRetries > 5) {
+    add(issues, "error", "suite.execution.infrastructureRetries", "infrastructureRetries 必须是 0–5 的整数");
+  }
+  if (!Number.isInteger(execution?.infrastructureRetryDelayMs) || execution.infrastructureRetryDelayMs < 0) {
+    add(issues, "error", "suite.execution.infrastructureRetryDelayMs", "infrastructureRetryDelayMs 必须是非负整数");
+  }
+  const protocol = execution?.researchProtocol;
+  if (!protocol?.id || !Array.isArray(protocol.instructions) || protocol.instructions.length < 4) {
+    add(issues, "error", "suite.execution.researchProtocol", "研究协议必须包含 id 和至少四条指令");
+  }
+  if (!Number.isInteger(protocol?.maxSubagents) || protocol.maxSubagents < 1 || protocol.maxSubagents > 8) {
+    add(issues, "error", "suite.execution.researchProtocol.maxSubagents", "maxSubagents 必须是 1–8 的整数");
+  }
+  if (!Number.isInteger(protocol?.sourcesPerDeliverable) || protocol.sourcesPerDeliverable < 1) {
+    add(issues, "error", "suite.execution.researchProtocol.sourcesPerDeliverable", "sourcesPerDeliverable 必须是正整数");
+  }
+  for (const field of ["maxSearchCalls", "synthesisReserveCalls"]) {
+    if (!Number.isInteger(protocol?.[field]) || protocol[field] < 1) {
+      add(issues, "error", `suite.execution.researchProtocol.${field}`, `${field} 必须是正整数`);
+    }
+  }
+  for (const track of ["SF", "LF", "PRODUCT"]) {
+    const budget = execution?.budgets?.[track];
+    if (!budget) {
+      add(issues, "error", `suite.execution.budgets.${track}`, `缺少 ${track} 轨预算`);
+      continue;
+    }
+    if (budget.maxSearchCalls != null && (!Number.isInteger(budget.maxSearchCalls) || budget.maxSearchCalls < 1)) {
+      add(issues, "error", `suite.execution.budgets.${track}.maxSearchCalls`, "maxSearchCalls 必须为 null 或正整数");
+    }
+    if (budget.maxToolCalls != null && (!Number.isInteger(budget.maxToolCalls) || budget.maxToolCalls < 1)) {
+      add(issues, "error", `suite.execution.budgets.${track}.maxToolCalls`, "maxToolCalls 必须为 null 或正整数");
+    }
+    for (const field of ["maxBudgetedCalls", "maxQueryRepeats", "noProgressMs"]) {
+      if (!Number.isInteger(budget[field]) || budget[field] < 1) {
+        add(issues, "error", `suite.execution.budgets.${track}.${field}`, `${field} 必须是正整数`);
+      }
+    }
+    if (Number.isFinite(budget.maxSearchCalls) && Number.isFinite(budget.maxToolCalls) && budget.maxToolCalls < budget.maxSearchCalls) {
+      add(issues, "error", `suite.execution.budgets.${track}`, "工具调用上限不能低于搜索调用上限");
+    }
+  }
 }
 
 function containsPlaceholder(value) {
@@ -185,8 +251,25 @@ export function selectTargets(catalog, selectors = []) {
   return selected;
 }
 
+export function selectTasks(suite, selectors = []) {
+  const tasks = suite.tasks ?? [];
+  if (!selectors.length) return tasks;
+  const wanted = selectors.flatMap((item) => String(item).split(",")).map((item) => item.trim().toUpperCase());
+  const selected = tasks.filter((task) => wanted.includes(String(task.id).toUpperCase()));
+  const missing = wanted.filter((value) => !tasks.some((task) => String(task.id).toUpperCase() === value));
+  if (missing.length) throw new Error(`题集中不存在: ${missing.join(", ")}`);
+  for (const task of selected) {
+    const sourceId = task.reusePromptFrom ?? task.deriveFrom;
+    if (task.mode === "derived" && sourceId && !selected.some((candidate) => candidate.id === sourceId)) {
+      throw new Error(`派生题 ${task.id} 需要同时选择来源题 ${sourceId}`);
+    }
+  }
+  return selected;
+}
+
 export function buildPlan(config, options = {}) {
   const targets = selectTargets(config.catalog, options.targets ?? []);
+  const tasks = selectTasks(config.suite, options.tasks ?? []);
   const judgeEnabled = options.judge ?? config.suite.judge.enabledByDefault;
   return {
     suiteId: config.suite.id,
@@ -200,10 +283,11 @@ export function buildPlan(config, options = {}) {
       plugin: target.plugin,
       installKind: target.install.kind,
       platformCompatible: target.platforms.includes(process.platform),
-      tasks: config.suite.tasks.map((task) => ({
+      tasks: tasks.map((task) => ({
         id: task.id,
         mode: task.mode,
         track: task.track,
+        budget: config.suite.execution.budgets?.[task.track] ?? null,
         action:
           task.mode === "derived"
             ? `derive from ${task.deriveFrom}`

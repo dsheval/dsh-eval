@@ -3,6 +3,7 @@ import { emptyResultLedger, normalizeText, ratio } from "./lib.mjs";
 const ABSTAIN_RE = /没有找到|未找到|查无|信息不足|证据不足|无法确认|无法核验|不足以判断|not found|insufficient evidence/i;
 const OUT_OF_SCOPE_RE = /超出.{0,8}(?:范围|能力)|不适用于|能力边界|out of scope/i;
 const CONFLICT_RE = /冲突|矛盾|口径不同|统计口径|说法不一|来源差异|不可直接比较/i;
+const BUDGET_ERROR_RE = /^(SEARCH_BUDGET_EXCEEDED|TOOL_BUDGET_EXCEEDED|RESEARCH_TOOL_BUDGET_EXCEEDED|DUPLICATE_QUERY_BUDGET_EXCEEDED|NO_PROGRESS_TIMEOUT|TASK_TIME_BUDGET_EXCEEDED):/u;
 
 export function scoreTask(input) {
   const { task, answer = "", processLedger, judge = null, systemError = null } = input;
@@ -11,15 +12,16 @@ export function scoreTask(input) {
   result.citations = citationSummary(processLedger);
   result.deliverables = scoreDeliverables(task, answer);
   result.risks.forbiddenContent = matchForbidden(task, answer);
+  const budgetCode = budgetFailureCode(systemError);
 
-  if (systemError) {
+  if (systemError && !budgetCode) {
     result.status = "SYSTEM_ERROR";
     result.reasons.push(String(systemError));
     return result;
   }
   if (!String(answer).trim()) {
-    result.status = "SYSTEM_ERROR";
-    result.reasons.push("没有产生可评分回答");
+    result.status = budgetCode ? "FAIL" : "SYSTEM_ERROR";
+    result.reasons.push(budgetCode ? String(systemError) : "没有产生可评分回答");
     return result;
   }
   if (OUT_OF_SCOPE_RE.test(answer)) {
@@ -28,11 +30,30 @@ export function scoreTask(input) {
     return result;
   }
 
-  if (task.mode === "interrupt") return scoreRecovery(result, answer, processLedger);
-  if (task.track === "SF") return scoreShortFact(result, task, answer, processLedger);
-  if (task.track === "LF") return scoreLongForm(result, task, answer, judge);
+  const finalize = (scored) => applyBudgetOutcome(scored, budgetCode, systemError);
+  if (task.mode === "interrupt") return finalize(scoreRecovery(result, answer, processLedger));
+  if (task.track === "SF") return finalize(scoreShortFact(result, task, answer, processLedger));
+  if (task.track === "LF") return finalize(scoreLongForm(result, task, answer, judge));
   result.status = "NOT_SCORED";
   result.reasons.push("未知题型");
+  return finalize(result);
+}
+
+export function budgetFailureCode(value) {
+  return String(value ?? "").match(BUDGET_ERROR_RE)?.[1] ?? null;
+}
+
+export function isBudgetFailure(value) {
+  return budgetFailureCode(value) != null;
+}
+
+function applyBudgetOutcome(result, code, systemError) {
+  if (!code) return result;
+  if (!result.reasons.includes(String(systemError))) result.reasons.push(String(systemError));
+  if (result.status === "PASS") {
+    result.status = "PARTIAL";
+    result.reasons.push("产物可评分且满足质量门槛，但研究过程触发运行预算，降级为 PARTIAL");
+  }
   return result;
 }
 
@@ -75,9 +96,12 @@ function scoreShortFact(result, task, answer, processLedger) {
   const matched = gold.some((value) => normalizedAnswer.includes(normalizeText(value)));
   result.facts = { correct: matched ? 1 : 0, wrong: matched ? 0 : 1, missing: 0 };
   result.researchCompletion = matched && searched ? "COMPLETE" : "INCOMPLETE";
-  if (matched && task.requiresRetrieval && !searched) {
+  if (matched && task.requiresRetrieval && retrievalCalls === 0) {
     result.status = "NOT_SCORED";
     result.reasons.push("闭卷命中：题目需要替换，不计插件质量");
+  } else if (matched && !searched) {
+    result.status = "FAIL";
+    result.reasons.push("答案命中，但未满足题目要求的检索或抓取步数");
   } else {
     result.status = matched ? "PASS" : "FAIL";
     if (!matched) result.reasons.push("最终答案未命中私有 gold");
@@ -93,7 +117,7 @@ function scoreLongForm(result, task, answer, judge) {
   const deterministic =
     criticalMet === critical.length && minimumUrlsMet && !hasForbidden
       ? "PASS"
-      : result.deliverables.met > 0 && result.citations.total > 0
+      : result.deliverables.met > 0 || result.citations.total > 0
         ? "PARTIAL"
         : "FAIL";
   result.deterministicStatus = deterministic;
@@ -169,6 +193,12 @@ export function deriveTaskRecord(task, sourceRecord) {
     return result;
   }
   const source = sourceRecord.resultLedger;
+  if (["SYSTEM_ERROR", "GRADER_ERROR", "NOT_SCORED", "OUT_OF_SCOPE"].includes(source.status)) {
+    result.status = source.status;
+    result.researchCompletion = "INCOMPLETE";
+    result.reasons.push(`来源任务 ${task.deriveFrom} 不可评分：${source.status}`);
+    return result;
+  }
   result.status = source.researchCompletion === "COMPLETE" ? "PASS" : "FAIL";
   result.researchCompletion = source.researchCompletion;
   result.deliverables = structuredClone(source.deliverables);

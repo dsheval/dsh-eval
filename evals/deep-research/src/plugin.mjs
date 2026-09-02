@@ -9,7 +9,7 @@ const AUTOMATIC_INSTALLS = new Set(["none", "dsh-add", "source-add", "source-pro
 export function preflightTarget(target, options = {}) {
   const required = credentialState(options.credentialHome, target.requiredCredentialRefs ?? [], options.env);
   const optional = credentialState(options.credentialHome, target.optionalCredentialRefs ?? [], options.env);
-  const missingRequired = Object.entries(required).filter(([, state]) => state === "missing").map(([name]) => name);
+  const missingRequired = Object.entries(required).filter(([, state]) => state !== "present").map(([name]) => name);
   const platformCompatible = target.platforms?.includes(process.platform) ?? true;
   const automaticInstall = AUTOMATIC_INSTALLS.has(target.install.kind);
   const source = resolveSource(target, options.env);
@@ -75,7 +75,12 @@ export async function installTarget(profile, target, options = {}) {
     );
   }
 
-  const spec = target.install.kind === "source-add" ? source.path : target.install.spec;
+  const spec =
+    target.install.kind === "source-add"
+      ? target.install.useArtifactAsSpec
+        ? source.artifactPath
+        : source.path
+      : target.install.spec;
   const result = await runDsh(["plugin", "--profile", profile, "add", spec], options);
   const noBundle = /declares no dsh\.bundle/i.test(result.output);
   if (result.code === 0 && !noBundle && target.install.verifyPlugin) {

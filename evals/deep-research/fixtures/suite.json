@@ -1,19 +1,61 @@
 {
-  "id": "dsh-research-eval-v2",
-  "asOf": "2026-08-28",
-  "description": "基于 TrueEval 本地 benchmark 冻结的 8 个独立题面、10 个测评项：2 个 xbench、2 个 BrowseComp-ZH、4 个 DeepResearchEval，以及 R9/R10 产品诊断。",
+  "id": "dsh-research-eval-v12-r3-refresh",
+  "asOf": "2026-08-31",
+  "description": "校准版：5 个测评项保持短事实、长报告、产品诊断 2:2:1 分布；按轨限制搜索扩张和研究型工具调用，为长文保留综合阶段，并自动重试可识别的模型基础设施错误。",
   "selection": {
-    "policy": "balanced-fixed-pilot-v1",
-    "shortFact": { "xbench-deepsearch.2505": 2, "browsecomp-zh.test": 2 },
-    "longForm": { "deepresearcheval.v1": 4 },
-    "productDiagnostics": 2,
+    "policy": "balanced-compact-no-search-cap-v1",
+    "shortFact": { "xbench-deepsearch.2505": 1, "browsecomp-zh.test": 1 },
+    "longForm": { "deepresearcheval.v1": 2 },
+    "productDiagnostics": 1,
     "officialAndDiagnosticMetricsStaySeparate": true
   },
   "execution": {
-    "taskTimeoutMs": 1800000,
+    "taskTimeoutMs": null,
+    "installTimeoutMs": 600000,
     "interruptAfterMs": 45000,
     "urlCheckLimit": 20,
-    "stabilityTasks": ["R2", "R6", "R8"],
+    "budgetPollIntervalMs": 10000,
+    "infrastructureRetries": 2,
+    "infrastructureRetryDelayMs": 5000,
+    "researchProtocol": {
+      "id": "bounded-evidence-v1",
+      "maxSubagents": 4,
+      "sourcesPerDeliverable": 2,
+      "maxSearchCalls": 20,
+      "synthesisReserveCalls": 12,
+      "instructions": [
+        "Before searching, map every required deliverable to a bounded evidence question.",
+        "Create at most four subagents and partition their scopes so they do not run the same searches.",
+        "Do not submit the same normalized search query more than twice across the parent and child sessions.",
+        "Stop expanding a deliverable after it has two credible independent sources, unless those sources materially conflict.",
+        "Use automatic subagent completion notifications; do not repeatedly call list_agents while work is still running.",
+        "Write the final report and supporting artifacts inside the current working directory, then always provide a final chat answer."
+      ]
+    },
+    "budgets": {
+      "SF": {
+        "maxSearchCalls": 12,
+        "maxToolCalls": null,
+        "maxBudgetedCalls": 40,
+        "maxQueryRepeats": 2,
+        "noProgressMs": 120000
+      },
+      "LF": {
+        "maxSearchCalls": 24,
+        "maxToolCalls": null,
+        "maxBudgetedCalls": 72,
+        "maxQueryRepeats": 2,
+        "noProgressMs": 240000
+      },
+      "PRODUCT": {
+        "maxSearchCalls": null,
+        "maxToolCalls": null,
+        "maxBudgetedCalls": 60,
+        "maxQueryRepeats": 2,
+        "noProgressMs": 600000
+      }
+    },
+    "stabilityTasks": ["R1", "R6", "R7"],
     "stabilityRepeats": 2
   },
   "judge": {
@@ -39,32 +81,8 @@
       "passRule": "最终短答案与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
     },
     {
-      "id": "R2",
-      "title": "GPU 单精度算力计算",
-      "track": "SF",
-      "mode": "normal",
-      "privateRef": "R2",
-      "requiresRetrieval": true,
-      "minSearchCalls": 2,
-      "officialMetric": "official.answer_accuracy",
-      "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality"],
-      "passRule": "最终答案与本地私有 gold 实质等价，且证据链包含至少两个检索或抓取步骤。"
-    },
-    {
       "id": "R3",
       "title": "历史文化地点识别",
-      "track": "SF",
-      "mode": "normal",
-      "privateRef": "R3",
-      "requiresRetrieval": true,
-      "minSearchCalls": 2,
-      "officialMetric": "official.answer_accuracy",
-      "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality"],
-      "passRule": "最终短答案与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
-    },
-    {
-      "id": "R4",
-      "title": "学术论文反向识别",
       "track": "SF",
       "mode": "normal",
       "privateRef": "R4",
@@ -72,97 +90,52 @@
       "minSearchCalls": 2,
       "officialMetric": "official.answer_accuracy",
       "diagnosticMetrics": ["citation_correctness", "citation_completeness", "source_quality"],
-      "passRule": "最终论文题名与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
-    },
-    {
-      "id": "R5",
-      "title": "AI 生成视觉与科学传播信任",
-      "track": "LF",
-      "mode": "normal",
-      "domain": "Science & Technology",
-      "language": "en",
-      "asOf": "2025-08",
-      "minOpenUrls": 4,
-      "judgeRequired": true,
-      "prompt": "Between January 2024 and August 2025, how have AI-generated visuals affected public trust in science communication across US, EU, and China? Provide case studies, policy responses, sentiment metrics, and recommendations.",
-      "benchmarkSource": {
-        "benchmarkId": "deepresearcheval",
-        "split": "v1",
-        "taskId": "deepresearcheval.v1.000002",
-        "sourceHash": "sha256:d9eaf63b8fa2e06396177288904577e569a454de4dd2b3b266689d1ef26409a4"
-      },
-      "officialMetrics": ["official.quality_score", "official.fact_ratio"],
-      "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
-      "deliverables": [
-        {
-          "id": "case_studies",
-          "label": "覆盖美国、欧盟和中国的案例",
-          "critical": true,
-          "patterns": ["US|United States|美国", "EU|European Union|欧盟", "China|中国", "case|案例"]
-        },
-        {
-          "id": "policy_responses",
-          "label": "政策回应",
-          "critical": true,
-          "patterns": ["policy|regulat|政策|监管"]
-        },
-        {
-          "id": "sentiment_metrics",
-          "label": "信任或情绪指标",
-          "critical": true,
-          "patterns": ["sentiment|trust|survey|metric|信任|情绪|调查|指标"]
-        },
-        {
-          "id": "recommendations",
-          "label": "建议与可核验引用",
-          "critical": true,
-          "patterns": ["recommend|建议", "http"]
-        }
-      ]
+      "passRule": "最终短答案与本地私有 gold 实质等价，且观察到至少两个检索或抓取步骤。"
     },
     {
       "id": "R6",
-      "title": "植物肉营养与超加工分类",
+      "title": "社区行为健康中的测量式照护与 AI 分诊",
       "track": "LF",
       "mode": "normal",
       "domain": "Health",
       "language": "en",
-      "asOf": "2025-08-15",
+      "asOf": null,
       "minOpenUrls": 4,
       "judgeRequired": true,
-      "prompt": "Assess nutritional quality, additive profiles, sodium levels, and 'ultra-processed' classification of top plant-based meat products across US and EU as of 2025-08-15; deliver comparative tables and public-health recommendations.",
+      "timeoutMs": 2400000,
+      "prompt": "Evaluate integrating measurement-based care with AI triage tools in community behavioral health settings: cost-benefit, workflow changes, data governance, clinician acceptance, evidence from pilots and online clinician forums; provide implementation roadmap.",
       "benchmarkSource": {
         "benchmarkId": "deepresearcheval",
         "split": "v1",
-        "taskId": "deepresearcheval.v1.000012",
-        "sourceHash": "sha256:c6dd8bf8887683f89bf2a41bd4af272f3389d99928b9bd844bc6fdb76a85d91b"
+        "taskId": "deepresearcheval.v1.000097",
+        "sourceHash": "sha256:8d6d6ee3d4e58eafdeccb26e2f8e1e0e69bb8103896fbc7aa6eaf65304712419"
       },
       "officialMetrics": ["official.quality_score", "official.fact_ratio"],
       "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
       "deliverables": [
         {
-          "id": "comparative_tables",
-          "label": "美国与欧盟产品对照表",
+          "id": "cost_benefit",
+          "label": "成本收益分析",
           "critical": true,
-          "patterns": ["US|United States|美国", "EU|European Union|欧盟", "table|表"]
+          "patterns": ["cost|成本", "benefit|收益"]
         },
         {
-          "id": "nutrition_profile",
-          "label": "营养、添加剂和钠含量",
+          "id": "workflow_changes",
+          "label": "工作流变化",
           "critical": true,
-          "patterns": ["nutrition|营养", "additive|添加剂", "sodium|钠"]
+          "patterns": ["workflow|工作流|流程"]
         },
         {
-          "id": "upf_classification",
-          "label": "超加工分类",
+          "id": "governance_acceptance",
+          "label": "数据治理与临床医生接受度",
           "critical": true,
-          "patterns": ["ultra-processed|UPF|超加工"]
+          "patterns": ["data governance|privacy|数据治理|隐私", "clinician|临床医生", "accept|adoption|接受|采纳"]
         },
         {
-          "id": "recommendations",
-          "label": "公共卫生建议与引用",
+          "id": "implementation_roadmap",
+          "label": "实施路线图",
           "critical": true,
-          "patterns": ["recommend|建议", "http"]
+          "patterns": ["roadmap|implementation plan|实施路线图|实施计划"]
         }
       ]
     },
@@ -176,6 +149,7 @@
       "asOf": "2025-08",
       "minOpenUrls": 4,
       "judgeRequired": true,
+      "timeoutMs": 2400000,
       "prompt": "Assess impact of global stablecoin regulatory changes (US, EU, Hong Kong, Singapore) from Jan 2024 to Aug 2025 on retail banks' deposit flight, payments revenue, and regulatory capital; provide scenarios, quantitative estimates, and recommended strategy.",
       "benchmarkSource": {
         "benchmarkId": "deepresearcheval",
@@ -206,72 +180,18 @@
         },
         {
           "id": "strategy",
-          "label": "推荐策略与引用",
+          "label": "推荐策略",
           "critical": true,
-          "patterns": ["strateg|recommend|策略|建议", "http"]
+          "patterns": ["strateg|recommend|策略|建议"]
         }
       ]
-    },
-    {
-      "id": "R8",
-      "title": "电动与氢燃料公交全生命周期比较",
-      "track": "LF",
-      "mode": "normal",
-      "domain": "Transportation",
-      "language": "en",
-      "asOf": null,
-      "minOpenUrls": 4,
-      "judgeRequired": true,
-      "prompt": "Compare lifecycle total cost, operational performance, and emissions of battery-electric versus hydrogen fuel-cell buses for mid-sized transit agencies; produce a 10-year cost model, procurement decision matrix, and sensitivity analysis.",
-      "benchmarkSource": {
-        "benchmarkId": "deepresearcheval",
-        "split": "v1",
-        "taskId": "deepresearcheval.v1.000035",
-        "sourceHash": "sha256:1ff2d0895e609f74a3e1cac9a55e13c44a3a824bd1a307ee7ed4e68ebdae1309"
-      },
-      "officialMetrics": ["official.quality_score", "official.fact_ratio"],
-      "judgeDimensions": ["Coverage", "Insight", "Instruction-following", "Clarity"],
-      "deliverables": [
-        {
-          "id": "cost_model",
-          "label": "10 年成本模型",
-          "critical": true,
-          "patterns": ["10-year|10 year|十年|10 年", "cost|成本"]
-        },
-        {
-          "id": "performance_emissions",
-          "label": "运营性能和排放比较",
-          "critical": true,
-          "patterns": ["performance|性能", "emission|排放"]
-        },
-        {
-          "id": "decision_matrix",
-          "label": "采购决策矩阵",
-          "critical": true,
-          "patterns": ["decision matrix|procurement matrix|决策矩阵|采购矩阵"]
-        },
-        {
-          "id": "sensitivity",
-          "label": "敏感性分析与引用",
-          "critical": true,
-          "patterns": ["sensitivity|敏感性", "http"]
-        }
-      ]
-    },
-    {
-      "id": "R9",
-      "title": "中断恢复",
-      "track": "PRODUCT",
-      "mode": "interrupt",
-      "reusePromptFrom": "R5",
-      "passRule": "能说明中断点并从已有状态继续，不把空白或重头执行谎称为恢复成功。"
     },
     {
       "id": "R10",
       "title": "搜索不等于研究",
       "track": "PRODUCT",
       "mode": "derived",
-      "deriveFrom": "R5",
+      "deriveFrom": "R6",
       "passRule": "只有搜索结果而缺少强制交付物时，研究完成度必须记为 SEARCH_ONLY 或 INCOMPLETE。"
     }
   ]

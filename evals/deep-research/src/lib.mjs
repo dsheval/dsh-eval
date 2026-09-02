@@ -59,7 +59,8 @@ export function ratio(numerator, denominator) {
 export function safeError(error) {
   const text = error instanceof Error ? error.message : String(error ?? "unknown error");
   return text
-    .replace(/(?:sk|tvly|xai|brv|exa|Bearer)[-_A-Za-z0-9]{12,}/gi, "[REDACTED]")
+    .replace(/\b(?:sk|tvly|xai|brv|exa)[-_][-_A-Za-z0-9]{10,}\b/gi, "[REDACTED]")
+    .replace(/\bBearer\s+[A-Za-z0-9._~-]{12,}\b/gi, "Bearer [REDACTED]")
     .slice(0, 2000);
 }
 
@@ -81,10 +82,14 @@ export function emptyProcessLedger(environment = {}) {
     },
     tools: {
       totalCalls: 0,
+      budgetedCalls: 0,
       searchCalls: 0,
       fetchCalls: 0,
       analysisCalls: 0,
       writeCalls: 0,
+      managementCalls: 0,
+      fileCalls: 0,
+      queryStats: { total: 0, unique: 0, duplicate: 0, maxRepeat: 0 },
       names: {},
     },
     sources: {
@@ -119,6 +124,7 @@ export function emptyProcessLedger(environment = {}) {
       outputTokens: null,
       totalTokens: null,
       costUsd: null,
+      budget: null,
     },
     artifacts: {
       count: 0,
