@@ -42,14 +42,6 @@ const metricConfig: Record<Metric, {
   },
 };
 
-const pipeline = [
-  ['01', '清理测试环境', '清空两个测试工作区，删除上一题留下的文件和会话。'],
-  ['02', '会话 A：提供信息', '发送 LoCoMo 原始对话；两种模式只有附加提示不同。'],
-  ['03', '重启环境', '正常关闭 DSH，等待数据写入后重新启动。'],
-  ['04', '会话 B：提出问题', '删除会话 A 的工作区文件，在新会话提出同一道题。'],
-  ['05', '按标准答案评分', '只看答案和必需信息，不使用 LLM 评分。'],
-];
-
 const metricBarWidth = (value: number, config: (typeof metricConfig)[Metric]) => {
   const ratio = Math.min(1, Math.max(0, value / config.max));
   return ratio * 100;
@@ -70,7 +62,7 @@ export default function MemoryBenchmark() {
       </div>
 
       <div className="memory-results-heading">
-        <p className="memory-result-readout"><span>结论</span><strong>{benchmark.pluginCount}/{benchmark.pluginCount} 个 Agent 提示后得分上升；无提示表现差距明显。</strong></p>
+        <p className="memory-result-readout"><span>结论</span><strong>明确提示后，{benchmark.pluginCount} 个 Agent 全部提升，增幅为 10–60 个百分点。</strong></p>
         <div className="memory-metric-switch" role="group" aria-label="选择对比指标">
           {(Object.keys(metricConfig) as Metric[]).map((name) => (
             <button key={name} type="button" className={metric === name ? 'active' : undefined} aria-pressed={metric === name} onClick={() => setMetric(name)}>
@@ -103,40 +95,11 @@ export default function MemoryBenchmark() {
         })}
         <footer><span><i className="passive" />无提示</span><span><i className="guided" />有提示</span><small>{config.lowerIsBetter ? '数值越低越好' : '数值越高越好'}</small></footer>
         <p className="memory-chart-disclosure"><span>*</span> Mnemon（官方版）来自 Mnemon 官方仓库，与 dsh-mnemon 共享核心实现，不代表完全独立的两种方案。</p>
-      </div>
-
-      <footer className="memory-source-actions">
-        <p><span>原始记录</span><strong>数据与评测代码已公开</strong></p>
-        <div><a href="/dsheval/data/memory/locomo20-2026-08-28.json" download>下载结果数据（JSON） <span aria-hidden="true">↓</span></a><a href="https://github.com/dsheval/dsh-eval/tree/main/evals/memory" target="_blank" rel="noreferrer">查看评测代码 <span aria-hidden="true">↗</span></a></div>
-      </footer>
-
-      <details className="memory-details">
-        <summary>
-          <span>PROTOCOL / CURRENT TEST</span>
-          <b>查看本次测试如何执行</b>
-          <i aria-hidden="true">+</i>
-        </summary>
-        <div className="memory-details-content memory-details-compact">
-          <header className="memory-compact-heading">
-            <p className="section-label">PROTOCOL / CURRENT BENCHMARK</p>
-            <h3>唯一变量：是否提醒 Agent 使用记忆。</h3>
-            <p>两组测试使用同一组 {benchmark.sampleSizePerTrack} 道题、同一模型和运行环境；提示不会透露工具名、答案或历史会话 ID。</p>
-          </header>
-
-          <div className="memory-track-summary" aria-label="两种提示方式说明">
-            <article><span>01 / 无提示</span><strong>观察默认表现</strong><p>直接提供原始对话和问题，不要求保存或检索记忆。</p></article>
-            <article><span>02 / 有提示</span><strong>观察提醒后的表现</strong><p>只增加通用记忆提示，不改变题目、答案和评分方式。</p></article>
-          </div>
-
-          <div className="memory-pipeline" aria-label="单题执行流程">
-            {pipeline.map(([number, title, copy]) => (
-              <article key={number}><span>{number}</span><strong>{title}</strong><p>{copy}</p></article>
-            ))}
-          </div>
-
-          <footer className="memory-detail-source"><p>完整逐项成绩、耗时和 Token 数据保存在原始 JSON 中。</p><a href="/dsheval/data/memory/locomo20-2026-08-28.json" download>下载完整数据 <span aria-hidden="true">↓</span></a></footer>
+        <div className="memory-chart-actions">
+          <p><span>公开材料</span><strong>结果数据与评测代码</strong></p>
+          <div><a href="/dsheval/data/memory/locomo20-2026-08-28.json" download>下载 JSON <span aria-hidden="true">↓</span></a><a href="https://github.com/dsheval/dsh-eval/tree/main/evals/memory" target="_blank" rel="noreferrer">查看代码 <span aria-hidden="true">↗</span></a></div>
         </div>
-      </details>
+      </div>
     </section>
   );
 }
