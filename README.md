@@ -4,6 +4,7 @@ DSH Eval 是 DSH 插件生态的独立评测与展示项目。仓库同时包含
 
 - 可部署的网站前端；
 - DSH Deep Research 插件的隔离评测运行器；
+- DSH 搜索插件 Hard-12 隔离测评运行器；
 - DSH 记忆插件双轨评测运行器；
 - LoCoMo 20 题评测配置、插件名录、评分逻辑与自动化测试；
 - 从本地完整测评记录导出的脱敏公开榜单快照。
@@ -24,6 +25,7 @@ npm run dev -- --host 0.0.0.0 --port 3000
 ```bash
 npm run lint
 npm run test:deep-research
+npm run test:search
 npm run test:memory
 npm run build
 ```
@@ -36,6 +38,15 @@ npm run eval:deep-research -- plan
 ```
 
 `validate`、`plan` 和单元测试不会启动 DSH 或调用模型。正式 `run` 另有命令参数与环境变量双重锁，详见 [`evals/deep-research/DEVELOPMENT.md`](./evals/deep-research/DEVELOPMENT.md)。
+
+搜索插件测评的只读入口：
+
+```bash
+npm run eval:search -- validate
+npm run eval:search -- plan
+```
+
+这两个命令及 `npm run test:search` 不会启动 DSH、安装插件或调用搜索服务。完整代码导读、文件树和运行安全边界见 [`evals/search/CODE-GUIDE.md`](./evals/search/CODE-GUIDE.md)。
 
 记忆评测入口：
 
@@ -68,11 +79,13 @@ npm --prefix evals/memory run export:site -- --day YYYY-MM-DD
 
 基线 C0 是不安装第三方记忆插件的原生 DSH。每题经过埋点、优雅关闭旧 Host、冷启动、创建新会话、追问、评分与过程指标采集。完整协议、评分和运行方式分别见 [`benchmark.md`](./evals/memory/benchmark.md)、[`DEVELOPMENT.md`](./evals/memory/DEVELOPMENT.md) 和 [`evals/memory/README.md`](./evals/memory/README.md)。
 
-Deep Research 评测同样以不安装插件的 C0 为基线，每次只安装一个插件。题集由 8 个独立题面、10 个测评项组成，分别记录研究过程账与结果账；短事实准确率、长文质量、引用、恢复能力和资源消耗分栏报告，不压成一个不可解释的加权总分。完整规则见 [`evals/deep-research/benchmark.md`](./evals/deep-research/benchmark.md)。
+Deep Research 评测同样以不安装插件的 C0 为基线，每次只安装一个插件。当前 V12 紧凑题集由 4 个独立题面、5 个测评项组成，按 `2:2:1` 覆盖短事实、长文和产品诊断；分别记录研究过程账与结果账，不压成一个不可解释的加权总分。完整规则见 [`evals/deep-research/benchmark.md`](./evals/deep-research/benchmark.md)。
+
+搜索插件使用 DeepResearch Bench 冻结 Hard-12，在完全相同的 search-only preset 中逐题比较 8 个插件与原生 C0。正式批次用 C0 首尾 bracket 检测环境漂移；工具过程、URL 可达性、证据 Judge 和系统故障分开记录，不压成一个不可解释的总分。完整规则见 [`evals/search/benchmark.md`](./evals/search/benchmark.md)。
 
 ## 完整文件树与职责
 
-以下列出仓库内全部受版本控制的项目文件；`node_modules/`、构建产物、本机缓存和评测原始记录不在其中。
+以下概览仓库主要文件；`node_modules/`、构建产物、本机缓存和评测原始记录不在其中。搜索测评子目录的逐文件树与职责见 [`evals/search/CODE-GUIDE.md`](./evals/search/CODE-GUIDE.md)。
 
 ```text
 dsh-eval/
@@ -89,8 +102,8 @@ dsh-eval/
 │   ├── components/
 │   │   ├── MemoryBenchmark.tsx
 │   │   │   └── 读取真实快照并展示 passive/guided 双轨排名、准确率、延迟、Token 与方法说明。
-│   │   └── RecommendationDemo.tsx
-│   │       └── 首页插件推荐报告的交互演示组件。
+│   │   └── EvaluationDemo.tsx
+│   │       └── 首页评测流程、证据与结果的交互演示组件。
 │   ├── data/memory/
 │   │   └── locomo20-2026-08-28.json
 │   │       └── 构建期读取的脱敏 LoCoMo 20 双轨榜单快照。
@@ -99,7 +112,7 @@ dsh-eval/
 │   ├── layout.tsx
 │   │   └── 根布局以及标题、canonical、Open Graph 等站点元数据。
 │   └── page.tsx
-│       └── 官网首页结构，组合介绍、推荐演示和记忆评测区域。
+│       └── 官网首页结构，组合介绍、评测演示和记忆评测区域。
 ├── deploy/
 │   └── Caddyfile
 │       └── 生产入口的 HTTPS、反向代理与路径转发配置。
@@ -115,7 +128,7 @@ dsh-eval/
 │   │   ├── source-lock.json
 │   │   │   └── 源码型插件与 DSH 的固定仓库、commit、归档名和 SHA-256。
 │   │   └── suite.json
-│   │       └── 8 个独立题面、10 个测评项及 Judge、交付物和来源门槛配置。
+│   │       └── V12 的 4 个独立题面、5 个测评项及 Judge、预算、交付物和来源门槛配置。
 │   ├── records/
 │   │   ├── .gitignore
 │   │   │   └── 忽略所有本地逐题记录和运行期榜单。
@@ -131,12 +144,20 @@ dsh-eval/
 │   ├── scripts/
 │   │   ├── admission-smoke.mjs
 │   │   │   └── 对源码型目标做隔离 Profile 安装与组合配置冒烟检查。
+│   │   ├── compose-v12-refresh.mjs
+│   │   │   └── 将统一补跑的 R3 与已验证 V11 记录组合为带来源追踪的 V12 条件记录。
+│   │   ├── generate-v12-html-report.mjs
+│   │   │   └── 从本机脱敏汇总生成离线 HTML 可视化报告；产物保留在忽略的 records 目录。
 │   │   ├── preflight-summary.mjs
 │   │   │   └── 输出全部目标的只读准入预检摘要。
 │   │   ├── prepare-wsl.sh
 │   │   │   └── 在 WSL 准备固定 Node、pnpm、DSH、源码和 Docker 环境。
-│   │   └── research-eval-wsl.sh
-│   │       └── 使用固定 WSL 运行时调用 Deep Research 评测 CLI。
+│   │   ├── research-eval-wsl.sh
+│   │   │   └── 使用固定 WSL 运行时调用 Deep Research 评测 CLI。
+│   │   ├── session-workspace-smoke.mjs
+│   │   │   └── 检查题目会话是否绑定到隔离工作区而非评测源码目录。
+│   │   └── validate-condition-run.mjs
+│   │       └── 严格验证条件运行状态、五题可评分性、Judge 与组合来源追踪。
 │   ├── src/
 │   │   ├── artifacts.mjs
 │   │   │   └── 在限定工作区内收集报告、表格等产物并阻止符号链接越界。
@@ -169,6 +190,8 @@ dsh-eval/
 │   │   │   └── 验证产物收集、目录限制和符号链接防越界行为。
 │   │   ├── config.test.mjs
 │   │   │   └── 覆盖私有题合并、严格校验、目标选择和计划生成。
+│   │   ├── host.test.mjs
+│   │   │   └── 覆盖 Host 生命周期、父子会话聚合、工具预算和无进展熔断。
 │   │   ├── judge.test.mjs
 │   │   │   └── 覆盖 Judge 提示、结构化结果和错误降级路径。
 │   │   ├── observe.test.mjs
@@ -184,13 +207,30 @@ dsh-eval/
 │   │   └── url-check.test.mjs
 │   │       └── 覆盖 URL 协议、私网阻断与安全失败结果。
 │   ├── benchmark.md
-│   │   └── Deep Research V2 的对象、题集、双账、评分和榜单规则。
+│   │   └── Deep Research V12 的对象、紧凑题集、双账、评分和榜单规则。
 │   ├── DEVELOPMENT.md
 │   │   └── 架构、执行锁、凭证、WSL 准入、私有题和正式运行说明。
 │   ├── package.json
 │   │   └── Deep Research 子包元数据及校验、计划、运行、报告和测试命令。
 │   └── README.md
 │       └── Deep Research 评测定位、安全边界、文件结构和只读命令入口。
+├── evals/search/
+│   ├── fixtures/
+│   │   └── 冻结 Hard-12、C0/C1 和 S1–S8 插件名录及执行参数。
+│   ├── src/
+│   │   └── 配置、隔离 Profile、插件安装、Host、观测、Judge、评分、编排与报告实现。
+│   ├── test/
+│   │   └── 覆盖题集哈希、执行锁、超时取消、隔离、观测、评分和报告的本地单元测试。
+│   ├── CODE-GUIDE.md
+│   │   └── 搜索测评完整文件树、逐文件职责、生命周期和安全命令导读。
+│   ├── benchmark.md
+│   │   └── Hard-12、公平性、C0 bracket、证据门槛和配对比较规范。
+│   ├── DEVELOPMENT.md
+│   │   └── 只读命令、正式运行双重锁、中止回收与输出说明。
+│   ├── package.json
+│   │   └── 搜索测评的校验、计划、预检、执行、报告与测试命令。
+│   └── README.md
+│       └── 题目来源、八插件条件、基线、隔离和评分入口。
 ├── evals/memory/
 │   ├── fixtures/
 │   │   ├── patches/
@@ -318,6 +358,7 @@ dsh-eval/
 ## 数据边界
 
 - `evals/deep-research/fixtures/private-tasks.local.json`、`evals/deep-research/records/` 和 `.research-eval-deps/` 只保存在本机，不提交 Git；示例模板不含真实题面或答案。
+- `evals/search/records/`、隔离 DSH_HOME、逐题回答和 Judge 结果只保存在本机，不提交 Git。
 - `evals/memory/records/`、`~/.dsh/memory-eval-workspaces/`、插件数据库和 DSH 会话均为本机运行数据，不提交 Git。
 - `app/data/memory/` 与 `public/data/memory/` 只保存经 `export-site.mjs` 裁剪后的公开指标，不包含标准答案、逐题回答、会话 ID、本机路径或原始会话。
 - 第三方插件会执行代码。正式评测应在隔离、低权限、仅带专用短期凭据的环境运行，不能把个人开发机或长期密钥当作安全边界。
