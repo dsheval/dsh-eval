@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install and audit all dependencies
+        run: |
+          npm ci
+          npm run audit:security
+
+      - name: Lint and typecheck
+        run: |
+          npm run lint
+          npx tsc --noEmit --incremental false
+
+      - name: Test evaluation suites
+        run: |
+          npm run test:deep-research
+          npm run test:search
+          npm run test:memory
+
+      - name: Build production output
+        run: npm run build
+
+      - name: Validate server configuration and build image
+        run: |
+          docker compose -p dsh-eval -f compose.production.yml -f docker/compose.server.example.yml config --quiet
+          docker build --tag dsh-eval-web:ci .
+
+      - name: Verify production container
+        run: |
+          docker run -d --name dsheval-ci -p 127.0.0.1:3301:3000 dsh-eval-web:ci
+          ready=0
+          for attempt in {1..30}; do
+            if curl --fail --silent --max-time 2 http://127.0.0.1:3301/dsheval/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = 1
+          node scripts/smoke-production.mjs http://127.0.0.1:3301
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs --tail 100 dsheval-ci 2>&1 || true
+
+      - name: Remove CI container
+        if: always()
+        run: docker rm -f dsheval-ci 2>/dev/null || true

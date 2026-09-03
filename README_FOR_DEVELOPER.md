@@ -19,7 +19,7 @@ npm run dev -- --host 0.0.0.0 --port 3000
 npm ci
 npm run audit:security
 npm run lint
-npx tsc --noEmit
+npx tsc --noEmit --incremental false
 npm run test:deep-research
 npm run test:search
 npm run test:memory
@@ -48,6 +48,8 @@ npm run build
 - `evals/memory/`：可独立执行的记忆评测代码、题集、协议、评分与单测。
 
 ## 生产配置
+
+正式发布遵循 [生产发布约定](./docs/deployment.md)：PR 检查通过并合并 `main` 后，服务器从 Git 拉取；主机配置独立放在 `/opt/dsh-eval-state`。GitHub CI 只验证，不自动部署。不要直接发布未合并分支或上传源码包替换正式工作目录。
 
 1. 应用部署在 `https://dsheval.ai/dsheval`，`next.config.ts` 中的 `basePath` 已设为 `/dsheval`。
 2. `app/page.tsx` 中的 `TOP100_URL` 指向现有线上 `https://dsheval.ai/`。
