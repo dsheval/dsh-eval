@@ -65,7 +65,7 @@ export function SiteHeader({ active }: { active?: NavKey }) {
 export function SiteFooter() {
   return (
     <footer className="site-footer site-footer-classic">
-      <a href="/dsheval" aria-label="返回 DSHEval 首页"><Brand /></a>
+      <a href="/dsheval/" aria-label="返回 DSHEval 首页"><Brand /></a>
       <p>验证真实能力，并公开证据。</p>
       <div><a href="/dsheval/#about">产品介绍</a><a href="/dsheval/methodology">评测方法</a><a href="/dsheval/results">评测结果</a><a href="/dsheval/faq">常见问题</a></div>
       <span>© 2026 DSHEval</span>

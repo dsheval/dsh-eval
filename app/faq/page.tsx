@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { InnerPageHero } from '../components/InnerPageHero';
 import { SiteFooter, SiteHeader } from '../components/SiteChrome';
 
 const FAQ_URL = '/dsheval/faq';
@@ -65,18 +66,16 @@ export default function FaqPage() {
     <>
       <a className="skip-link" href="#main-content">跳到主要内容</a>
       <SiteHeader active="faq" />
-      <main id="main-content" className="inner-page faq-page">
+      <main id="main-content" className="content-page inner-page faq-page">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-        <header className="faq-hero">
-          <div>
-            <p className="product-label">QUESTIONS / ANSWERS</p>
-            <h1>关于 DSHEval，<br />先回答清楚。</h1>
-          </div>
-          <p>这里集中回答评测范围、公平性、复查方式和验证等级。具体数字与限制，请以对应测试报告为准。</p>
-        </header>
+        <InnerPageHero
+          eyebrow="QUESTIONS / ANSWERS"
+          title="关于 DSHEval，先回答清楚。"
+          description="这里集中回答评测范围、公平性、复查方式和验证等级。具体数字与限制，请以对应测试报告为准。"
+        />
 
         <section className="faq-list" aria-labelledby="faq-title">
-          <header><p className="section-label">FREQUENTLY ASKED</p><h2 id="faq-title">常见问题</h2></header>
+          <header><p className="section-label">FREQUENTLY ASKED</p><h2 className="section-title" id="faq-title">常见问题</h2></header>
           <div>
             {questions.map(({ question, answer }, index) => (
               <details key={question} open={index === 0}>
