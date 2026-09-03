@@ -16,10 +16,19 @@ npm run dev -- --host 0.0.0.0 --port 3000
 ## 交付前检查
 
 ```bash
+npm ci
+npm run audit:security
 npm run lint
+npx tsc --noEmit
+npm run test:deep-research
+npm run test:search
 npm run test:memory
 npm run build
 ```
+
+安全检查覆盖完整依赖树，而不只检查 `dependencies`：Vinext 和 React Server Components 虽列在 `devDependencies`，也会进入正式构建。容器构建遇到高危或严重的 npm 已知漏洞会直接失败；审计不可用时也不会跳过。
+
+2026-09-03 的安全更新统一升级了 Next.js、React/RSC、Vite 与 Vinext。`package.json` 中的 `overrides` 将旧上游锁定的 PostCSS、Sharp、ws、Undici 和 esbuild 指向修复版本，避免重新安装时带回已知漏洞。升级这些上游依赖时应重新审视约束，并验证本地构建及 Linux 正式容器；不要使用 `npm audit fix --force` 直接改写依赖树。
 
 ## 主要文件
 
