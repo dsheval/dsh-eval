@@ -369,4 +369,6 @@ dsh-eval/
 
 生产站点使用 `/dsheval` base path。传统容器部署使用 `Dockerfile`、`compose.production.yml`、Caddy 与 Nginx 配置；OpenAI Sites 部署由 `.openai/hosting.json` 和 `vite.config.ts` 管理。
 
+现有服务器采用 PR → 检查 → 合并 `main` → Git 拉取发布的流程，生产配置与源码分离。具体操作、验收与回滚边界见 [生产发布约定](./docs/deployment.md)。GitHub CI 不会自动部署。
+
 更具体的前端交付信息见 [`README_FOR_DEVELOPER.md`](./README_FOR_DEVELOPER.md)。

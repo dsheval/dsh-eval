@@ -10,6 +10,7 @@
     "build": "vinext build",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "audit:security": "npm audit --audit-level=high",
     "test:deep-research": "npm --prefix evals/deep-research test",
     "eval:deep-research": "node evals/deep-research/src/run.mjs",
     "test:search": "npm --prefix evals/search test",
@@ -18,9 +19,9 @@
     "eval:memory": "npm --prefix evals/memory start --"
   },
   "dependencies": {
-    "next": "16.2.6",
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "next": "16.2.11",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
@@ -31,15 +32,24 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
-    "@vitejs/plugin-rsc": "0.5.26",
+    "@vitejs/plugin-rsc": "0.5.34",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.6",
-    "react-server-dom-webpack": "19.2.6",
+    "eslint-config-next": "16.2.11",
+    "react-server-dom-webpack": "19.2.8",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
-    "vinext": "1.0.0-beta.3",
-    "vite": "8.0.13",
+    "vinext": "1.0.0-beta.9",
+    "vite": "8.0.16",
     "wrangler": "4.92.0"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.26"
+    },
+    "sharp": "0.35.4",
+    "ws": "8.21.3",
+    "undici": "7.29.0",
+    "esbuild": "0.28.1"
   },
   "type": "module"
 }

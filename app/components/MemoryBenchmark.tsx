@@ -55,9 +55,8 @@ export default function MemoryBenchmark() {
     <section className="memory-benchmark" id="memory-benchmark" aria-labelledby="memory-benchmark-title">
       <div className="memory-benchmark-hero">
         <div>
-          <p className="section-label light-label">MEMORY BENCHMARK / 2026-08-28</p>
-          <h2 id="memory-benchmark-title">换一个会话，Agent 还记得吗？</h2>
-          <p className="memory-benchmark-deck">同一批 Agent 完成同一组 {benchmark.sampleSizePerTrack} 道题，对比用户不提醒和明确提醒使用记忆两种情况。</p>
+          <p className="section-label">RESULTS / TWO TRACKS</p>
+          <h2 className="section-title" id="memory-benchmark-title">双轨结果对比</h2>
         </div>
       </div>
 

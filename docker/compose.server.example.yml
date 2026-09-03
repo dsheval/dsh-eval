@@ -1,0 +1,13 @@
+# Copy once to /opt/dsh-eval-state/compose.production.yml during server setup.
+# Preserve the server copy on subsequent Git updates. Never add credentials here.
+# Always combine with the checkout's compose.production.yml using -p dsh-eval.
+services:
+  web:
+    image: dsh-eval-web:latest
+    container_name: dsh-eval-web
+    restart: unless-stopped
+
+networks:
+  top100_proxy:
+    external: true
+    name: dsh-top100_default
