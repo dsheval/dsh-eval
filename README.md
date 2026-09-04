@@ -11,6 +11,10 @@ DSH Eval 是 DSH 插件生态的独立评测与展示项目。仓库同时包含
 
 线上地址：[https://dsheval.ai/dsheval](https://dsheval.ai/dsheval)
 
+## Deep Research 公开结果
+
+[V12 数据与脱敏说明](./evals/deep-research/results/v12/README.md)包含 C0 + 7 个插件的 40 条真实运行指标、[机器可读榜单](./evals/deep-research/results/v12/leaderboard.json)、[榜单 HTML](./evals/deep-research/results/v12/leaderboard.html)和[过程监控 HTML](./evals/deep-research/results/v12/process-monitoring.html)。HTML 可下载后离线打开；GitHub 文件页面显示源码，不直接渲染页面。公开副本不包含私有题面、答案、原始日志、完整 URL 或本机路径。
+
 ## 快速开始
 
 环境要求：Node.js 22.13 或更高版本。
@@ -358,6 +362,7 @@ dsh-eval/
 ## 数据边界
 
 - `evals/deep-research/fixtures/private-tasks.local.json`、`evals/deep-research/records/` 和 `.research-eval-deps/` 只保存在本机，不提交 Git；示例模板不含真实题面或答案。
+- `evals/deep-research/results/v12/` 是经字段白名单重新构造的公开副本，不是原始 `records/` 的复制；导出时校验指标及排名不变，原始记录继续被 Git 忽略。
 - `evals/search/records/`、隔离 DSH_HOME、逐题回答和 Judge 结果只保存在本机，不提交 Git。
 - `evals/memory/records/`、`~/.dsh/memory-eval-workspaces/`、插件数据库和 DSH 会话均为本机运行数据，不提交 Git。
 - `app/data/memory/` 与 `public/data/memory/` 只保存经 `export-site.mjs` 裁剪后的公开指标，不包含标准答案、逐题回答、会话 ID、本机路径或原始会话。

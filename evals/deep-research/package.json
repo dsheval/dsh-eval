@@ -12,6 +12,7 @@
     "validate:condition": "node scripts/validate-condition-run.mjs",
     "compose:v12": "node scripts/compose-v12-refresh.mjs",
     "report:html": "node scripts/generate-v12-html-report.mjs",
+    "export:public": "node scripts/export-public-results.mjs",
     "run": "node src/run.mjs run",
     "report": "node src/run.mjs report",
     "test": "node --test test/*.test.mjs"
