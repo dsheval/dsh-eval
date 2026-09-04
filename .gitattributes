@@ -1,1 +1,2 @@
 evals/deep-research/scripts/*.sh text eol=lf
+evals/deep-research/results/v12/* text eol=lf

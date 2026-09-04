@@ -1,0 +1,603 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "dsh-research-eval-v12-r3-refresh",
+  "generatedAt": "2026-09-04T02:47:05.470Z",
+  "rankingRule": "准入 → 编造 → LF PASS/PARTIAL → 引用忠实度 → SF PASS → 恢复 → 负增量 → 效率",
+  "baseline": {
+    "condition": "C0",
+    "plugin": "none",
+    "totalRecords": 5,
+    "scorableRecords": 5,
+    "qualityEligible": true,
+    "statusCounts": {
+      "PASS": 2,
+      "FAIL": 1,
+      "PARTIAL": 2
+    },
+    "sf": {
+      "passed": 1,
+      "total": 2
+    },
+    "lf": {
+      "passed": 0,
+      "partial": 2,
+      "failed": 0,
+      "total": 2
+    },
+    "citationValidity": 0.7666666666666666,
+    "citationFaithfulness": 0.6666666666666666,
+    "keyClaimCoverage": 0.7000000000000001,
+    "recoveryPasses": 0,
+    "systemFailureRate": 0,
+    "fabricatedTotal": 0,
+    "upliftCounts": {
+      "NOT_COMPARABLE": 5
+    },
+    "efficiency": {
+      "meanLatencyMs": 427294.25,
+      "meanTokens": 33309.75,
+      "meanCostUsd": null
+    }
+  },
+  "leaderboard": [
+    {
+      "rank": 1,
+      "condition": "P5",
+      "plugin": "dsh-search-boost",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 4,
+        "PARTIAL": 1
+      },
+      "sf": {
+        "passed": 2,
+        "total": 2
+      },
+      "lf": {
+        "passed": 1,
+        "partial": 1,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.8333333333333333,
+      "citationFaithfulness": 0.8333333333333334,
+      "keyClaimCoverage": 0.8666666666666667,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 3,
+        "POSITIVE": 2
+      },
+      "efficiency": {
+        "meanLatencyMs": 334048.5,
+        "meanTokens": 34550.5,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "rank": 2,
+      "condition": "P4",
+      "plugin": "dsh-deep-research",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 3,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 2,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.7166666666666667,
+      "citationFaithfulness": 0.8333333333333334,
+      "keyClaimCoverage": 0.8666666666666667,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 3,
+        "POSITIVE": 2
+      },
+      "efficiency": {
+        "meanLatencyMs": 366125.5,
+        "meanTokens": 47201.75,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "rank": 3,
+      "condition": "P1",
+      "plugin": "hanai-investment-dsh",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 3,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 2,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.6866666666666666,
+      "citationFaithfulness": 0.75,
+      "keyClaimCoverage": 0.8000000000000002,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 3,
+        "POSITIVE": 2
+      },
+      "efficiency": {
+        "meanLatencyMs": 265475,
+        "meanTokens": 38700,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "rank": 4,
+      "condition": "P8",
+      "plugin": "dsh-science-workbench",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 2,
+        "FAIL": 1,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 1,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 1,
+      "citationFaithfulness": 0.75,
+      "keyClaimCoverage": 0.8000000000000002,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 4,
+        "POSITIVE": 1
+      },
+      "efficiency": {
+        "meanLatencyMs": 408959.5,
+        "meanTokens": 50010.75,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "rank": 5,
+      "condition": "P3",
+      "plugin": "dsh-scholar",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 2,
+        "FAIL": 1,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 1,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.9166666666666666,
+      "citationFaithfulness": 0.75,
+      "keyClaimCoverage": 0.8000000000000002,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 4,
+        "POSITIVE": 1
+      },
+      "efficiency": {
+        "meanLatencyMs": 1757152,
+        "meanTokens": 44496.75,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "rank": 6,
+      "condition": "P6",
+      "plugin": "dsh-deepresearch",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "FAIL": 2,
+        "PARTIAL": 2,
+        "PASS": 1
+      },
+      "sf": {
+        "passed": 0,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": null,
+      "citationFaithfulness": 0.75,
+      "keyClaimCoverage": 0.7333333333333334,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NEGATIVE": 1,
+        "NO_CLEAR": 4
+      },
+      "efficiency": {
+        "meanLatencyMs": 433434.25,
+        "meanTokens": 42135.25,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "rank": 7,
+      "condition": "P2",
+      "plugin": "dsh-science",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "FAIL": 1,
+        "PASS": 2,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 1,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.45,
+      "citationFaithfulness": 0.6666666666666666,
+      "keyClaimCoverage": 0.6666666666666666,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NEGATIVE": 1,
+        "POSITIVE": 1,
+        "NO_CLEAR": 3
+      },
+      "efficiency": {
+        "meanLatencyMs": 220770.25,
+        "meanTokens": 59362.25,
+        "meanCostUsd": null
+      }
+    }
+  ],
+  "allConditions": [
+    {
+      "condition": "C0",
+      "plugin": "none",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 2,
+        "FAIL": 1,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 1,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.7666666666666666,
+      "citationFaithfulness": 0.6666666666666666,
+      "keyClaimCoverage": 0.7000000000000001,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NOT_COMPARABLE": 5
+      },
+      "efficiency": {
+        "meanLatencyMs": 427294.25,
+        "meanTokens": 33309.75,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "condition": "P1",
+      "plugin": "hanai-investment-dsh",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 3,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 2,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.6866666666666666,
+      "citationFaithfulness": 0.75,
+      "keyClaimCoverage": 0.8000000000000002,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 3,
+        "POSITIVE": 2
+      },
+      "efficiency": {
+        "meanLatencyMs": 265475,
+        "meanTokens": 38700,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "condition": "P2",
+      "plugin": "dsh-science",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "FAIL": 1,
+        "PASS": 2,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 1,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.45,
+      "citationFaithfulness": 0.6666666666666666,
+      "keyClaimCoverage": 0.6666666666666666,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NEGATIVE": 1,
+        "POSITIVE": 1,
+        "NO_CLEAR": 3
+      },
+      "efficiency": {
+        "meanLatencyMs": 220770.25,
+        "meanTokens": 59362.25,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "condition": "P3",
+      "plugin": "dsh-scholar",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 2,
+        "FAIL": 1,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 1,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.9166666666666666,
+      "citationFaithfulness": 0.75,
+      "keyClaimCoverage": 0.8000000000000002,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 4,
+        "POSITIVE": 1
+      },
+      "efficiency": {
+        "meanLatencyMs": 1757152,
+        "meanTokens": 44496.75,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "condition": "P4",
+      "plugin": "dsh-deep-research",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 3,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 2,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.7166666666666667,
+      "citationFaithfulness": 0.8333333333333334,
+      "keyClaimCoverage": 0.8666666666666667,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 3,
+        "POSITIVE": 2
+      },
+      "efficiency": {
+        "meanLatencyMs": 366125.5,
+        "meanTokens": 47201.75,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "condition": "P5",
+      "plugin": "dsh-search-boost",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 4,
+        "PARTIAL": 1
+      },
+      "sf": {
+        "passed": 2,
+        "total": 2
+      },
+      "lf": {
+        "passed": 1,
+        "partial": 1,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 0.8333333333333333,
+      "citationFaithfulness": 0.8333333333333334,
+      "keyClaimCoverage": 0.8666666666666667,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 3,
+        "POSITIVE": 2
+      },
+      "efficiency": {
+        "meanLatencyMs": 334048.5,
+        "meanTokens": 34550.5,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "condition": "P6",
+      "plugin": "dsh-deepresearch",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "FAIL": 2,
+        "PARTIAL": 2,
+        "PASS": 1
+      },
+      "sf": {
+        "passed": 0,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": null,
+      "citationFaithfulness": 0.75,
+      "keyClaimCoverage": 0.7333333333333334,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NEGATIVE": 1,
+        "NO_CLEAR": 4
+      },
+      "efficiency": {
+        "meanLatencyMs": 433434.25,
+        "meanTokens": 42135.25,
+        "meanCostUsd": null
+      }
+    },
+    {
+      "condition": "P8",
+      "plugin": "dsh-science-workbench",
+      "totalRecords": 5,
+      "scorableRecords": 5,
+      "qualityEligible": true,
+      "statusCounts": {
+        "PASS": 2,
+        "FAIL": 1,
+        "PARTIAL": 2
+      },
+      "sf": {
+        "passed": 1,
+        "total": 2
+      },
+      "lf": {
+        "passed": 0,
+        "partial": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "citationValidity": 1,
+      "citationFaithfulness": 0.75,
+      "keyClaimCoverage": 0.8000000000000002,
+      "recoveryPasses": 0,
+      "systemFailureRate": 0,
+      "fabricatedTotal": 0,
+      "upliftCounts": {
+        "NO_CLEAR": 4,
+        "POSITIVE": 1
+      },
+      "efficiency": {
+        "meanLatencyMs": 408959.5,
+        "meanTokens": 50010.75,
+        "meanCostUsd": null
+      }
+    }
+  ]
+}
