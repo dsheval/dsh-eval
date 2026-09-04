@@ -1,3 +1,4 @@
+import { ReportStatus } from './ReportElements';
 import memoryBenchmark from '../data/memory/locomo20-2026-08-28.json';
 
 const evaluationSteps = [
@@ -26,14 +27,11 @@ const currentTestSteps = [
 export default function EvaluationEvidence() {
   return (
     <section className="proof-section" id="result-evidence">
-      <div className="proof-summary-compact">
-        <div><h2>Level 03 · 已完成测试</h2></div>
-        <p>0 次评测故障，结果数据与评测代码已公开；关键结果尚待独立环境复测。</p>
-      </div>
+      <ReportStatus evidence="0 次评测故障，结果数据与评测代码已公开。" limitation="同一组 20 道题、两种提示方式；结果仅适用于本轮环境，部分 Agent 共享核心实现。" />
 
       <details className="verification-disclosure" id="evaluation-pipeline">
         <summary>
-          <div><span>评测与验证说明</span><b>查看测试如何执行、复查与分级</b></div>
+          <div><span>评测与验证说明</span><b>测试方法、证据与适用范围</b></div>
           <i aria-hidden="true">+</i>
         </summary>
         <div className="verification-content">

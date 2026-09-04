@@ -21,6 +21,8 @@
   --mono: 'SFMono-Regular', 'Roboto Mono', Consolas, monospace;
   --section-title-size: clamp(30px, 3vw, 40px);
   --section-space: clamp(56px, 6vw, 88px);
+  --page-end-space: clamp(48px, 5vw, 64px);
+  --hero-block-space: clamp(32px, 3.5vw, 48px);
 }
 
 * {
@@ -4501,16 +4503,13 @@ main {
 .inner-page-hero {
   background: var(--paper);
   border-bottom: 1px solid var(--line);
-  padding: clamp(66px, 7vw, 96px) var(--page-gutter);
+  padding: var(--hero-block-space) var(--page-gutter);
   position: relative;
 }
 
 .inner-page-breadcrumbs {
   color: var(--muted);
-  left: var(--page-gutter);
-  position: absolute;
-  right: var(--page-gutter);
-  top: 24px;
+  margin-bottom: 16px;
 }
 
 .inner-page-breadcrumbs ol {
@@ -4548,13 +4547,15 @@ main {
   max-width: 1040px;
 }
 
+.homepage-hero-copy .product-label,
 .inner-page-hero-eyebrow {
   color: var(--pine);
   font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: 0.09em;
-  margin: 0 0 30px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  margin: 0 0 24px;
   text-transform: uppercase;
 }
 
@@ -4617,11 +4618,7 @@ main {
 
 @media (max-width: 720px) {
   .inner-page-hero {
-    padding: 58px 20px;
-  }
-
-  .inner-page-breadcrumbs {
-    top: 18px;
+    padding-inline: 20px;
   }
 
   .inner-page-hero h1 {
@@ -7595,26 +7592,6 @@ main {
   white-space: nowrap;
 }
 
-.minimal-results-note {
-  border-bottom: 1px solid var(--line-soft);
-  display: grid;
-  gap: 28px;
-  grid-template-columns: 150px minmax(0, 620px);
-  margin-top: 46px;
-  padding-bottom: 22px;
-}
-
-.minimal-results-note strong {
-  font-size: 14px;
-}
-
-.minimal-results-note p {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.7;
-  margin: 0;
-}
-
 @media (max-width: 1020px) {
   .home-evaluation-shell {
     max-width: 100%;
@@ -7715,11 +7692,6 @@ main {
   .minimal-result-row > strong {
     grid-column: auto;
   }
-
-  .minimal-results-note {
-    gap: 12px;
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Homepage composition · thesis + evidence + one evaluation system */
@@ -7743,10 +7715,6 @@ main {
 .homepage-hero-copy {
   max-width: 520px;
   padding-top: 0;
-}
-
-.homepage-hero-copy .product-label {
-  margin-bottom: 22px;
 }
 
 .homepage-hero-copy h1 {
@@ -7777,17 +7745,16 @@ main {
 .homepage-hero-actions a {
   align-items: center;
   display: inline-flex;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 750;
-  gap: 24px;
-  justify-content: space-between;
+  gap: 8px;
+  justify-content: center;
   min-height: 42px;
 }
 
 .homepage-primary-link {
   background: var(--pine);
   color: var(--white);
-  min-width: 148px;
   padding: 0 15px;
 }
 
@@ -8033,7 +8000,7 @@ main {
 .home-product-page .home-product-relationship p {
   border-left: 2px solid var(--pine);
   font-family: var(--sans);
-  font-size: clamp(22px, 2vw, 28px);
+  font-size: clamp(24px, 2.5vw, 32px);
   font-weight: 600;
   letter-spacing: -0.015em;
   line-height: 1.6;
@@ -8198,6 +8165,9 @@ main {
 }
 
 .homepage-dossier .dossier-head {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
   padding-bottom: 31px;
 }
 
@@ -8228,7 +8198,7 @@ main {
 
 .home-product-page .home-product-relationship {
   border-top: 0;
-  padding-bottom: clamp(48px, 5vw, 72px);
+  padding-bottom: var(--page-end-space);
   padding-top: clamp(42px, 4vw, 60px);
 }
 
@@ -8371,11 +8341,11 @@ main {
 .faq-list summary > span {
   color: var(--pine);
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .faq-list summary h3 {
-  font-size: 17px;
+  font-size: 18px;
   letter-spacing: -0.02em;
   margin: 0;
 }
@@ -8394,37 +8364,11 @@ main {
 
 .faq-list details > p {
   color: var(--muted);
+  font-size: 16px;
   line-height: 1.8;
   margin: -4px 44px 0 58px;
   max-width: 760px;
   padding: 0 0 28px;
-}
-
-.faq-boundary {
-  align-items: center;
-  background: var(--mint);
-  display: flex;
-  gap: 32px;
-  justify-content: space-between;
-  padding: 28px var(--page-gutter);
-}
-
-.faq-boundary p {
-  color: var(--muted);
-  line-height: 1.7;
-  margin: 0;
-}
-
-.faq-boundary p strong {
-  color: var(--ink);
-  margin-right: 10px;
-}
-
-.faq-boundary a {
-  color: var(--pine);
-  font-size: 12px;
-  font-weight: 750;
-  white-space: nowrap;
 }
 
 @media (max-width: 1050px) {
@@ -8452,8 +8396,7 @@ main {
 @media (max-width: 720px) {
   .method-principles,
   .faq-hero,
-  .faq-list,
-  .faq-boundary {
+  .faq-list {
     padding-left: 20px;
     padding-right: 20px;
   }
@@ -8495,11 +8438,6 @@ main {
 
   .faq-list {
     gap: 32px;
-  }
-
-  .faq-boundary {
-    align-items: flex-start;
-    flex-direction: column;
   }
 }
 
@@ -8577,8 +8515,13 @@ main {
 
 .homepage-hero-inner {
   min-height: 520px;
-  padding-bottom: 86px;
-  padding-top: 82px;
+  padding-block: var(--hero-block-space);
+}
+
+@media (min-width: 1051px) {
+  .homepage-hero-copy {
+    transform: translateY(-16px);
+  }
 }
 
 .homepage-hero-copy h1,
@@ -8590,7 +8533,6 @@ main {
   line-height: 1.03;
 }
 
-.homepage-hero-copy .product-label,
 .methodology-hero .product-label,
 .faq-hero .product-label {
   font-size: 13px;
@@ -8606,8 +8548,7 @@ main {
 
 .homepage-primary-link,
 .homepage-secondary-link,
-.method-cta a,
-.faq-boundary a {
+.method-cta a {
   font-family: var(--mono);
   letter-spacing: 0.035em;
 }
@@ -8682,12 +8623,6 @@ main {
   background: var(--white);
 }
 
-.minimal-results-note {
-  background: var(--paper);
-  margin: 0;
-  padding: 28px var(--page-gutter);
-}
-
 .methodology-hero,
 .faq-hero {
   isolation: isolate;
@@ -8714,8 +8649,7 @@ main {
   background: var(--pine-deep);
 }
 
-.method-cta,
-.faq-boundary {
+.method-cta {
   background: var(--mint);
 }
 
@@ -8797,7 +8731,6 @@ main {
 }
 
 @media (max-width: 720px) {
-  .homepage-hero-inner,
   .methodology-overview-page .methodology-hero,
   .minimal-page-header {
     padding-bottom: 58px;
@@ -8813,7 +8746,6 @@ main {
     padding-right: 20px;
   }
 
-  .minimal-results-note,
   .report-breadcrumb {
     padding-left: 20px;
     padding-right: 20px;
@@ -9553,9 +9485,9 @@ main {
   display: flex;
   flex-wrap: wrap;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 14px;
   gap: 10px 18px;
-  letter-spacing: 0.055em;
+  letter-spacing: 0.02em;
 }
 
 .result-report-kicker time {
@@ -9590,9 +9522,9 @@ main {
   color: var(--pine);
   display: inline-flex;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 750;
-  gap: 24px;
+  gap: 8px;
   letter-spacing: 0.025em;
   margin-top: 30px;
 }
@@ -9610,17 +9542,18 @@ main {
 .result-report-finding small {
   color: var(--pine);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 750;
-  letter-spacing: 0.055em;
+  letter-spacing: 0.02em;
+  line-height: 1.6;
 }
 
 .result-report-finding strong {
-  font-family: var(--serif);
-  font-size: clamp(46px, 4.8vw, 64px);
-  font-weight: 550;
-  letter-spacing: -0.06em;
-  line-height: 0.95;
+  font-family: var(--sans);
+  font-size: clamp(24px, 2.2vw, 32px);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.35;
   margin: 22px 0 9px;
 }
 
@@ -9687,6 +9620,11 @@ main {
 ) {
   padding-bottom: var(--section-space);
   padding-top: var(--section-space);
+}
+
+.content-page > .faq-list,
+.content-page > .minimal-results-list {
+  padding-bottom: var(--page-end-space);
 }
 
 .content-page .method-contract-rules {
@@ -9791,25 +9729,191 @@ main {
   }
 
   .result-report-finding {
-    display: grid;
-    gap: 7px 20px;
-    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
     padding: 22px 20px;
   }
 
-  .result-report-finding strong {
-    align-self: center;
-    grid-column: 2;
-    grid-row: 1 / span 3;
-    margin: 0;
-  }
+  .result-report-finding strong { margin: 4px 0 0; }
+  .result-report-finding small { margin-top: 5px; }
 
-  .result-report-finding p {
-    grid-column: 1;
-  }
+}
 
-  .result-report-finding small {
-    grid-column: 1;
-    margin-top: 5px;
-  }
+/* Deep Research: a compact summary with progressively disclosed evidence. */
+.research-benchmark, .research-evidence { padding: 36px var(--page-gutter) 52px; }
+.research-overview { background: var(--white); border-top: 2px solid var(--ink); }
+.research-overview-head, .research-plugin-summary { display: grid; grid-template-columns: minmax(220px, 1.4fr) minmax(120px, .8fr) minmax(200px, 1.2fr) 24px; align-items: center; column-gap: 24px; padding: 22px 24px; }
+.research-overview-head { color: var(--muted); font-size: 14px; border-bottom: 1px solid var(--line); }
+.research-overview-head small { margin-left: 8px; font-size: 14px; font-weight: 400; }
+.research-plugin { border-bottom: 1px solid var(--line-soft); }
+.research-plugin-baseline { border-bottom-color: var(--line); }
+.research-plugin-summary { list-style: none; cursor: pointer; font-size: 16px; min-height: 80px; }
+.research-plugin-summary::-webkit-details-marker, .research-task > summary::-webkit-details-marker { display: none; }
+.research-plugin-summary::marker, .research-task > summary::marker { content: ''; }
+.research-plugin-name { overflow-wrap: anywhere; }
+.research-plugin-name strong { font-size: 16px; font-weight: 600; }
+.research-plugin-name small { display: block; margin-top: 6px; color: var(--muted); font-size: 13px; }
+.research-report-result { color: var(--muted); line-height: 1.7; }
+.research-plugin-summary:hover .research-plugin-name strong { color: var(--pine); }
+.research-expand { font-size: 20px; color: var(--pine); font-weight: 400; text-align: center; transition: transform .15s; }
+.research-plugin[open] > summary > .research-expand, .research-task[open] > summary > .research-expand { transform: rotate(45deg); }
+.research-plugin[open] > summary { border-bottom: 1px solid var(--line-soft); }
+.research-mobile-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.research-plugin-detail { padding: 28px 32px 32px; background: var(--paper); }
+.research-plugin-detail h3 { font-size: 16px; margin: 0 0 18px; }
+.research-task > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 1fr 140px 24px; align-items: center; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--line-soft); font-size: 15px; }
+.research-task > summary:hover { color: var(--pine); }
+.research-task > summary small { display: block; margin-top: 6px; color: var(--muted); font-size: 13px; }
+.research-task-derived { margin-top: 10px; border-top: 1px dashed var(--line); }
+.research-task-status { color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.research-task-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #89938f; flex: 0 0 6px; }
+.research-task-status.status-pass::before { background: var(--pine); }
+.research-task-status.status-fail::before, .research-task-status.status-system_error::before { background: var(--caution); }
+.research-task-detail { padding: 8px 20px 16px; border-left: 2px solid var(--line); margin: 16px 0; }
+.research-plugin-detail p { font-size: 14px; color: var(--muted); line-height: 1.8; }
+.research-plugin-metrics { margin-top: 30px; }
+.research-uplift strong { color: var(--ink); font-weight: 600; }
+.research-uplift > span { padding: 0 8px; color: var(--line); }
+.research-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin: 20px 0; }
+.research-metrics dt { color: var(--muted); font-size: 14px; }
+.research-metrics dd { margin: 8px 0 0; font-size: 18px; font-variant-numeric: tabular-nums; }
+.research-table-note { color: var(--muted); font-size: 14px; line-height: 1.8; margin: 0; padding: 18px 0; }
+.research-evidence { padding-top: 0; }
+.research-method-copy p { margin: 0 0 18px; font-size: 16px; color: var(--muted); line-height: 1.9; }
+.research-method-links { display: flex; flex-wrap: wrap; gap: 16px 28px; }
+.research-method-links a { color: var(--pine); font-size: 14px; text-decoration: underline; text-underline-offset: 4px; }
+.result-report-entry + .result-report-entry { border-top: 1px solid var(--line); }
+@media (max-width: 900px) {
+  .research-overview-head, .research-plugin-summary { grid-template-columns: minmax(165px, 1.25fr) minmax(90px, .65fr) minmax(145px, 1.1fr) 20px; gap: 16px; padding: 20px; }
+  .research-plugin-summary, .research-plugin-name strong { font-size: 14px; }
+  .research-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .research-report .inner-page-hero h1 { font-size: clamp(28px, 8.6vw, 40px); }
+  .research-benchmark, .research-evidence { padding-left: 20px; padding-right: 20px; }
+  .research-overview-head { display: none; }
+  .research-plugin-summary { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr) 20px; row-gap: 18px; column-gap: 14px; padding: 22px 16px; }
+  .research-plugin-name { grid-column: 1 / 3; }
+  .research-plugin-name strong { font-size: 16px; }
+  .research-plugin-summary > .research-expand { grid-column: 3; grid-row: 1; }
+  .research-answer-result { grid-column: 1; grid-row: 2; }
+  .research-report-result { grid-column: 2 / 4; grid-row: 2; }
+  .research-mobile-label { display: block; position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+  .research-plugin-detail { padding: 24px 16px; }
+  .research-task > summary { grid-template-columns: minmax(0, 1fr) 90px 16px; gap: 12px; font-size: 14px; }
+  .research-task-detail { padding-left: 12px; padding-right: 0; }
+  .research-task > summary small { font-size: 12px; }
+  .research-uplift > span { padding: 0 3px; }
+  .research-metrics { gap: 20px 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .research-expand { transition: none; }
+}
+
+/* Shared report structure: results, public materials, verification, next links. */
+.benchmark-report .memory-benchmark,
+.benchmark-report .research-benchmark { padding: 36px var(--page-gutter) 28px; }
+.report-results-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
+.report-results-heading .section-label { margin: 0 0 14px; }
+.report-results-heading .section-title { margin: 0; }
+.report-sample-note { color: var(--muted); font-size: 14px; }
+.report-conclusion { display: flex; align-items: baseline; gap: 14px; margin: 28px 0 22px; }
+.report-conclusion > span { color: var(--pine); font-size: 11px; font-weight: 800; letter-spacing: .08em; flex-shrink: 0; }
+.report-conclusion > strong { font-size: 16px; font-weight: 600; line-height: 1.8; }
+.benchmark-report .report-result-surface { background: var(--white); border-top: 2px solid var(--ink); box-shadow: none; }
+.benchmark-report .memory-chart { padding: 0 24px 22px; }
+.report-chart-toolbar { display: flex; align-items: center; gap: 16px 24px; flex-wrap: wrap; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.report-chart-toolbar .memory-metric-switch { flex-shrink: 0; }
+.report-chart-toolbar > p { flex: 1 1 260px; color: var(--muted); font-size: 13px; line-height: 1.7; margin: 0; }
+.benchmark-report .memory-chart-row { min-height: 64px; margin: 0; padding: 16px 0; border-bottom: 1px solid var(--line-soft); }
+.benchmark-report .memory-chart-row > strong { font-size: 14px; font-weight: 600; }
+.report-resources { margin: 0 var(--page-gutter) 32px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 16px 0; }
+.report-resource-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.report-resource-bar h2 { font-size: 15px; font-weight: 600; margin: 0; }
+.report-resource-bar > div, .report-extra-resources > div { display: flex; flex-wrap: wrap; gap: 12px 28px; }
+.report-resources a, .report-next-links a { color: var(--pine); font-size: 14px; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; }
+.report-resources a:hover, .report-next-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.report-extra-resources { margin-top: 8px; color: var(--muted); font-size: 13px; }
+.report-extra-resources > summary { cursor: pointer; width: fit-content; padding: 12px 0; }
+.report-extra-resources > div { padding: 4px 0 8px; }
+.benchmark-report .proof-section, .benchmark-report .research-evidence { padding: 0 var(--page-gutter) 40px; }
+.report-verification-summary { border-top: 1px solid var(--line); padding: 24px 0; }
+.report-verification-summary > div { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 20px; }
+.report-verification-summary > div + div { margin-top: 14px; }
+.report-verification-summary h2, .report-verification-summary h3 { margin: 0; font-size: 14px; line-height: 1.8; font-weight: 600; }
+.report-verification-summary h2 { color: var(--pine); }
+.report-verification-summary p { color: var(--muted); font-size: 14px; line-height: 1.8; margin: 0; }
+.benchmark-report .verification-disclosure { border-top: 1px solid var(--line); }
+.benchmark-report .verification-disclosure > summary { padding: 16px 0; }
+.report-next-links { margin: 0 var(--page-gutter); padding: 20px 0 36px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
+@media (max-width: 600px) {
+  .benchmark-report .inner-page-hero h1 { font-size: clamp(28px, 8.6vw, 40px); }
+  .report-results-heading { flex-direction: column; align-items: start; }
+  .benchmark-report .memory-benchmark, .benchmark-report .research-benchmark { padding: 28px 20px 24px; }
+  .report-conclusion { display: block; margin-top: 24px; }
+  .report-conclusion > span { display: block; margin-bottom: 8px; }
+  .benchmark-report .memory-chart { padding: 0 16px 20px; }
+  .benchmark-report .memory-chart-row { grid-template-columns: 120px minmax(0, 1fr); }
+  .report-chart-toolbar { gap: 12px; }
+  .report-chart-toolbar .memory-metric-switch { width: 100%; }
+  .report-chart-toolbar .memory-metric-switch button { flex: 1; }
+  .report-resources { margin-left: 20px; margin-right: 20px; }
+  .report-resource-bar > div { gap: 20px; }
+  .benchmark-report .proof-section, .benchmark-report .research-evidence { padding: 0 20px 32px; }
+  .report-verification-summary > div { grid-template-columns: 1fr; gap: 4px; }
+  .report-next-links { margin: 0 20px; }
+}
+
+/* Two published evaluations share one stable, manually controlled card stack. */
+.evaluation-carousel-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 10px 16px 0; }
+.evaluation-carousel-labels { display: flex; gap: 20px; }
+.evaluation-carousel-labels button { padding: 10px 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-size: 14px; min-height: 44px; }
+.evaluation-carousel-labels button[aria-pressed="true"] { color: var(--pine); border-bottom-color: var(--pine); font-weight: 650; }
+.evaluation-carousel-pagination { display: flex; align-items: center; gap: 8px; }
+.evaluation-carousel-pagination > span { color: var(--muted); font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; margin-right: 8px; white-space: nowrap; }
+.evaluation-carousel-pagination button { background: transparent; border: 1px solid var(--line); color: var(--pine); width: 44px; height: 44px; font-size: 20px; }
+.evaluation-carousel-pagination button:hover { background: var(--sage-section); }
+.evaluation-carousel button:focus-visible { outline: 2px solid var(--pine); outline-offset: 4px; }
+.evaluation-carousel-stage { display: grid; touch-action: pan-y; }
+.evaluation-carousel-card { grid-area: 1 / 1; min-width: 0; visibility: hidden; pointer-events: none; }
+.evaluation-carousel-card[data-active="true"] { visibility: visible; pointer-events: auto; animation: evaluation-card-arrive 240ms ease-out; }
+.evaluation-carousel-card .homepage-dossier { height: 100%; display: flex; flex-direction: column; }
+.evaluation-carousel-card .dossier-notch { display: none; }
+.evaluation-carousel-card .dossier-link { margin-top: auto; }
+@keyframes evaluation-card-arrive { from { opacity: .35; transform: translateX(12px) rotate(.4deg); } to { opacity: 1; transform: none; } }
+@media (max-width: 420px) {
+  .evaluation-carousel-controls { flex-wrap: wrap; gap: 8px; }
+  .evaluation-carousel-labels { gap: 16px; }
+  .evaluation-carousel-pagination { margin-left: auto; gap: 6px; }
+  .evaluation-carousel-pagination > span { margin-right: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .evaluation-carousel-card[data-active="true"] { animation: none; }
+}
+
+/* Method overview: protocol links and a short shared introduction. */
+.method-overview-body { padding: 0 var(--page-gutter) var(--page-end-space); }
+.method-overview-section { padding: 40px 0; }
+.method-overview-section > header { margin-bottom: 24px; }
+.method-overview-section h2 { font-size: clamp(24px, 2.4vw, 30px); line-height: 1.4; letter-spacing: -.03em; margin: 0; }
+.method-overview-section > header > p { color: var(--muted); font-size: 15px; line-height: 1.8; margin: 10px 0 0; max-width: 720px; }
+.method-capabilities { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.method-capabilities article { border-top: 2px solid var(--ink); padding: 20px 0 0; display: flex; flex-direction: column; align-items: start; }
+.method-capabilities h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.method-capabilities p { color: var(--muted); font-size: 15px; line-height: 1.8; margin: 12px 0; }
+.method-capabilities a, .method-results-link { display: inline-flex; align-items: center; gap: 18px; min-height: 44px; color: var(--pine); font-size: 14px; font-weight: 600; }
+.method-capabilities a { margin-top: auto; }
+.method-capabilities a:hover, .method-results-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.method-overview-note { border-top: 1px solid var(--line); padding: 28px 0 0; scroll-margin-top: 100px; }
+.method-overview-note > p { max-width: 76ch; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.9; }
+.method-results-link { margin-top: 24px; }
+@media (min-width: 1200px) {
+  .method-overview-section { display: grid; grid-template-columns: 260px minmax(0, 1fr); column-gap: clamp(40px, 5vw, 80px); padding: 48px 0; }
+  .method-overview-section > header { margin-bottom: 0; }
+  .method-overview-section > header > p { max-width: 28ch; }
+}
+@media (max-width: 600px) {
+  .method-overview-page .inner-page-hero h1 { font-size: clamp(28px, 8.6vw, 40px); }
+  .method-overview-body { padding: 0 20px var(--page-end-space); }
+  .method-overview-section { padding: 30px 0; }
+  .method-capabilities { grid-template-columns: 1fr; gap: 24px; }
 }

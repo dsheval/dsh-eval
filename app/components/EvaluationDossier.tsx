@@ -17,24 +17,24 @@ export default function EvaluationDossier({ className, compact = false, reportHr
       <span className="dossier-notch notch-left" aria-hidden="true" />
       <span className="dossier-notch notch-right" aria-hidden="true" />
       <header className="dossier-head">
-        <span>RUN #260829–021</span>
-        <span>LEVEL 03 · 已完成测试</span>
+        <span>发布于 {benchmark.evaluationDay}</span>
+        <span>已完成测试</span>
       </header>
 
       <div className="dossier-task">
-        <span className="field-label">最新评测 · 跨会话记忆</span>
-        <p>换一个会话后，Agent 能否找回之前的信息？</p>
+        <span className="field-label">跨会话记忆</span>
+        <p>换一个会话，Agent 还记得吗？</p>
       </div>
 
       <div className="dossier-verdict">
         <div>
-          <span className="field-label">关键结果</span>
-          <h2>{improvedWithGuidance} / {benchmark.pluginCount}</h2>
-          <p>明确提示后得分上升</p>
+          <span className="field-label">本轮观察</span>
+          <h2>{improvedWithGuidance} 个 Agent</h2>
+          <p>明确提示使用记忆后，正确率均提升</p>
         </div>
         <dl className="confidence-block">
-          <div><dt>每种模式</dt><dd>{benchmark.sampleSizePerTrack} 题</dd></div>
-          <div><dt>任务记录</dt><dd>{benchmark.totalPluginTaskRecords} 条</dd></div>
+          <div><dt>参评 Agent</dt><dd>{benchmark.pluginCount} 个</dd></div>
+          <div><dt>每组题目</dt><dd>{benchmark.sampleSizePerTrack} 道</dd></div>
         </dl>
       </div>
 

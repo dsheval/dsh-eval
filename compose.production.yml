@@ -6,6 +6,11 @@ services:
     image: dsh-eval-web:latest
     container_name: dsh-eval-web
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     expose:
       - "3000"
     healthcheck:

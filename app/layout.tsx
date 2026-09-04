@@ -18,7 +18,11 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: '/dsheval/favicon.svg',
+    icon: [
+      { url: '/dsheval/favicon-a.png', type: 'image/png', sizes: '32x32' },
+      { url: '/dsheval/favicon-a.svg', type: 'image/svg+xml', sizes: 'any' },
+    ],
+    apple: { url: '/dsheval/apple-touch-icon-a.png', sizes: '180x180', type: 'image/png' },
   },
   openGraph: {
     url: '/dsheval',

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "dsh-research-eval-v12-r3-refresh",
+  "generatedAt": "2026-09-04T02:47:05.470Z",
+  "recordCount": 40,
+  "files": {
+    "results.json": {
+      "bytes": 1241890,
+      "sha256": "295ceaa98ec3aae9785dbee985a4122a28fd7c7a849e671fd06fc9d68346f1f2"
+    },
+    "leaderboard.json": {
+      "bytes": 13600,
+      "sha256": "72365ffd932cef3d32fff509bddb652355bc8bda5e127508eaa35ed0aa5cd100"
+    },
+    "leaderboard.html": {
+      "bytes": 621706,
+      "sha256": "52b664d7587e7c5d1a6990c14d652dd1ab5267c5f793cf6e9d8fd4d1147c2464"
+    },
+    "process-monitoring.html": {
+      "bytes": 610868,
+      "sha256": "ea9853011153be17a6025e52d8dec0376ddcdc684ae2a3e0d092d52664209ee8"
+    }
+  }
+}

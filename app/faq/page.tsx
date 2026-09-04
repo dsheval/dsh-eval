@@ -69,7 +69,7 @@ export default function FaqPage() {
       <main id="main-content" className="content-page inner-page faq-page">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
         <InnerPageHero
-          eyebrow="QUESTIONS / ANSWERS"
+          eyebrow="FAQ"
           title="关于 DSHEval，先回答清楚。"
           description="这里集中回答评测范围、公平性、复查方式和验证等级。具体数字与限制，请以对应测试报告为准。"
         />
@@ -86,10 +86,6 @@ export default function FaqPage() {
           </div>
         </section>
 
-        <aside className="faq-boundary">
-          <p><strong>没有找到答案？</strong> 与某次测试相关的问题，请从对应结果页进入公开材料和代码仓库。</p>
-          <a href="/dsheval/results">查看评测结果 <span aria-hidden="true">→</span></a>
-        </aside>
       </main>
       <SiteFooter />
     </>
