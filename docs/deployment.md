@@ -7,9 +7,9 @@
 固定流程：功能分支 → GitHub PR → 检查与审查 → 合并 `main` → 确认合并提交 CI 通过 → 经授权在服务器发布该提交。
 
 - 不从未合并分支发布生产，不用本地源码压缩包替换正式工作目录。
-- `.github/workflows/ci.yml` 检查依赖安全、lint、类型、三个评测套件、应用构建、Compose 配置和完整容器。CI 只做验证，不持有服务器凭证，也不自动部署。
-- npm 审计必须检查完整依赖树；部分 `devDependencies` 会进入服务端构建。任何 high / critical 漏洞或审计异常都需要先处理，不能跳过。
-- `scripts/smoke-production.mjs` 验证六个页面、生产 JS/CSS、公开结果 JSON 与 sitemap。必须对完整 Nginx + Node 服务运行，不能只对裸 Vinext 端口运行。
+- `.github/workflows/ci.yml` 检查依赖安全、lint、类型、三个评测套件、应用构建、Compose 配置和完整容器。CI 只做验证，不持有服务器凭证，也不自动部署。功能改动由 PR 触发检查，主分支 push 再验证合并提交；同一分支的新提交会取消旧检查。
+- npm 审计必须检查完整依赖树；部分 `devDependencies` 会进入服务端构建。任何 high / critical 漏洞或审计异常都需要先处理，不能跳过。安装使用 `--no-audit` 避免隐式重复审计，随后明确执行完整审计；每个审计请求最多等待 5 分钟、重试 1 次，服务不可用时仍阻断发布。
+- `scripts/smoke-production.mjs` 验证八个页面、生产 JS/CSS、品牌图标、公开结果 JSON 与 sitemap。必须对完整 Nginx + Node 服务运行，不能只对裸 Vinext 端口运行。
 - 本机缺少 Deep Research 私有题集时，对应测试会跳过，不能将其写成已通过。私有题集及任何秘密不得上传 GitHub 或 CI。
 
 ## 服务器目录边界
@@ -67,8 +67,10 @@ sudo -n docker exec -i dsh-eval-web node --input-type=module < scripts/smoke-pro
 
 1. 容器为 `healthy`，镜像 revision 标签与预定发布提交相同。
 2. `git status --porcelain` 为空；HEAD 位于 `main` 且与目标远端提交一致。
-3. 六页、JS/CSS、JSON、sitemap 及公网 HTTPS 可用。
+3. 八页、JS/CSS、品牌图标、JSON、sitemap 及公网 HTTPS 可用。
 4. Top100 与网关保持运行；清理本次独立候选容器，不删除回滚镜像和备份。
+
+容器使用 `json-file` 日志驱动，单文件上限 10 MB，最多保留 3 个文件。发布后检查容器日志配置是否生效；这不替代发布记录和回滚镜像。
 
 ## 失败与回滚
 

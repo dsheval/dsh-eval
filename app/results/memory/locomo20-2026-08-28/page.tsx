@@ -3,9 +3,9 @@ import EvaluationEvidence from '@/app/components/EvaluationEvidence';
 import MemoryBenchmark from '@/app/components/MemoryBenchmark';
 import { InnerPageHero } from '@/app/components/InnerPageHero';
 import benchmark from '@/app/data/memory/locomo20-2026-08-28.json';
-import { Arrow, SiteFooter, SiteHeader } from '@/app/components/SiteChrome';
+import { SiteFooter, SiteHeader } from '@/app/components/SiteChrome';
+import { ReportResources, ReportNextLinks } from '@/app/components/ReportElements';
 
-const TOP100_URL = 'https://dsheval.ai/';
 const RESULT_URL = '/dsheval/results/memory/locomo20-2026-08-28';
 
 export const metadata: Metadata = {
@@ -48,10 +48,10 @@ export default function MemoryResultPage() {
     <>
       <a className="skip-link" href="#main-content">跳到主要内容</a>
       <SiteHeader active="results" />
-      <main id="main-content" className="content-page report-page">
+      <main id="main-content" className="content-page report-page benchmark-report">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(resultJsonLd) }} />
         <InnerPageHero
-          eyebrow="MEMORY BENCHMARK / 2026-08-28"
+          eyebrow="MEMORY EVALUATION · 2026-08-28"
           title={<><span className="title-phrase">换一个会话，</span><wbr /><span className="title-phrase">Agent 还</span><wbr /><span className="title-phrase">记得吗？</span></>}
           description={`同一批 Agent 完成同一组 ${benchmark.sampleSizePerTrack} 道题，对比用户不提醒和明确提醒使用记忆两种情况。`}
           breadcrumbs={[
@@ -61,15 +61,10 @@ export default function MemoryResultPage() {
           ]}
         />
         <MemoryBenchmark />
+        <ReportResources dataUrl="/dsheval/data/memory/locomo20-2026-08-28.json" codeUrl="https://github.com/dsheval/dsh-eval/tree/main/evals/memory" />
         <EvaluationEvidence />
 
-        <section className="top100-section top100-compact" id="agent-pool">
-          <div className="top100-copy">
-            <h2 className="section-title">发现值得安装的 DSH 插件</h2>
-            <p>按热度、增长、活跃度与安装证据持续更新；排行不等于能力评测。</p>
-            <a className="top100-direct-link" href={TOP100_URL} target="_blank" rel="noreferrer"><span>打开插件市场</span><Arrow /></a>
-          </div>
-        </section>
+        <ReportNextLinks />
       </main>
       <SiteFooter />
     </>

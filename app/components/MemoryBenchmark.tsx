@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ReportHeading, ReportConclusion } from './ReportElements';
 import benchmark from '../data/memory/locomo20-2026-08-28.json';
 
 type Protocol = 'passive' | 'guided';
@@ -53,26 +54,20 @@ export default function MemoryBenchmark() {
 
   return (
     <section className="memory-benchmark" id="memory-benchmark" aria-labelledby="memory-benchmark-title">
-      <div className="memory-benchmark-hero">
-        <div>
-          <p className="section-label">RESULTS / TWO TRACKS</p>
-          <h2 className="section-title" id="memory-benchmark-title">双轨结果对比</h2>
-        </div>
-      </div>
+      <ReportHeading id="memory-benchmark-title" title="双轨结果对比" sample={`${benchmark.sampleSizePerTrack} 道题 · 两种提示方式`} />
+      <ReportConclusion>明确提示后，{benchmark.pluginCount} 个 Agent 全部提升，增幅为 10–60 个百分点。</ReportConclusion>
 
-      <div className="memory-results-heading">
-        <p className="memory-result-readout"><span>结论</span><strong>明确提示后，{benchmark.pluginCount} 个 Agent 全部提升，增幅为 10–60 个百分点。</strong></p>
-        <div className="memory-metric-switch" role="group" aria-label="选择对比指标">
-          {(Object.keys(metricConfig) as Metric[]).map((name) => (
-            <button key={name} type="button" className={metric === name ? 'active' : undefined} aria-pressed={metric === name} onClick={() => setMetric(name)}>
-              {metricConfig[name].label}
-            </button>
-          ))}
+      <div className="memory-chart report-result-surface" aria-label={`${config.label}两种提示方式对比`}>
+        <div className="report-chart-toolbar">
+          <div className="memory-metric-switch" role="group" aria-label="选择对比指标">
+            {(Object.keys(metricConfig) as Metric[]).map((name) => (
+              <button key={name} type="button" className={metric === name ? 'active' : undefined} aria-pressed={metric === name} onClick={() => setMetric(name)}>
+                {metricConfig[name].label}
+              </button>
+            ))}
+          </div>
+          <p>{config.note}</p>
         </div>
-      </div>
-
-      <div className="memory-chart" aria-label={`${config.label}两种提示方式对比`}>
-        <header><span>{config.label}</span><small>{config.note}</small></header>
         {benchmark.plugins.map((row) => {
           const passive = config.value(row.passive);
           const guided = config.value(row.guided);
@@ -94,10 +89,6 @@ export default function MemoryBenchmark() {
         })}
         <footer><span><i className="passive" />无提示</span><span><i className="guided" />有提示</span><small>{config.lowerIsBetter ? '数值越低越好' : '数值越高越好'}</small></footer>
         <p className="memory-chart-disclosure"><span>*</span> Mnemon（官方版）来自 Mnemon 官方仓库，与 dsh-mnemon 共享核心实现，不代表完全独立的两种方案。</p>
-        <div className="memory-chart-actions">
-          <p><span>公开材料</span><strong>结果数据与评测代码</strong></p>
-          <div><a href="/dsheval/data/memory/locomo20-2026-08-28.json" download>下载 JSON <span aria-hidden="true">↓</span></a><a href="https://github.com/dsheval/dsh-eval/tree/main/evals/memory" target="_blank" rel="noreferrer">查看代码 <span aria-hidden="true">↗</span></a></div>
-        </div>
       </div>
     </section>
   );
