@@ -10,7 +10,7 @@
     "build": "vinext build",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "audit:security": "npm audit --audit-level=high --fetch-retries=1 --fetch-timeout=60000",
+    "audit:security": "npm audit --audit-level=high --fetch-retries=1 --fetch-timeout=300000",
     "test:deep-research": "npm --prefix evals/deep-research test",
     "eval:deep-research": "node evals/deep-research/src/run.mjs",
     "test:search": "npm --prefix evals/search test",
