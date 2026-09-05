@@ -35,8 +35,8 @@ npm run build
 
 - `app/page.tsx`：产品官网首页，负责说明 DSHEval 是什么、如何评测以及与 Top100 的关系。
 - `app/results/page.tsx`：公开评测结果中心。
-- `app/results/memory/locomo20-2026-08-28/page.tsx`：首个记忆能力评测结果详情。
-- `app/results/deep-research/v12/page.tsx`：Deep Research V12 逐题状态、基线增量、资源用量和方法说明。
+- `app/results/memory/2026-08-28/page.tsx`：首个记忆能力评测结果详情。
+- `app/results/deep-research/2026-09-04/page.tsx`：Deep Research V12 逐题状态、基线增量、资源用量和方法说明。
 - `app/data/deep-research.ts`：从已审核 V12 数据提取精简展示字段，完整账本不传入客户端。
 - `public/eval-data/deep-research/v12/`：与 `evals/deep-research/results/v12/` 保持逐字节一致的五份下载文件；Deep Research 测试会检查同步状态。
 - `app/methodology/memory/page.tsx`：记忆能力评测协议与证据要求。

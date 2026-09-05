@@ -46,7 +46,7 @@ export default function ResultsPage() {
             <div className="result-report-finding"><span>本轮观察</span><strong>仅 {researchLongformPassCount} 个插件</strong><p data-site-copy="note">通过了其中一道报告题</p><small data-site-copy="note">{researchPluginCount} 个插件 · 2 道报告题</small></div>
           </a>
 
-          <a className="result-report-entry" href="/results/memory/locomo20-2026-08-28">
+          <a className="result-report-entry" href="/results/memory/2026-08-28">
             <div className="result-report-main">
               <div className="result-report-kicker">
                 <time dateTime="2026-08-28">发布于 2026-08-28</time>

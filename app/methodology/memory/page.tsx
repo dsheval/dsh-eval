@@ -3,7 +3,7 @@ import { InnerPageHero } from '@/app/components/InnerPageHero';
 import { SiteFooter, SiteHeader } from '@/app/components/SiteChrome';
 
 const METHOD_URL = '/methodology/memory';
-const RESULT_URL = '/results/memory/locomo20-2026-08-28';
+const RESULT_URL = '/results/memory/2026-08-28';
 
 export const metadata: Metadata = {
   title: '跨会话记忆评测方法 · DSH-Eval',

@@ -7,8 +7,8 @@ const pages = [
   ['/methodology/memory', 'memory-protocol-timeline'],
   ['/methodology/deep-research', 'research-protocol-page'],
   ['/results', 'result-report-status'],
-  ['/results/memory/locomo20-2026-08-28', 'verification-run-sequence'],
-  ['/results/deep-research/v12', 'research-overview'],
+  ['/results/memory/2026-08-28', 'verification-run-sequence'],
+  ['/results/deep-research/2026-09-04', 'research-overview'],
   ['/faq', 'inner-page-hero'],
 ];
 const pageNames = {
@@ -16,10 +16,23 @@ const pageNames = {
   '/methodology/memory': '跨会话记忆评测方法',
   '/methodology/deep-research': '深度研究评测方法',
   '/results': '评测结果',
-  '/results/memory/locomo20-2026-08-28': '跨会话记忆评测报告',
-  '/results/deep-research/v12': '深度研究评测报告',
+  '/results/memory/2026-08-28': '跨会话记忆评测报告',
+  '/results/deep-research/2026-09-04': '深度研究评测报告',
   '/faq': '常见问题',
 };
+const oldReportPaths = [
+  ['/results/deep-research/v12', '/results/deep-research/2026-09-04'],
+  ['/results/memory/locomo20-2026-08-28', '/results/memory/2026-08-28'],
+];
+for (const [oldPath, newPath] of oldReportPaths) {
+  const response = await fetch(`${base}${oldPath}?from=shared`, { redirect: 'manual', signal: AbortSignal.timeout(15000) });
+  const destination = new URL(response.headers.get('location') || '', base);
+  if (response.status !== 308 || destination.pathname !== newPath || destination.search !== '?from=shared') {
+    throw new Error(`Report redirect failed: ${oldPath}`);
+  }
+  console.log(`PASS report redirect ${oldPath}`);
+}
+
 const assets = new Set();
 const icons = [
   ['/favicon-a.svg', 'image/svg+xml'],
@@ -57,6 +70,7 @@ for (const [path, expected] of pages) {
   for (const marker of ['class="dsh-site-header"', 'class="dsh-site-footer"', 'class="dsh-mobile-menu"', '公开评测，发现值得关注的项目。', '© 2026 DSH-Eval', 'href="/site-chrome.css?v=20260905-type8c"']) {
     if (!html.includes(marker)) throw new Error(`Missing shared website shell: ${path}, ${marker}`);
   }
+  if (oldReportPaths.some(([oldPath]) => html.includes(`href="${oldPath}"`))) throw new Error(`Old report link remains: ${path}`);
   if (/(?:href|src)="\/dsheval(?:\/|")/.test(html)) throw new Error(`Old evaluation path remains: ${path}`);
   for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
     if (match[1].includes('/_next/static/')) {
@@ -97,9 +111,10 @@ if (data.pluginCount !== 7 || data.sampleSizePerTrack !== 20 || data.totalPlugin
 }
 const sitemap = await request('/sitemap.xml');
 const sitemapText = await sitemap.text();
-if (!sitemap.ok || !sitemapText.includes('/methodology/memory') || !sitemapText.includes('/methodology/deep-research') || !sitemapText.includes('/results/deep-research/v12')) {
+if (!sitemap.ok || !sitemapText.includes('/methodology/memory') || !sitemapText.includes('/methodology/deep-research') || !sitemapText.includes('/results/deep-research/2026-09-04')) {
   throw new Error('Sitemap failed');
 }
+if (!sitemapText.includes('/results/memory/2026-08-28') || oldReportPaths.some(([oldPath]) => sitemapText.includes(oldPath))) throw new Error('Sitemap must use dated report URLs');
 const researchResponse = await request('/eval-data/deep-research/v12/results.json');
 if (!researchResponse.ok) throw new Error('Deep Research download failed');
 const research = await researchResponse.json();

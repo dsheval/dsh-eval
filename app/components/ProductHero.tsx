@@ -19,7 +19,7 @@ export default function ProductHero() {
         <div className="homepage-evidence">
           <EvaluationCarousel cards={[
             { id: 'research', label: '深度研究', content: <ResearchDossier /> },
-            { id: 'memory', label: '跨会话记忆', content: <EvaluationDossier className="homepage-dossier" reportHref="/results/memory/locomo20-2026-08-28" /> },
+            { id: 'memory', label: '跨会话记忆', content: <EvaluationDossier className="homepage-dossier" reportHref="/results/memory/2026-08-28" /> },
           ]} />
         </div>
       </div>

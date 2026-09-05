@@ -1,7 +1,7 @@
 import results from '../../evals/deep-research/results/v12/results.json';
 import leaderboard from '../../evals/deep-research/results/v12/leaderboard.json';
 
-export const researchUrl = '/results/deep-research/v12';
+export const researchUrl = '/results/deep-research/2026-09-04';
 export const researchDownloadUrl = '/eval-data/deep-research/v12';
 export const researchCodeUrl = 'https://github.com/dsheval/dsh-eval/tree/main/evals/deep-research';
 export const researchDate = results.generatedAt.slice(0, 10);

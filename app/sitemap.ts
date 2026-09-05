@@ -17,13 +17,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${ORIGIN}/results/deep-research/v12`,
+      url: `${ORIGIN}/results/deep-research/2026-09-04`,
       lastModified: new Date('2026-09-04'),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${ORIGIN}/results/memory/locomo20-2026-08-28`,
+      url: `${ORIGIN}/results/memory/2026-08-28`,
       lastModified: new Date('2026-09-02'),
       changeFrequency: 'monthly',
       priority: 0.8,

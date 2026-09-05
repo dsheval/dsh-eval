@@ -3,7 +3,7 @@ import { InnerPageHero } from '@/app/components/InnerPageHero';
 import { SiteFooter, SiteHeader } from '@/app/components/SiteChrome';
 
 const METHOD_URL = '/methodology/deep-research';
-const RESULT_URL = '/results/deep-research/v12';
+const RESULT_URL = '/results/deep-research/2026-09-04';
 const SOURCE_URL = 'https://github.com/dsheval/dsh-eval/blob/main/evals/deep-research/benchmark.md';
 
 export const metadata: Metadata = {
