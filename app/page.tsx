@@ -38,6 +38,7 @@ export default function Home() {
         <section className="home-product-relationship" aria-label="Top100 与 DSH-Eval 的关系">
           <p>
             <a href={TOP100_URL}>Top100</a> 是 DSH-Eval 旗下的插件与 Skills 发现栏目。
+            <br />
             <a href="/results">评测结果</a> 公开项目在真实任务中的表现与证据。
           </p>
         </section>

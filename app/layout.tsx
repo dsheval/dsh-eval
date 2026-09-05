@@ -57,7 +57,7 @@ export default function RootLayout({
     <html lang="zh-CN">
       <head>
         {/* eslint-disable-next-line @next/next/no-css-tags -- Keep this stylesheet byte-identical to the independently deployed Top100 shell. */}
-        <link rel="stylesheet" href="/site-chrome.css?v=20260905-nav2" />
+        <link rel="stylesheet" href="/site-chrome.css?v=20260905-type8c" />
         <script src="/legacy-top100.js" defer />
       </head>
       <body>{children}</body>

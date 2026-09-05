@@ -40,12 +40,13 @@ const questions = [
 ];
 
 export const metadata: Metadata = {
+  twitter: { card: 'summary', title: '常见问题 · DSH-Eval', images: [] },
   title: '常见问题 · DSH-Eval',
   description: '了解 DSH-Eval 是什么、评测什么、如何保证公平、怎样复查结果，以及 DSH-Eval 与 Top100 的关系。',
   alternates: { canonical: FAQ_URL },
   openGraph: {
     url: FAQ_URL,
-    title: 'DSH-Eval 常见问题',
+    title: '常见问题 · DSH-Eval',
     description: '关于评测对象、测试条件、验证等级、复现和结果异议的直接回答。',
     type: 'website',
   },
@@ -66,21 +67,21 @@ export default function FaqPage() {
     <>
       <a className="skip-link" href="#main-content">跳到主要内容</a>
       <SiteHeader active="faq" />
-      <main id="main-content" className="content-page inner-page faq-page">
+      <main id="main-content" className="content-page reading-page inner-page faq-page">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
         <InnerPageHero
           eyebrow="FAQ"
-          title="关于 DSH-Eval，先回答清楚。"
+          title="常见问题"
           description="这里集中回答评测范围、公平性、复查方式和验证等级。具体数字与限制，请以对应测试报告为准。"
         />
 
         <section className="faq-list" aria-labelledby="faq-title">
-          <header><p className="section-label">FREQUENTLY ASKED</p><h2 className="section-title" id="faq-title">常见问题</h2></header>
+          <header className="reading-section-heading"><p className="section-label" data-site-label="section" lang="en">FREQUENTLY ASKED</p><h2 className="section-title" id="faq-title" data-site-title="section">关于评测与结果</h2></header>
           <div>
             {questions.map(({ question, answer }, index) => (
               <details key={question} open={index === 0}>
-                <summary><span>{String(index + 1).padStart(2, '0')}</span><h3>{question}</h3><i aria-hidden="true">+</i></summary>
-                <p>{answer}</p>
+                <summary><span>{String(index + 1).padStart(2, '0')}</span><h3 data-site-title="minor">{question}</h3><i aria-hidden="true">+</i></summary>
+                <p data-site-copy="body">{answer}</p>
               </details>
             ))}
           </div>

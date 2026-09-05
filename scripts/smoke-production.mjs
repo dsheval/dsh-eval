@@ -11,6 +11,15 @@ const pages = [
   ['/results/deep-research/v12', 'research-overview'],
   ['/faq', 'inner-page-hero'],
 ];
+const pageNames = {
+  '/methodology': '评测方法',
+  '/methodology/memory': '跨会话记忆评测方法',
+  '/methodology/deep-research': '深度研究评测方法',
+  '/results': '评测结果',
+  '/results/memory/locomo20-2026-08-28': '跨会话记忆评测报告',
+  '/results/deep-research/v12': '深度研究评测报告',
+  '/faq': '常见问题',
+};
 const assets = new Set();
 const icons = [
   ['/favicon-a.svg', 'image/svg+xml'],
@@ -29,10 +38,23 @@ for (const [path, expected] of pages) {
     throw new Error(`Page failed: ${path}, HTTP ${response.status}`);
   }
   if ([...html.matchAll(/<h1(?:\s|>)/g)].length !== 1) throw new Error(`Expected one h1: ${path}`);
+  const pageName = pageNames[path];
+  if (pageName) {
+    const title = `${pageName} · DSH-Eval`;
+    if (!html.includes(`<title>${title}</title>`)) throw new Error(`Wrong page title: ${path}`);
+    const heading = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1].replace(/<[^>]+>/g, '');
+    if (heading !== pageName) throw new Error(`Wrong page heading: ${path}`);
+  }
+  if (path.startsWith('/results/')) {
+    for (const id of ['report-results', 'report-verification', 'report-resources']) {
+      if (!html.includes(`id="${id}"`) || !html.includes(`href="#${id}"`)) throw new Error(`Missing report section: ${path}, ${id}`);
+    }
+  }
+
   const canonical = html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/);
   if (!canonical || new URL(canonical[1]).href !== `https://dsheval.ai${path}`) throw new Error(`Wrong canonical: ${path}`);
   if (!html.includes('href="/top100/"')) throw new Error(`Missing Top100 navigation: ${path}`);
-  for (const marker of ['class="dsh-site-header"', 'class="dsh-site-footer"', 'class="dsh-mobile-menu"', '公开评测，发现值得关注的项目。', '© 2026 DSH-Eval', 'href="/site-chrome.css?v=20260905-nav2"']) {
+  for (const marker of ['class="dsh-site-header"', 'class="dsh-site-footer"', 'class="dsh-mobile-menu"', '公开评测，发现值得关注的项目。', '© 2026 DSH-Eval', 'href="/site-chrome.css?v=20260905-type8c"']) {
     if (!html.includes(marker)) throw new Error(`Missing shared website shell: ${path}, ${marker}`);
   }
   if (/(?:href|src)="\/dsheval(?:\/|")/.test(html)) throw new Error(`Old evaluation path remains: ${path}`);

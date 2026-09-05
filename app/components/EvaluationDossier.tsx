@@ -23,14 +23,14 @@ export default function EvaluationDossier({ className, compact = false, reportHr
 
       <div className="dossier-task">
         <span className="field-label">跨会话记忆</span>
-        <p>换一个会话，Agent 还记得吗？</p>
+        <p data-site-copy="body">换一个会话，Agent 还记得吗？</p>
       </div>
 
       <div className="dossier-verdict">
         <div>
           <span className="field-label">本轮观察</span>
           <h2>{improvedWithGuidance} 个 Agent</h2>
-          <p>明确提示使用记忆后，正确率均提升</p>
+          <p data-site-copy="note">明确提示使用记忆后，正确率均提升</p>
         </div>
         <dl className="confidence-block">
           <div><dt>参评 Agent</dt><dd>{benchmark.pluginCount} 个</dd></div>
@@ -40,7 +40,7 @@ export default function EvaluationDossier({ className, compact = false, reportHr
 
       {compact ? null : (
         <>
-          <p className="dossier-reason">同一组题、同一环境，只改变是否明确提示 Agent 使用记忆。</p>
+          <p className="dossier-reason" data-site-copy="note">同一组题、同一环境，只改变是否明确提示 Agent 使用记忆。</p>
 
           <dl className="fact-grid">
             <div><dt>无提示最佳</dt><dd>Causal Memory · 13/20</dd></div>

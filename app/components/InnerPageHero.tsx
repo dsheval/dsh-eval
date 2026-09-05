@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 
 type InnerPageHeroProps = {
   eyebrow: string;
@@ -23,10 +23,14 @@ export function InnerPageHero({ eyebrow, title, description, actions, breadcrumb
         </nav>
       )}
       <div className="inner-page-hero-content">
-        <p className="inner-page-hero-eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
+        <p className="inner-page-hero-eyebrow" data-site-label="page" lang="en">
+          {eyebrow.split(' · ').map((part, index) => (
+            <Fragment key={part}>{index > 0 ? ' · ' : null}<span>{part}</span></Fragment>
+          ))}
+        </p>
+        <h1 data-site-title="page">{title}</h1>
         <div className="inner-page-hero-summary">
-          <p>{description}</p>
+          <p data-site-copy="lead">{description}</p>
           {actions}
         </div>
       </div>
