@@ -31,53 +31,53 @@ export default function EvaluationEvidence() {
 
       <details className="verification-disclosure" id="evaluation-pipeline">
         <summary>
-          <div><span>评测与验证说明</span><b>测试方法、证据与适用范围</b></div>
+          <div><h2 className="verification-disclosure-title" data-site-title="minor">评测与验证说明</h2><b>测试方法、证据与适用范围</b></div>
           <i aria-hidden="true">+</i>
         </summary>
         <div className="verification-content">
           <section className="verification-block" aria-labelledby="verification-test-title">
-            <header><span>CURRENT TEST</span><h3 id="verification-test-title">本次测试怎样执行</h3></header>
+            <header><span data-site-label="section" lang="en">CURRENT TEST</span><h3 id="verification-test-title" data-site-title="group">本次测试怎样执行</h3></header>
             <div className="verification-test-body">
-              <p className="verification-intro">两组使用同一组 {memoryBenchmark.sampleSizePerTrack} 道题、同一模型和运行环境，只改变是否提醒 Agent 使用记忆。</p>
+              <p className="verification-intro" data-site-copy="body">两组使用同一组 {memoryBenchmark.sampleSizePerTrack} 道题、同一模型和运行环境，只改变是否提醒 Agent 使用记忆。</p>
               <dl className="verification-track-rows" aria-label="两种提示方式说明">
-                <div><dt>无提示</dt><dd>直接提供对话和问题，不要求保存或检索记忆。</dd></div>
-                <div><dt>有提示</dt><dd>只增加通用记忆提示，不透露工具名、答案或历史会话 ID。</dd></div>
+                <div><dt>无提示</dt><dd data-site-copy="body">直接提供对话和问题，不要求保存或检索记忆。</dd></div>
+                <div><dt>有提示</dt><dd data-site-copy="body">只增加通用记忆提示，不透露工具名、答案或历史会话 ID。</dd></div>
               </dl>
               <ol className="verification-run-sequence" role="list" aria-label="本次测试执行顺序">
                 {currentTestSteps.map(([number, title, description]) => (
-                  <li key={number}><span aria-hidden="true">{number}</span><strong>{title}</strong><p>{description}</p></li>
+                  <li key={number}><span aria-hidden="true">{number}</span><strong>{title}</strong><p data-site-copy="body">{description}</p></li>
                 ))}
               </ol>
-              <a className="verification-protocol-link" href="/dsheval/methodology/memory">查看完整评测协议 <span aria-hidden="true">→</span></a>
+              <a className="verification-protocol-link" href="/methodology/memory">查看完整评测方法 <span aria-hidden="true">→</span></a>
             </div>
           </section>
 
           <section className="verification-block" aria-labelledby="verification-review-title">
-            <header><span>REVIEW METHOD</span><h3 id="verification-review-title">结果如何复查</h3></header>
+            <header><span data-site-label="section" lang="en">REVIEW METHOD</span><h3 id="verification-review-title" data-site-title="group">结果如何复查</h3></header>
             <dl className="verification-review-list">
               {evaluationSteps.map(([title, copy]) => (
-                <div key={title}><dt>{title}</dt><dd>{copy}</dd></div>
+                <div key={title}><dt>{title}</dt><dd data-site-copy="body">{copy}</dd></div>
               ))}
             </dl>
           </section>
 
           <section className="verification-block" aria-labelledby="verification-levels-title">
-            <header><span>VERIFICATION LEVELS</span><h3 id="verification-levels-title">当前验证到哪一步</h3><p>本次为 Level 03。<br />关键结果尚待独立环境复测。</p></header>
+            <header><span data-site-label="section" lang="en">VERIFICATION LEVELS</span><h3 id="verification-levels-title" data-site-title="group">当前验证到哪一步</h3><p data-site-copy="note">本次为 Level 03。<br />关键结果尚待独立环境复测。</p></header>
             <div>
               <ol className="verification-level-list" role="list">
                 {trustLevels.map(([number, name, label, copy]) => (
                   <li key={name}>
                     <span className="verification-level-number">Level {number}</span>
                     <div>
-                      <div className="verification-level-heading"><h4>{label}</h4>{number === '03' ? <span className="verification-current-marker">本次等级</span> : null}</div>
-                      <p>{copy}</p>
+                      <div className="verification-level-heading"><h4 data-site-title="minor">{label}</h4>{number === '03' ? <span className="verification-current-marker">本次等级</span> : null}</div>
+                      <p data-site-copy="note">{copy}</p>
                     </div>
                   </li>
                 ))}
               </ol>
               <div className="verification-reading-notes">
-                <p><b>证据不足</b>缺少关键记录时标记“无法评测”，不把它当作零分。</p>
-                <p><b>安全边界</b>评测通过不等于可以安全使用；权限与高风险操作需单独检查。</p>
+                <p data-site-copy="body"><b>证据不足</b>缺少关键记录时标记“无法评测”，不把它当作零分。</p>
+                <p data-site-copy="body"><b>安全边界</b>评测通过不等于可以安全使用；权限与高风险操作需单独检查。</p>
               </div>
             </div>
           </section>

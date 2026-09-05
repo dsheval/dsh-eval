@@ -37,26 +37,39 @@ jobs:
           npm run lint
           npx tsc --noEmit --incremental false
 
+      - name: Test legacy website links
+        run: node --test scripts/test-legacy-links.mjs
+
       - name: Test evaluation suites
         run: |
           npm run test:deep-research
           npm run test:search
           npm run test:memory
 
-      - name: Build production output
-        run: npm run build
-
-      - name: Validate server configuration and build image
+      - name: Validate server configuration
         run: |
           docker compose -p dsh-eval -f compose.production.yml -f docker/compose.server.example.yml config --quiet
-          docker build --tag dsh-eval-web:ci .
+          docker run --rm -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build production image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: dsh-eval-web:ci
+          cache-from: type=gha,scope=dsh-eval-web
+          cache-to: type=gha,scope=dsh-eval-web,mode=max
 
       - name: Verify production container
         run: |
           docker run -d --name dsheval-ci -p 127.0.0.1:3301:3000 dsh-eval-web:ci
           ready=0
-          for attempt in {1..30}; do
-            if curl --fail --silent --max-time 2 http://127.0.0.1:3301/dsheval/ >/dev/null; then
+          for _ in {1..30}; do
+            if curl --fail --silent --max-time 2 http://127.0.0.1:3301/ >/dev/null; then
               ready=1
               break
             fi

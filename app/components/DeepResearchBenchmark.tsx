@@ -1,4 +1,4 @@
-import { ReportHeading, ReportConclusion } from './ReportElements';
+import { ReportHeading } from './ReportElements';
 import type { ResearchCondition, ResearchRecord } from '../data/deep-research';
 
 const taskNames: Record<string, string> = {
@@ -40,8 +40,7 @@ export default function DeepResearchBenchmark({ conditions, records }: {
 }) {
   return (
     <section className="research-benchmark" aria-labelledby="research-results-title">
-      <ReportHeading id="research-results-title" title="找对答案，完成报告" sample="4 个独立题面 · 小样本" />
-      <ReportConclusion>7 个插件中，仅 dsh-search-boost 有一道报告题通过，其余报告均为部分完成。</ReportConclusion>
+      <ReportHeading id="research-results-title" title="研究任务表现" sample="4 个独立题面 · 小样本" />
       <div className="research-overview report-result-surface">
         <div className="research-overview-head" aria-hidden="true">
           <span>插件</span><span>找对答案 <small>2 题</small></span><span>完成报告 <small>2 题</small></span><span />
@@ -54,23 +53,23 @@ export default function DeepResearchBenchmark({ conditions, records }: {
           return (
             <details className={`research-plugin${baseline ? ' research-plugin-baseline' : ''}`} key={condition.condition}>
               <summary className="research-plugin-summary">
-                <span className="research-plugin-name"><strong>{name}</strong>{baseline ? <small>不安装研究插件</small> : null}</span>
+                <span className="research-plugin-name"><strong>{name}</strong>{baseline ? <small data-site-copy="note">不安装研究插件</small> : null}</span>
                 <span className="research-answer-result"><span className="research-mobile-label">找对答案 · 2 题</span>{condition.sfPassed} 题通过</span>
                 <span className="research-report-result"><span className="research-mobile-label">完成报告 · 2 题</span>{reportOutcome(longform)}</span>
                 <span className="research-expand" aria-label="展开或收起详情">+</span>
               </summary>
               <div className="research-plugin-detail">
                 <div className="research-task-list">
-                  <h3>各项任务表现</h3>
+                  <h3 data-site-title="minor">各项任务表现</h3>
                   {rows.map(record => (
                     <details className={`research-task${record.taskId === 'R10' ? ' research-task-derived' : ''}`} key={record.taskId}>
                       <summary>
-                        <span>{taskNames[record.taskId]}{record.taskId === 'R10' ? <small>复用健康报告，不单独运行</small> : null}</span>
+                        <span>{taskNames[record.taskId]}{record.taskId === 'R10' ? <small data-site-copy="note">复用健康报告，不单独运行</small> : null}</span>
                         <span className={`research-task-status status-${record.status.toLowerCase()}`}>{statuses[record.status] ?? record.status}</span>
                         <span className="research-expand" aria-hidden="true">+</span>
                       </summary>
                       <div className="research-task-detail">
-                        <p>{uplifts[record.uplift]}</p>
+                        <p data-site-copy="note">{uplifts[record.uplift]}</p>
                         <dl className="research-metrics">
                           <div><dt>耗时</dt><dd>{minutes(record.latencyMs)}</dd></div>
                           <div><dt>总 Token</dt><dd>{number(record.tokens)}</dd></div>
@@ -78,28 +77,28 @@ export default function DeepResearchBenchmark({ conditions, records }: {
                           <div><dt>可打开 / 已检查链接</dt><dd>{number(record.openUrls)} / {number(record.checkedUrls)}</dd></div>
                           <div><dt>引用忠实度</dt><dd>{percent(record.faithfulness)}</dd></div>
                         </dl>
-                        <p>{record.reused ? '复用上一批已验证的记录。' : '本轮重新运行的多跳检索题。'}{record.taskId === 'R10' ? ' 派生诊断的耗时和 Token 不适用。' : ` 运行保护：${record.budget ? budgetLabels[record.budget] ?? record.budget : '未触发'}。`}</p>
+                        <p data-site-copy="note">{record.reused ? '复用上一批已验证的记录。' : '本轮重新运行的多跳检索题。'}{record.taskId === 'R10' ? ' 派生诊断的耗时和 Token 不适用。' : ` 运行保护：${record.budget ? budgetLabels[record.budget] ?? record.budget : '未触发'}。`}</p>
                       </div>
                     </details>
                   ))}
                 </div>
                 <div className="research-plugin-metrics">
-                  <h3>{baseline ? '原生基线的运行指标' : '与原生能力相比'}</h3>
-                  {baseline ? <p>原生基线不参与排名，也不与自身计算增量。</p> : <p className="research-uplift"><strong>{condition.positive}</strong> 项更好<span> / </span><strong>{condition.noClear}</strong> 项无明显变化<span> / </span><strong>{condition.negative}</strong> 项更差</p>}
+                  <h3 data-site-title="minor">{baseline ? '原生基线的运行指标' : '与原生能力相比'}</h3>
+                  {baseline ? <p data-site-copy="note">原生基线不参与排名，也不与自身计算增量。</p> : <p className="research-uplift"><strong>{condition.positive}</strong> 项更好<span> / </span><strong>{condition.noClear}</strong> 项无明显变化<span> / </span><strong>{condition.negative}</strong> 项更差</p>}
                   <dl className="research-metrics">
                     <div><dt>每题平均耗时</dt><dd>{minutes(condition.latencyMs)}</dd></div>
                     <div><dt>每题平均总 Token</dt><dd>{number(condition.tokens)}</dd></div>
                     <div><dt>引用忠实度</dt><dd>{percent(condition.faithfulness)}</dd></div>
                     <div><dt>系统失败率</dt><dd>{percent(condition.failureRate)}</dd></div>
                   </dl>
-                  <p className="research-metric-note">增量与引用忠实度沿用原榜单，包含研究交付诊断；耗时与 Token 均值只统计实际运行的题目，不包含全部已丢弃尝试和评分模型用量。系统失败率仅统计最终保留记录。</p>
+                  <p className="research-metric-note" data-site-copy="note">增量与引用忠实度沿用原榜单，包含研究交付诊断；耗时与 Token 均值只统计实际运行的题目，不包含全部已丢弃尝试和评分模型用量。系统失败率仅统计最终保留记录。</p>
                 </div>
               </div>
             </details>
           );
         })}
       </div>
-      <p className="research-table-note">部分完成表示仍有缺项，未达到通过标准。点击插件可展开任务和运行指标；插件顺序沿用本轮榜单。</p>
+      <p className="research-table-note" data-site-copy="note">部分完成表示仍有缺项，未达到通过标准。点击插件可展开任务和运行指标；插件顺序沿用本轮榜单。</p>
     </section>
   );
 }

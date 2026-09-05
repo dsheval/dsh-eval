@@ -11,26 +11,54 @@
 
 dsheval.ai {
 	import traffic_logging
+	encode zstd gzip
+	log_skip /api/events
 
-	@dsh_eval path /dsheval /dsheval/*
-	handle @dsh_eval {
-		reverse_proxy dsh-eval-web:3000
+	# Keep the trailing slash: Top100 uses relative scripts and content pages.
+	redir /top100 /top100/{http.request.uri.prefixed_query} 308
+	@old_eval_root path /dsheval /dsheval/
+	redir @old_eval_root /{http.request.uri.prefixed_query} 308
+	@old_top100_pages path /index.html /skills.html /top300.html /docs.html /dsh.html /dsheval.html /readme-cover.html
+	redir @old_top100_pages /top100{uri} 308
+
+	# Public evaluation downloads have their own namespace. /data belongs to
+	# the existing Top100 plugin API, including clients already installed.
+	handle_path /dsheval/data/* {
+		redir * /eval-data{uri} 308
+	}
+	handle_path /dsheval/* {
+		# An absolute trusted origin also prevents a doubled slash in an old
+		# path from becoming a protocol-relative redirect to another host.
+		redir https://dsheval.ai{uri} 308
+	}
+	handle_path /top100/* {
+		reverse_proxy web:80
+	}
+	@top100_api path /data /data/* /api/events
+	handle @top100_api {
+		reverse_proxy web:80
+	}
+	# Published README images and cached social previews retain their URLs.
+	handle /assets/* {
+		reverse_proxy web:80
 	}
 
 	handle {
-		reverse_proxy web:80
+		reverse_proxy dsh-eval-web:3000
 	}
 }
 
 www.dsheval.ai {
 	import traffic_logging
+	encode zstd gzip
+	log_skip /api/events
 
-	@dsh_eval path /dsheval /dsheval/*
-	handle @dsh_eval {
-		reverse_proxy dsh-eval-web:3000
-	}
-
-	handle {
+	# Do not add cross-origin redirects to installed plugins or POST events.
+	@top100_api path /data /data/* /api/events
+	handle @top100_api {
 		reverse_proxy web:80
+	}
+	handle {
+		redir https://dsheval.ai{uri} 308
 	}
 }

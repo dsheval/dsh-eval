@@ -9,7 +9,9 @@ DSH Eval 是 DSH 插件生态的独立评测与展示项目。仓库同时包含
 - LoCoMo 20 题评测配置、插件名录、评分逻辑与自动化测试；
 - 从本地完整测评记录导出的脱敏公开榜单快照。
 
-线上地址：[https://dsheval.ai/dsheval](https://dsheval.ai/dsheval)
+目标官网地址（迁移上线后）：[https://dsheval.ai/](https://dsheval.ai/)
+
+DSH-Eval 是面向 DSH Agent 与插件的公开评测平台，公开真实任务中的表现、方法与证据。[Top100](https://dsheval.ai/top100/) 是旗下的插件与 Skills 发现栏目，收录与排名不表示通过能力评测。
 
 ## Deep Research 公开结果
 
@@ -24,7 +26,7 @@ npm install
 npm run dev -- --host 0.0.0.0 --port 3000
 ```
 
-浏览器访问 `http://localhost:3000/dsheval`。交付前运行：
+浏览器访问 `http://localhost:3000/`。交付前运行：
 
 ```bash
 npm run lint
@@ -122,7 +124,7 @@ dsh-eval/
 │       └── 生产入口的 HTTPS、反向代理与路径转发配置。
 ├── docker/
 │   └── nginx.conf
-│       └── 容器内静态资源及 `/dsheval` 路径的 Nginx 配置。
+│       └── 容器内静态资源及 根路径的 Nginx 配置。
 ├── evals/deep-research/
 │   ├── fixtures/
 │   │   ├── catalog.json
@@ -344,7 +346,7 @@ dsh-eval/
 ├── eslint.config.mjs
 │   └── TypeScript、React 和 Next/Vinext 的 ESLint 规则入口。
 ├── next.config.ts
-│   └── Next 兼容配置，包括 `/dsheval` basePath 和静态资源前缀。
+│   └── Next 兼容配置，应用在根路径运行。
 ├── package-lock.json
 │   └── 锁定根项目全部 npm 依赖版本与完整性信息，确保可复现安装。
 ├── package.json
@@ -365,14 +367,14 @@ dsh-eval/
 - `evals/deep-research/results/v12/` 是经字段白名单重新构造的公开副本，不是原始 `records/` 的复制；导出时校验指标及排名不变，原始记录继续被 Git 忽略。
 - `evals/search/records/`、隔离 DSH_HOME、逐题回答和 Judge 结果只保存在本机，不提交 Git。
 - `evals/memory/records/`、`~/.dsh/memory-eval-workspaces/`、插件数据库和 DSH 会话均为本机运行数据，不提交 Git。
-- `app/data/memory/` 与 `public/data/memory/` 只保存经 `export-site.mjs` 裁剪后的公开指标，不包含标准答案、逐题回答、会话 ID、本机路径或原始会话。
+- `app/data/memory/` 与 `public/eval-data/memory/` 只保存经 `export-site.mjs` 裁剪后的公开指标，不包含标准答案、逐题回答、会话 ID、本机路径或原始会话。
 - 第三方插件会执行代码。正式评测应在隔离、低权限、仅带专用短期凭据的环境运行，不能把个人开发机或长期密钥当作安全边界。
 - DSH 子进程只继承运行所需的最小环境变量；插件 API Key 只有在名录的 `requiredEnv` 中明确声明时才会传入。
 - 远端排行榜只用于从本地审核名录中选择和排序插件，不能提供安装命令；所有执行源都必须固定版本并通过 SHA-256 或 SRI 校验。
 
 ## 部署
 
-生产站点使用 `/dsheval` base path。传统容器部署使用 `Dockerfile`、`compose.production.yml`、Caddy 与 Nginx 配置；OpenAI Sites 部署由 `.openai/hosting.json` 和 `vite.config.ts` 管理。
+生产站点以 DSH-Eval 为根首页，Top100 位于 `/top100/`；旧 `/dsheval/...` 地址由网关重定向。传统容器部署使用 `Dockerfile`、`compose.production.yml`、Caddy 与 Nginx 配置；OpenAI Sites 部署由 `.openai/hosting.json` 和 `vite.config.ts` 管理。
 
 现有服务器采用 PR → 检查 → 合并 `main` → Git 拉取发布的流程，生产配置与源码分离。具体操作、验收与回滚边界见 [生产发布约定](./docs/deployment.md)。GitHub CI 不会自动部署。
 

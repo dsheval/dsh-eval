@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ReportHeading, ReportConclusion } from './ReportElements';
+import { ReportHeading } from './ReportElements';
 import benchmark from '../data/memory/locomo20-2026-08-28.json';
 
 type Protocol = 'passive' | 'guided';
@@ -54,8 +54,7 @@ export default function MemoryBenchmark() {
 
   return (
     <section className="memory-benchmark" id="memory-benchmark" aria-labelledby="memory-benchmark-title">
-      <ReportHeading id="memory-benchmark-title" title="双轨结果对比" sample={`${benchmark.sampleSizePerTrack} 道题 · 两种提示方式`} />
-      <ReportConclusion>明确提示后，{benchmark.pluginCount} 个 Agent 全部提升，增幅为 10–60 个百分点。</ReportConclusion>
+      <ReportHeading id="memory-benchmark-title" title="记忆表现对比" sample={`${benchmark.sampleSizePerTrack} 道题 · 两种提示方式`} />
 
       <div className="memory-chart report-result-surface" aria-label={`${config.label}两种提示方式对比`}>
         <div className="report-chart-toolbar">
@@ -66,7 +65,11 @@ export default function MemoryBenchmark() {
               </button>
             ))}
           </div>
-          <p>{config.note}</p>
+          <p data-site-copy="note">{config.note}</p>
+        </div>
+        <div className="memory-chart-columns" aria-hidden="true">
+          <span>参评 Agent</span><div className="memory-chart-scale"><span>{config.format(0)}</span><span>{config.format(config.max / 2)}</span><span>{config.format(config.max)}</span></div>
+          <div className="memory-column-labels"><span>无提示</span><span>有提示</span></div>
         </div>
         {benchmark.plugins.map((row) => {
           const passive = config.value(row.passive);
@@ -83,12 +86,12 @@ export default function MemoryBenchmark() {
                 <i className="memory-point passive" style={{ left: `${passivePosition}%` }} />
                 <i className="memory-point guided" style={{ left: `${guidedPosition}%` }} />
               </div>
-              <span>{config.format(passive)} <i>/</i> {config.format(guided)}</span>
+              <span className="memory-values"><span><small>无提示</small><b>{config.format(passive)}</b></span><span><small>有提示</small><b>{config.format(guided)}</b></span></span>
             </div>
           );
         })}
-        <footer><span><i className="passive" />无提示</span><span><i className="guided" />有提示</span><small>{config.lowerIsBetter ? '数值越低越好' : '数值越高越好'}</small></footer>
-        <p className="memory-chart-disclosure"><span>*</span> Mnemon（官方版）来自 Mnemon 官方仓库，与 dsh-mnemon 共享核心实现，不代表完全独立的两种方案。</p>
+        <footer><span><i className="passive" />无提示</span><span><i className="guided" />有提示</span><small data-site-copy="note">{config.lowerIsBetter ? '数值越低越好' : '数值越高越好'}</small></footer>
+        <p className="memory-chart-disclosure" data-site-copy="note"><span>*</span> Mnemon（官方版）来自 Mnemon 官方仓库，与 dsh-mnemon 共享核心实现，不代表完全独立的两种方案。</p>
       </div>
     </section>
   );
