@@ -5,7 +5,7 @@ import benchmark from '@/app/data/memory/locomo20-2026-08-28.json';
 import { SiteFooter, SiteHeader } from '@/app/components/SiteChrome';
 import { ReportCover, ReportResources, ReportNextLinks } from '@/app/components/ReportElements';
 
-const RESULT_URL = '/results/memory/locomo20-2026-08-28';
+const RESULT_URL = '/results/memory/2026-08-28';
 
 export const metadata: Metadata = {
   title: '跨会话记忆评测报告 · DSH-Eval',
