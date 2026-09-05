@@ -82,7 +82,7 @@ PowerShell 对应 `$env:DSH_EVAL_ISOLATED = '1'` 与 `$env:DSH_EVAL_CREDENTIALS_
 npm run export:site -- --day 2026-08-28
 ```
 
-默认同时输出到 `../../app/data/memory/locomo20-<day>.json` 与 `../../public/data/memory/locomo20-<day>.json`：前者供榜单组件编译读取，后者供用户下载。
+默认同时输出到 `../../app/data/memory/locomo20-<day>.json` 与 `../../public/eval-data/memory/locomo20-<day>.json`：前者供榜单组件编译读取，后者供用户下载。
 
 自动化里的 `close-session` 会真正优雅关闭当前 DSH Host，等待进程退出后冷启动，再创建追问会话；它不是“仅创建一个新会话”的占位动作。历史结果不会因代码修复而自动重算，需要用 `--fresh` 重跑后才能公平比较。
 

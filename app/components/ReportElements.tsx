@@ -30,7 +30,7 @@ export function ReportStatus({ evidence, limitation }: { evidence: string; limit
 
 export function ReportNextLinks() {
   return <nav className="report-next-links" aria-label="继续浏览">
-    <a href="/dsheval/results">查看其他评测 <span aria-hidden="true">→</span></a>
-    <a href="https://dsheval.ai/" target="_blank" rel="noreferrer">发现 DSH 插件 <span aria-hidden="true">↗</span></a>
+    <a href="/results">查看其他评测 <span aria-hidden="true">→</span></a>
+    <a href="/top100/">发现 DSH 插件 <span aria-hidden="true">↗</span></a>
   </nav>;
 }

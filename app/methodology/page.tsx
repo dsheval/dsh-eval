@@ -2,16 +2,16 @@ import type { Metadata } from 'next';
 import { InnerPageHero } from '../components/InnerPageHero';
 import { SiteFooter, SiteHeader } from '../components/SiteChrome';
 
-const METHOD_URL = '/dsheval/methodology';
+const METHOD_URL = '/methodology';
 
 export const metadata: Metadata = {
-  title: '评测方法 · DSHEval',
-  description: '了解 DSHEval 如何固定比较条件、执行真实任务、区分任务失败与评测故障，并公开可复查的 Agent 与插件评测证据。',
+  title: '评测方法 · DSH-Eval',
+  description: '了解 DSH-Eval 如何固定比较条件、执行真实任务、区分任务失败与评测故障，并公开可复查的 Agent 与插件评测证据。',
   alternates: { canonical: METHOD_URL },
   openGraph: {
     url: METHOD_URL,
-    title: 'DSHEval 评测方法',
-    description: '从固定条件、真实执行到判分和证据公开，了解一项 DSHEval 结果如何成立。',
+    title: 'DSH-Eval 评测方法',
+    description: '从固定条件、真实执行到判分和证据公开，了解一项 DSH-Eval 结果如何成立。',
     type: 'article',
   },
 };
@@ -35,19 +35,19 @@ export default function MethodologyPage() {
               <article>
                 <h3>跨会话记忆</h3>
                 <p>换一个会话后，Agent 还能找回之前的信息吗？</p>
-                <a href="/dsheval/methodology/memory">查看评测协议 <span aria-hidden="true">→</span></a>
+                <a href="/methodology/memory">查看评测协议 <span aria-hidden="true">→</span></a>
               </article>
               <article>
                 <h3>深度研究</h3>
                 <p>研究插件能否找对答案，并完成有依据的报告？</p>
-                <a href="/dsheval/methodology/deep-research">查看评测协议 <span aria-hidden="true">→</span></a>
+                <a href="/methodology/deep-research">查看评测协议 <span aria-hidden="true">→</span></a>
               </article>
             </div>
           </section>
 
           <div className="method-overview-note" id="evaluation-contract">
             <p>我们先约定测试条件和评分规则，再运行真实任务。每份报告同时说明结果、异常和适用范围，方便读者检查结论的依据。不同测试条件下的结果不直接比较。</p>
-            <a className="method-results-link" href="/dsheval/results">查看评测结果 <span aria-hidden="true">→</span></a>
+            <a className="method-results-link" href="/results">查看评测结果 <span aria-hidden="true">→</span></a>
           </div>
         </div>
       </main>

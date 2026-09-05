@@ -9,12 +9,12 @@ const improvedWithGuidance = memoryBenchmark.plugins.filter(
 ).length;
 
 export const metadata: Metadata = {
-  title: 'DSHEval 评测结果 · Agent 与插件真实任务测试',
-  description: '浏览 DSHEval 已公开的 Agent 与插件评测结果。每项结果包含版本、环境、方法、证据、限制和复现信息。',
-  alternates: { canonical: '/dsheval/results' },
+  title: 'DSH-Eval 评测结果 · Agent 与插件真实任务测试',
+  description: '浏览 DSH-Eval 已公开的 Agent 与插件评测结果。每项结果包含版本、环境、方法、证据、限制和复现信息。',
+  alternates: { canonical: '/results' },
   openGraph: {
-    url: '/dsheval/results',
-    title: 'DSHEval 评测结果',
+    url: '/results',
+    title: 'DSH-Eval 评测结果',
     description: '查看带版本、环境、方法、证据和限制的 Agent 与插件真实任务评测。',
     type: 'website',
   },
@@ -29,7 +29,7 @@ export default function ResultsPage() {
         <InnerPageHero
           eyebrow="PUBLIC RESULTS"
           title="评测结果"
-          description="查看 DSHEval 已公开的评测。每份报告都会说明评测对象、测试条件、证据、限制和复查状态。"
+          description="查看 DSH-Eval 已公开的评测。每份报告都会说明评测对象、测试条件、证据、限制和复查状态。"
         />
 
         <section className="minimal-results-list" aria-labelledby="published-results-title">
@@ -46,7 +46,7 @@ export default function ResultsPage() {
             <div className="result-report-finding"><span>本轮观察</span><strong>仅 {researchLongformPassCount} 个插件</strong><p>通过了其中一道报告题</p><small>{researchPluginCount} 个插件 · 2 道报告题</small></div>
           </a>
 
-          <a className="result-report-entry" href="/dsheval/results/memory/locomo20-2026-08-28">
+          <a className="result-report-entry" href="/results/memory/locomo20-2026-08-28">
             <div className="result-report-main">
               <div className="result-report-kicker">
                 <time dateTime="2026-08-28">发布于 2026-08-28</time>

@@ -2,22 +2,22 @@ import type { Metadata } from 'next';
 import { InnerPageHero } from '@/app/components/InnerPageHero';
 import { SiteFooter, SiteHeader } from '@/app/components/SiteChrome';
 
-const METHOD_URL = '/dsheval/methodology/deep-research';
-const RESULT_URL = '/dsheval/results/deep-research/v12';
+const METHOD_URL = '/methodology/deep-research';
+const RESULT_URL = '/results/deep-research/v12';
 const SOURCE_URL = 'https://github.com/dsheval/dsh-eval/blob/main/evals/deep-research/benchmark.md';
 
 export const metadata: Metadata = {
-  title: '深度研究评测协议 · DSHEval',
-  description: '了解 DSHEval 如何比较研究插件与原生能力，检查事实答案、报告交付与引用，并公开评测依据。',
+  title: '深度研究评测协议 · DSH-Eval',
+  description: '了解 DSH-Eval 如何比较研究插件与原生能力，检查事实答案、报告交付与引用，并公开评测依据。',
   alternates: { canonical: METHOD_URL },
   openGraph: {
     url: METHOD_URL,
-    title: '深度研究评测协议 · DSHEval',
+    title: '深度研究评测协议 · DSH-Eval',
     description: '同一组任务，对照原生能力与研究插件，分别检查检索答案与报告质量。',
     type: 'article',
     images: [],
   },
-  twitter: { card: 'summary', title: '深度研究评测协议 · DSHEval', images: [] },
+  twitter: { card: 'summary', title: '深度研究评测协议 · DSH-Eval', images: [] },
 };
 
 const methodSteps = [
@@ -38,8 +38,8 @@ export default function ResearchMethodologyPage() {
           title="深度研究评测协议"
           description="让研究插件与 DSH 原生能力完成同一组任务。既检查能否找到正确答案，也检查能否交付有依据的完整报告。"
           breadcrumbs={[
-            { label: 'DSHEval', href: '/dsheval/' },
-            { label: '评测方法', href: '/dsheval/methodology' },
+            { label: 'DSH-Eval', href: '/' },
+            { label: '评测方法', href: '/methodology' },
             { label: '深度研究' },
           ]}
         />

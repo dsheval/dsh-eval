@@ -120,7 +120,7 @@ export function exportSiteSnapshot(options = {}) {
     options.output ?? arg("--output", join(evalRoot(), "..", "..", "app", "data", "memory", `locomo20-${day}.json`)),
   );
   const publicOutput = resolve(
-    options.publicOutput ?? arg("--public-output", join(evalRoot(), "..", "..", "public", "data", "memory", `locomo20-${day}.json`)),
+    options.publicOutput ?? arg("--public-output", join(evalRoot(), "..", "..", "public", "eval-data", "memory", `locomo20-${day}.json`)),
   );
   const passive = readJson(join(records, `leaderboard-dsh-locomo-refined-20-passive-${day}.json`));
   const guided = readJson(join(records, `leaderboard-dsh-locomo-refined-20-guided-${day}.json`));

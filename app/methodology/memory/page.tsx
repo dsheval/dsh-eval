@@ -2,23 +2,23 @@ import type { Metadata } from 'next';
 import { InnerPageHero } from '@/app/components/InnerPageHero';
 import { SiteFooter, SiteHeader } from '@/app/components/SiteChrome';
 
-const METHOD_URL = '/dsheval/methodology/memory';
-const RESULT_URL = '/dsheval/results/memory/locomo20-2026-08-28';
+const METHOD_URL = '/methodology/memory';
+const RESULT_URL = '/results/memory/locomo20-2026-08-28';
 
 export const metadata: Metadata = {
-  title: '跨会话记忆评测协议 · DSHEval',
-  description: '了解 DSHEval 如何清理环境、执行双轨跨会话记忆任务、确定性判分、记录失败并发布可复查证据。',
+  title: '跨会话记忆评测协议 · DSH-Eval',
+  description: '了解 DSH-Eval 如何清理环境、执行双轨跨会话记忆任务、确定性判分、记录失败并发布可复查证据。',
   alternates: { canonical: METHOD_URL },
   openGraph: {
     url: METHOD_URL,
-    title: '跨会话记忆评测协议 · DSHEval',
+    title: '跨会话记忆评测协议 · DSH-Eval',
     description: '无提示与明确提醒使用记忆两条测试轨道，共用题目、模型、环境和评分规则。',
     type: 'article',
     images: [],
   },
   twitter: {
     card: 'summary',
-    title: '跨会话记忆评测协议 · DSHEval',
+    title: '跨会话记忆评测协议 · DSH-Eval',
     description: '了解环境清理、双轨任务、确定性判分、失败记录与证据发布方法。',
     images: [],
   },
@@ -79,8 +79,8 @@ export default function MemoryMethodologyPage() {
           title="跨会话记忆评测协议"
           description="在会话 A 中提供信息，重启后在会话 B 中提问。用两条测试轨道，区分 Agent 默认的记忆表现与明确提醒后的表现。"
           breadcrumbs={[
-            { label: 'DSHEval', href: '/dsheval/' },
-            { label: '评测方法', href: '/dsheval/methodology' },
+            { label: 'DSH-Eval', href: '/' },
+            { label: '评测方法', href: '/methodology' },
             { label: '跨会话记忆' },
           ]}
         />

@@ -48,7 +48,7 @@ export default function EvaluationEvidence() {
                   <li key={number}><span aria-hidden="true">{number}</span><strong>{title}</strong><p>{description}</p></li>
                 ))}
               </ol>
-              <a className="verification-protocol-link" href="/dsheval/methodology/memory">查看完整评测协议 <span aria-hidden="true">→</span></a>
+              <a className="verification-protocol-link" href="/methodology/memory">查看完整评测协议 <span aria-hidden="true">→</span></a>
             </div>
           </section>
 
