@@ -1,12 +1,13 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Shared navigation spans independently deployed applications and uses full document navigation. */
 
-type NavKey = 'about' | 'methodology' | 'results' | 'faq' | 'top100';
+type NavKey = 'home' | 'about' | 'methodology' | 'results' | 'faq' | 'top100';
 
 const navLinks: { href: string; key: NavKey; label: string }[] = [
-  { href: '/', key: 'about', label: '首页' },
+  { href: '/', key: 'home', label: '首页' },
   { href: '/top100/', key: 'top100', label: 'Top100' },
   { href: '/results', key: 'results', label: '评测结果' },
   { href: '/methodology', key: 'methodology', label: '评测方法' },
+  { href: '/about', key: 'about', label: '产品介绍' },
   { href: '/faq', key: 'faq', label: '常见问题' },
 ];
 

@@ -2,7 +2,8 @@
 // These requests never run an evaluation or invoke third-party plugins.
 const base = new URL(process.argv[2] || 'http://127.0.0.1:3000').origin;
 const pages = [
-  ['/', '看真实表现'],
+  ['/', '万物皆可测'],
+  ['/about', 'product-intro-page'],
   ['/methodology', 'inner-page-hero'],
   ['/methodology/memory', 'memory-protocol-timeline'],
   ['/methodology/deep-research', 'research-protocol-page'],
@@ -58,6 +59,16 @@ for (const [path, expected] of pages) {
     const heading = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1].replace(/<[^>]+>/g, '');
     if (heading !== pageName) throw new Error(`Wrong page heading: ${path}`);
   }
+  if (path === '/about') {
+    for (const marker of ['<title>DSH-Eval 是什么 · 产品介绍</title>', '万物皆可测', 'DeepSeek Harness', '五个环节设计', '两份独立报告']) {
+      if (!html.includes(marker)) throw new Error(`Missing product introduction: ${marker}`);
+    }
+  }
+  const nav = html.match(/<nav[^>]*aria-label="DSH-Eval 主导航"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+  const navHrefs = [...nav.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
+  if (JSON.stringify(navHrefs) !== JSON.stringify(['/', '/top100/', '/results', '/methodology', '/about', '/faq'])) {
+    throw new Error(`Wrong primary navigation order: ${path}`);
+  }
   if (path.startsWith('/results/')) {
     for (const id of ['report-results', 'report-verification', 'report-resources']) {
       if (!html.includes(`id="${id}"`) || !html.includes(`href="#${id}"`)) throw new Error(`Missing report section: ${path}, ${id}`);
@@ -112,7 +123,7 @@ if (data.pluginCount !== 7 || data.sampleSizePerTrack !== 20 || data.totalPlugin
 }
 const sitemap = await request('/sitemap.xml');
 const sitemapText = await sitemap.text();
-if (!sitemap.ok || !sitemapText.includes('/methodology/memory') || !sitemapText.includes('/methodology/deep-research') || !sitemapText.includes('/results/deep-research/2026-09-04')) {
+if (!sitemap.ok || !sitemapText.includes('https://www.dsheval.ai/about</loc>') || !sitemapText.includes('/methodology/memory') || !sitemapText.includes('/methodology/deep-research') || !sitemapText.includes('/results/deep-research/2026-09-04')) {
   throw new Error('Sitemap failed');
 }
 if (!sitemapText.includes('/results/memory/2026-08-28') || oldReportPaths.some(([oldPath]) => sitemapText.includes(oldPath))) throw new Error('Sitemap must use dated report URLs');

@@ -56,7 +56,8 @@ for (const [path, target] of [
 }
 
 for (const [path, marker] of [
-  ['/', '看真实表现'],
+  ['/', '万物皆可测'],
+  ['/about', 'product-intro-page'],
   ['/results', 'result-report-status'],
   ['/top100/', 'data-content-switch="ranking"'],
   ['/top100/?page=dsh', 'data-content-switch="dsh"'],
