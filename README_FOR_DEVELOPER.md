@@ -56,7 +56,7 @@ npm run build
 
 正式发布遵循 [生产发布约定](./docs/deployment.md)：PR 检查通过并合并 `main` 后，服务器从 Git 拉取；主机配置独立放在 `/opt/dsh-eval-state`。GitHub CI 只验证，不自动部署。不要直接发布未合并分支或上传源码包替换正式工作目录。
 
-1. 目标部署地址为 `https://dsheval.ai/`，`next.config.ts` 不再设置 `basePath`。这次迁移须与 Top100 和网关一起切换，详见生产发布约定。
+1. 正式部署地址为 `https://www.dsheval.ai/`，`next.config.ts` 不再设置 `basePath`。页面、SEO 元数据与 Top100 均使用 www 入口；裸域由网关重定向，详见生产发布约定。
 2. 首页与公共导航的 Top100 入口使用站内 `/top100/`；Top100 是 DSH-Eval 旗下的插件与 Skills 发现栏目。
 3. 首页可切换 Memory 与 Deep Research 两份摘要；结果中心保留两项评测，各有独立详情页、评测协议和公开下载。
 4. 各公开页面已经配置独立标题、描述、canonical 和结构化数据。

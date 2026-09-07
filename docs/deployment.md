@@ -16,7 +16,7 @@
 | `/assets/...` | Top100 的历史图片链接兼容 |
 
 1. 记录两个现有镜像、发布提交及网关配置，保留可恢复的整组旧版本。构建两个候选站点，使用独立网络和仅环回可访问的端口联合验收。
-2. 使用 `deploy/Caddyfile` 的路由配置：裸域作为标准页面域名；`www` 页面跳到裸域，但已有 `/data/...` 与 `/api/events` 请求直接代理，避免给旧插件增加跨域跳转。Caddy 需要支持 `http.request.uri.prefixed_query`（2.9 或更新），切换前运行配置验证。
+2. 使用 `deploy/Caddyfile` 的路由配置：`www` 作为页面访问入口；裸域页面跳到 `www`，但两个域名已有 `/data/...` 与 `/api/events` 请求直接代理，避免给旧插件增加跨域跳转。旧 `/dsheval/*` 页面也跳到 `www`；裸域 HTTP 页面直接跳到 HTTPS `www`，不先经过裸域 HTTPS。应用 canonical、Open Graph、结构化数据、robots 和两个 sitemap 统一使用 `https://www.dsheval.ai`；两站更新须一起验收，避免再次出现页面入口与 SEO 地址不一致。Caddy 需要支持 `http.request.uri.prefixed_query`（2.9 或更新），切换前运行配置验证。
 3. `/dsheval/...` 以 308 跳到对应根路径；其中 `/dsheval/data/...` 跳到 `/eval-data/...`。`/top100` 补尾斜杠。旧独立 Top100 HTML 页面跳到 `/top100` 下同名页面，保留查询参数。
 4. `public/legacy-top100.js` 在根首页识别旧 `?page=dsh`、`?page=docs`、榜单筛选参数及 `#ranking` 等片段，保留状态进入 Top100。纯根首页链接无法区分旧意图，因此首页持续提供 Top100 导航。旧评测页面的 `#about` 留在主站。
 5. 在同一次发布窗口协调切换两个站点和网关，运行 `scripts/smoke-production.mjs` 验收评测服务，再对统一网关运行 `scripts/smoke-migration.mjs`。核对旧榜单数据、安装指南、Skills、下载文件、搜索地图、查询参数与跳转循环；两侧 `/api/events` 不写入网关访问日志。
@@ -26,12 +26,12 @@
 
 路由语义参考：[Caddy handle_path](https://caddyserver.com/docs/caddyfile/directives/handle_path)、[Caddy redir](https://caddyserver.com/docs/caddyfile/directives/redir)。独立 Sites 预览仅包含评测应用；本次两个服务共用域名的迁移以统一网关为准。
 
-迁移上线后的 GitHub 对外信息使用以下内容；这里只准备文案，不修改远端设置：
+GitHub 对外信息统一使用以下内容；本地修改不会自动更新远端设置：
 
 | 入口 | 简介 | Website |
 | --- | --- | --- |
-| `dsheval/dsh-eval` | 面向 DSH Agent 与插件的公开评测平台，公开真实任务中的表现、方法与证据。 | `https://dsheval.ai/` |
-| `dsheval/dsh-top100` | DSH-Eval 旗下的插件与 Skills 发现栏目，按公开 GitHub 信号持续更新。 | `https://dsheval.ai/top100/` |
+| `dsheval/dsh-eval` | 面向 DSH Agent 与插件的公开评测平台，公开真实任务中的表现、方法与证据。 | `https://www.dsheval.ai/` |
+| `dsheval/dsh-top100` | DSH-Eval 旗下的插件与 Skills 发现栏目，按公开 GitHub 信号持续更新。 | `https://www.dsheval.ai/top100/` |
 | GitHub 组织主页（如已配置） | DSH-Eval：公开评测与插件发现。 | 主入口 `/`，Top100 入口 `/top100/` |
 
 ## 发布来源与检查

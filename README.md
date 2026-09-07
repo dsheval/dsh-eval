@@ -9,9 +9,9 @@ DSH Eval 是 DSH 插件生态的独立评测与展示项目。仓库同时包含
 - LoCoMo 20 题评测配置、插件名录、评分逻辑与自动化测试；
 - 从本地完整测评记录导出的脱敏公开榜单快照。
 
-目标官网地址（迁移上线后）：[https://dsheval.ai/](https://dsheval.ai/)
+官网地址：[https://www.dsheval.ai/](https://www.dsheval.ai/)
 
-DSH-Eval 是面向 DSH Agent 与插件的公开评测平台，公开真实任务中的表现、方法与证据。[Top100](https://dsheval.ai/top100/) 是旗下的插件与 Skills 发现栏目，收录与排名不表示通过能力评测。
+DSH-Eval 是面向 DSH Agent 与插件的公开评测平台，公开真实任务中的表现、方法与证据。[Top100](https://www.dsheval.ai/top100/) 是旗下的插件与 Skills 发现栏目，收录与排名不表示通过能力评测。
 
 ## Deep Research 公开结果
 

@@ -8,19 +8,19 @@ const siteJsonLd = {
   '@graph': [
     {
       '@type': 'Organization',
-      '@id': 'https://dsheval.ai/#organization',
+      '@id': 'https://www.dsheval.ai/#organization',
       name: 'DSH-Eval',
-      url: 'https://dsheval.ai/',
-      logo: 'https://dsheval.ai/favicon-a.svg',
+      url: 'https://www.dsheval.ai/',
+      logo: 'https://www.dsheval.ai/favicon-a.svg',
       description: '面向 Agent 与插件生态的公开评测平台，在统一环境中执行真实任务，公开测试过程、结果与适用边界。',
     },
     {
       '@type': 'WebSite',
-      '@id': 'https://dsheval.ai/#website',
+      '@id': 'https://www.dsheval.ai/#website',
       name: 'DSH-Eval',
-      url: 'https://dsheval.ai/',
+      url: 'https://www.dsheval.ai/',
       inLanguage: 'zh-CN',
-      publisher: { '@id': 'https://dsheval.ai/#organization' },
+      publisher: { '@id': 'https://www.dsheval.ai/#organization' },
     },
   ],
 };

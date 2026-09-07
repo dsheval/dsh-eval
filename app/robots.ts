@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: ['/', '/data/manifest.json', '/data/snapshots/', '/data/rankings-hot.json'],
       disallow: ['/api/', '/data/'],
     },
-    sitemap: ['https://dsheval.ai/sitemap.xml', 'https://dsheval.ai/top100/sitemap.xml'],
+    sitemap: ['https://www.dsheval.ai/sitemap.xml', 'https://www.dsheval.ai/top100/sitemap.xml'],
   };
 }

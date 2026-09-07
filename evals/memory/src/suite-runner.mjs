@@ -97,7 +97,7 @@ export async function prepareTargets(catalog, options = {}) {
   if ((options.allMemory || options.rankingsPath) && !rankings) {
     rankings = options.rankingsPath
       ? loadRankings(options.rankingsPath)
-      : await fetchRankings(catalog.rankingsUrl ?? "https://dsheval.ai/data");
+      : await fetchRankings(catalog.rankingsUrl ?? "https://www.dsheval.ai/data");
   }
   const targets = resolveTargets(catalog, {
     plugins: options.plugins,

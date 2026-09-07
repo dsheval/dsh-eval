@@ -9,7 +9,7 @@
 	}
 }
 
-dsheval.ai {
+www.dsheval.ai {
 	import traffic_logging
 	encode zstd gzip
 	log_skip /api/events
@@ -29,7 +29,7 @@ dsheval.ai {
 	handle_path /dsheval/* {
 		# An absolute trusted origin also prevents a doubled slash in an old
 		# path from becoming a protocol-relative redirect to another host.
-		redir https://dsheval.ai{uri} 308
+		redir https://www.dsheval.ai{uri} 308
 	}
 	handle_path /top100/* {
 		reverse_proxy web:80
@@ -48,7 +48,7 @@ dsheval.ai {
 	}
 }
 
-www.dsheval.ai {
+dsheval.ai {
 	import traffic_logging
 	encode zstd gzip
 	log_skip /api/events
@@ -59,6 +59,17 @@ www.dsheval.ai {
 		reverse_proxy web:80
 	}
 	handle {
+		redir https://www.dsheval.ai{uri} 308
+	}
+}
+
+# HTTP page visits must reach www without first negotiating TLS on the apex.
+http://dsheval.ai {
+	@top100_api path /data /data/* /api/events
+	handle @top100_api {
 		redir https://dsheval.ai{uri} 308
+	}
+	handle {
+		redir https://www.dsheval.ai{uri} 308
 	}
 }

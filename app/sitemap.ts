@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const ORIGIN = 'https://dsheval.ai';
+const ORIGIN = 'https://www.dsheval.ai';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
