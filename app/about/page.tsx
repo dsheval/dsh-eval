@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import { ProductFaq } from '../components/ProductFaq';
 import { InnerPageHero } from '../components/InnerPageHero';
 import { SiteFooter, SiteHeader } from '../components/SiteChrome';
 
 const title = 'DSH-Eval 是什么 · 产品介绍';
-const description = 'DSH-Eval 是面向 DeepSeek Harness（DSH）Agent 与插件的通用测评平台。了解任务、逐题证据、统一标签与原生基线的方法设计，以及独立报告和 Top100 的关系。';
+const description = 'DSH-Eval 是面向 DeepSeek Harness（DSH）Agent 与插件的通用测评平台。了解任务、逐题证据、统一标签与原生基线的方法设计，以及评测范围、结果复查等常见问题。';
 
 export const metadata: Metadata = {
   title,
@@ -61,8 +62,12 @@ export default function AboutPage() {
               <h2 className="section-title" id="definition-title" data-site-title="section">让能力判断有依据</h2>
             </header>
             <div className="product-intro-copy">
-              <p>Agent 能完成哪些任务？安装插件后有没有提升？升级版本是否出现退步？DSH-Eval 围绕这些问题设计测评，让开发者和选型团队有依据地判断。</p>
-              <p>每项结论都需要结合任务、模型与运行环境来理解，方便你判断结果是否适用于自己的场景。</p>
+              <ul className="product-key-questions" aria-label="测评回答的三个问题">
+                <li>Agent 能完成哪些任务？</li>
+                <li>安装插件后有没有提升？</li>
+                <li>升级版本是否出现退步？</li>
+              </ul>
+              <p>DSH-Eval 帮助开发者和选型团队回答这三个问题。每项结论都结合具体任务、模型与运行环境，便于判断是否适用于自己的场景。</p>
             </div>
           </section>
 
@@ -70,7 +75,7 @@ export default function AboutPage() {
             <header className="reading-section-heading">
               <p className="section-label" data-site-label="section" lang="en">METHOD DESIGN</p>
               <h2 className="section-title" id="design-title" data-site-title="section">从任务到可比较的结论</h2>
-              <p>产品方法围绕以下五个环节设计。</p>
+              <p>为回答这些问题，测评方法围绕以下五个环节设计。</p>
             </header>
             <ol className="product-method-steps">
               {steps.map(([heading, copy]) => (
@@ -79,21 +84,7 @@ export default function AboutPage() {
             </ol>
           </section>
 
-          <section className="product-intro-section" id="reports-and-top100" aria-labelledby="reports-title">
-            <header className="reading-section-heading">
-              <p className="section-label" data-site-label="section" lang="en">REPORTS & DISCOVERY</p>
-              <h2 className="section-title" id="reports-title" data-site-title="section">从公开材料开始了解</h2>
-            </header>
-            <div className="product-intro-copy">
-              <p>目前可阅读 Memory 与 Deep Research 两份独立报告，查看各自的测试方法、结果和适用范围。</p>
-              <div className="method-capabilities">
-                <article><h3 data-site-title="group">Memory · 跨会话记忆</h3><p>查看记忆任务结果、测试条件和公开数据。</p><a href="/results/memory/2026-08-28">阅读报告 <span aria-hidden="true">→</span></a><a href="/methodology/memory">评测协议 <span aria-hidden="true">→</span></a></article>
-                <article><h3 data-site-title="group">Deep Research · 深度研究</h3><p>查看研究任务结果、基线差异和资源消耗。</p><a href="/results/deep-research/2026-09-04">阅读报告 <span aria-hidden="true">→</span></a><a href="/methodology/deep-research">评测方法 <span aria-hidden="true">→</span></a></article>
-              </div>
-              <p><a href="/top100/">Top100</a> 是 DSH-Eval 旗下的插件与 Skills 发现栏目。收录与热度不代表通过能力评测。</p>
-              <a className="method-results-link" href="/results">查看全部公开结果 <span aria-hidden="true">→</span></a>
-            </div>
-          </section>
+          <ProductFaq />
         </div>
       </main>
       <SiteFooter />

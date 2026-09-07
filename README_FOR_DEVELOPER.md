@@ -34,7 +34,7 @@ npm run build
 ## 主要文件
 
 - `app/page.tsx`：产品官网首页，提供品牌、产品定义、报告摘要和产品介绍入口。
-- `app/about/page.tsx`：产品介绍，说明 DSH Agent 与插件范围、通用方法设计、证据与原生基线，以及独立报告和 Top100 的关系；设计不等于功能已交付。
+- `app/about/page.tsx`：产品介绍，说明产品定位与方法设计；页底包含折叠式常见问题，原 `/faq` 永久跳转到 `/about#faq`。
 - `app/results/page.tsx`：公开评测结果中心。
 - `app/results/memory/2026-08-28/page.tsx`：首个记忆能力评测结果详情。
 - `app/results/deep-research/2026-09-04/page.tsx`：Deep Research V12 逐题状态、基线增量、资源用量和方法说明。

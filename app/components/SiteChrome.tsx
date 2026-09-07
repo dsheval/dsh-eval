@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Shared navigation spans independently deployed applications and uses full document navigation. */
 
-type NavKey = 'home' | 'about' | 'methodology' | 'results' | 'faq' | 'top100';
+type NavKey = 'home' | 'about' | 'methodology' | 'results' | 'top100';
 
 const navLinks: { href: string; key: NavKey; label: string }[] = [
   { href: '/', key: 'home', label: '首页' },
@@ -8,7 +8,6 @@ const navLinks: { href: string; key: NavKey; label: string }[] = [
   { href: '/results', key: 'results', label: '评测结果' },
   { href: '/methodology', key: 'methodology', label: '评测方法' },
   { href: '/about', key: 'about', label: '产品介绍' },
-  { href: '/faq', key: 'faq', label: '常见问题' },
 ];
 
 export function Brand() {
@@ -49,7 +48,7 @@ export function SiteFooter() {
         <nav className="dsh-footer-links" aria-label="页脚导航">
           <a href="https://github.com/dsheval/dsh-eval" target="_blank" rel="noopener noreferrer">评测源码 <span aria-hidden="true">↗</span><span className="dsh-visually-hidden">（新窗口打开）</span></a>
           <a href="https://github.com/dsheval/dsh-top100" target="_blank" rel="noopener noreferrer">Top100 源码 <span aria-hidden="true">↗</span><span className="dsh-visually-hidden">（新窗口打开）</span></a>
-          <a href="/faq">常见问题</a>
+          <a href="/about#faq">常见问题</a>
         </nav>
         <span className="dsh-copyright">© 2026 DSH-Eval</span>
       </div>

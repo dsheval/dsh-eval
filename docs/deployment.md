@@ -8,7 +8,7 @@
 
 | 路径 | 所属服务 |
 | --- | --- |
-| `/`、`/results/...`、`/methodology/...`、`/faq` | DSH-Eval |
+| `/`、`/results/...`、`/methodology/...`、`/about`（含常见问题；`/faq` 永久跳转到 `/about#faq`） | DSH-Eval |
 | `/eval-data/...` | DSH-Eval 的公开评测下载 |
 | `/robots.txt`、`/sitemap.xml` | DSH-Eval；robots 同时列出 Top100 sitemap |
 | `/top100/` 及其子路径 | 网关剥掉 `/top100` 前缀后交给 Top100 |
@@ -42,7 +42,7 @@ GitHub 对外信息统一使用以下内容；本地修改不会自动更新远�
 - `.github/workflows/ci.yml` 检查依赖安全、lint、类型、三个评测套件、应用构建、Compose 配置和完整容器。CI 只做验证，不持有服务器凭证，也不自动部署。功能改动由 PR 触发检查，主分支 push 再验证合并提交；同一分支的新提交会取消旧检查。
 - npm 审计必须检查完整依赖树；部分 `devDependencies` 会进入服务端构建。任何 high / critical 漏洞或审计异常都需要先处理，不能跳过。安装使用 `--no-audit` 避免隐式重复审计，随后明确执行完整审计；每个审计请求最多等待 5 分钟、重试 1 次，服务不可用时仍阻断发布。CI 每轮独立审计一次，Dockerfile 不重复审计；手动发布必须确认目标提交的审计已通过。
 - 应用只在 Docker 构建阶段编译一次，随后验收该镜像。Buildx 使用 GitHub Actions 缓存复用镜像层；缓存不替代每轮独立审计、测试和容器验收，也不会推送镜像。
-- `scripts/smoke-production.mjs` 验证九个页面（含产品介绍 `/about`）、生产 JS/CSS、品牌图标、公开结果 JSON 与 sitemap。必须对完整 Nginx + Node 服务运行，不能只对裸 Vinext 端口运行。
+- `scripts/smoke-production.mjs` 验证八个页面（产品介绍 `/about` 含常见问题）及 `/faq` 重定向、生产 JS/CSS、品牌图标、公开结果 JSON 与 sitemap。必须对完整 Nginx + Node 服务运行，不能只对裸 Vinext 端口运行。
 - `node --test scripts/test-legacy-links.mjs` 验证旧链接片段和参数兼容；`scripts/smoke-migration.mjs` 对独立联合网关或已授权发布后的公网执行只读迁移验收。
 - 本机缺少 Deep Research 私有题集时，对应测试会跳过，不能将其写成已通过。私有题集及任何秘密不得上传 GitHub 或 CI。
 
@@ -101,7 +101,7 @@ sudo -n docker exec -i dsh-eval-web node --input-type=module < scripts/smoke-pro
 
 1. 容器为 `healthy`，镜像 revision 标签与预定发布提交相同。
 2. `git status --porcelain` 为空；HEAD 位于 `main` 且与目标远端提交一致。
-3. 九页、JS/CSS、品牌图标、JSON、sitemap 及公网 HTTPS 可用。
+3. 八页、FAQ 重定向、JS/CSS、品牌图标、JSON、sitemap 及公网 HTTPS 可用。
 4. Top100 与网关保持运行；清理本次独立候选容器，不删除回滚镜像和备份。
 
 容器使用 `json-file` 日志驱动，单文件上限 10 MB，最多保留 3 个文件。发布后检查容器日志配置是否生效；这不替代发布记录和回滚镜像。
