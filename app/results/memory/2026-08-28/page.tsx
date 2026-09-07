@@ -31,14 +31,14 @@ const resultJsonLd = {
   '@type': 'Dataset',
   name: 'DSH-Eval LoCoMo20 跨会话记忆评测结果',
   description: 'DSH Agent 在无提示与明确提醒使用记忆两种模式下的跨会话记忆评测结果。',
-  url: `https://dsheval.ai${RESULT_URL}`,
+  url: `https://www.dsheval.ai${RESULT_URL}`,
   datePublished: '2026-08-28',
   dateModified: '2026-08-29',
-  creator: { '@type': 'Organization', name: 'DSH-Eval', url: 'https://dsheval.ai' },
+  creator: { '@type': 'Organization', name: 'DSH-Eval', url: 'https://www.dsheval.ai' },
   distribution: {
     '@type': 'DataDownload',
     encodingFormat: 'application/json',
-    contentUrl: 'https://dsheval.ai/eval-data/memory/locomo20-2026-08-28.json',
+    contentUrl: 'https://www.dsheval.ai/eval-data/memory/locomo20-2026-08-28.json',
   },
 };
 

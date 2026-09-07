@@ -1,23 +1,26 @@
 // Read-only checks against the combined Caddy + DSH-Eval + Top100 gateway.
-// For an isolated local gateway, set MIGRATION_HOST_HEADER=dsheval.ai.
+// For an isolated local gateway, set MIGRATION_HOST_HEADER=www.dsheval.ai.
+// To include its HTTP entrypoint, set MIGRATION_HTTP_BASE=http://127.0.0.1:PORT.
 import assert from 'node:assert/strict';
 import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 
 const base = new URL(process.argv[2] || 'http://127.0.0.1:3382');
-const primaryHost = process.env.MIGRATION_HOST_HEADER;
-const canonicalOrigin = 'https://dsheval.ai';
+const primaryHost = process.env.MIGRATION_HOST_HEADER
+  ? `www.${process.env.MIGRATION_HOST_HEADER.replace(/^www\./, '')}`
+  : !['dsheval.ai', 'www.dsheval.ai'].includes(base.hostname) ? 'www.dsheval.ai' : undefined;
+const canonicalOrigin = 'https://www.dsheval.ai';
 
-async function request(path, www = false) {
+async function request(path, apex = false) {
   const url = new URL(path, base);
   const headers = {};
-  if (primaryHost) headers.Host = www ? `www.${primaryHost}` : primaryHost;
-  else if (www) url.hostname = 'www.dsheval.ai';
+  if (primaryHost) headers.Host = apex ? primaryHost.replace(/^www\./, '') : primaryHost;
+  else url.hostname = apex ? 'dsheval.ai' : 'www.dsheval.ai';
   // Node fetch can discard a custom Host header; use HTTP directly so local
   // checks exercise the actual virtual hosts, with no DNS or hosts-file edits.
   return new Promise((resolve, reject) => {
     const send = url.protocol === 'https:' ? httpsRequest : httpRequest;
-    const req = send(url, { headers, signal: AbortSignal.timeout(15000) }, (res) => {
+    const req = send(url, { headers, servername: headers.Host, signal: AbortSignal.timeout(15000) }, (res) => {
       const chunks = [];
       res.on('data', (chunk) => chunks.push(chunk));
       res.on('error', reject);
@@ -77,23 +80,41 @@ for (const [path, marker] of [
   console.log(`PASS content and assets ${path}`);
 }
 
-for (const www of [false, true]) {
-  const manifestResponse = await request('/data/manifest.json', www);
+for (const apex of [false, true]) {
+  const manifestResponse = await request('/data/manifest.json', apex);
   assert.equal(manifestResponse.status, 200, 'Existing data API must not redirect');
   assert.ok(manifestResponse.headers.get('content-type')?.includes('application/json'));
   const manifest = await manifestResponse.json();
   assert.ok(manifest.datasets, 'Expected Top100 manifest');
-  const rankingsResponse = await request('/data/rankings-hot.json', www);
+  const rankingsResponse = await request('/data/rankings-hot.json', apex);
   assert.equal(rankingsResponse.status, 200, 'Legacy rankings must not redirect');
   await rankingsResponse.json();
   // GET is intentionally rejected. Do not emit test analytics into production.
-  assert.equal((await request('/api/events', www)).status, 405);
-  console.log(`PASS ${www ? 'www' : 'primary'} data and events routes`);
+  assert.equal((await request('/api/events', apex)).status, 405);
+  console.log(`PASS ${apex ? 'apex' : 'www'} data and events routes`);
 }
 
-const wwwPage = await request('/top100/?page=dsh', true);
-assert.equal(wwwPage.status, 308);
-assert.equal(wwwPage.headers.get('location'), `${canonicalOrigin}/top100/?page=dsh`);
+for (const path of ['/', '/top100/?page=dsh', '/results?from=github', '/dsheval/results?from=github']) {
+  const apexPage = await request(path, true);
+  assert.equal(apexPage.status, 308, `Apex redirect: ${path}`);
+  assert.equal(apexPage.headers.get('location'), `${canonicalOrigin}${path}`);
+}
+console.log('PASS apex pages redirect to www and preserve paths and queries');
+const httpBase = process.env.MIGRATION_HTTP_BASE || (!primaryHost ? 'http://dsheval.ai' : undefined);
+if (httpBase) {
+  for (const path of ['/', '/top100/?page=dsh']) {
+    const response = await request(new URL(path, httpBase).href, true);
+    assert.equal(response.status, 308, `HTTP apex redirect: ${path}`);
+    assert.equal(response.headers.get('location'), `${canonicalOrigin}${path}`);
+  }
+  for (const path of ['/data/manifest.json', '/api/events']) {
+    const response = await request(new URL(path, httpBase).href, true);
+    assert.equal(response.status, 308, `HTTP API upgrade: ${path}`);
+    assert.equal(response.headers.get('location'), `https://dsheval.ai${path}`);
+  }
+  console.log('PASS HTTP apex pages go directly to HTTPS www; legacy APIs keep their host');
+}
+
 const doubledSlash = await request('/dsheval//example.org/');
 assert.equal(doubledSlash.status, 308);
 assert.equal(new URL(doubledSlash.headers.get('location'), canonicalOrigin).origin, canonicalOrigin);
@@ -115,7 +136,11 @@ for (const path of ['/sitemap.xml', '/top100/sitemap.xml']) {
   const response = await request(path);
   assert.equal(response.status, 200, path);
   const xml = await response.text();
-  assert.ok(!xml.includes('https://dsheval.ai/dsheval'), path);
-  assert.ok(!xml.includes('https://www.dsheval.ai'), path);
+  const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]));
+  assert.ok(locations.length > 0, `Empty sitemap: ${path}`);
+  for (const location of locations) {
+    assert.equal(location.origin, canonicalOrigin, `Sitemap host: ${path}`);
+    assert.ok(!location.pathname.startsWith('/dsheval'), `Legacy sitemap path: ${path}`);
+  }
 }
 console.log('PASS combined website migration, standard domain and both sitemaps');

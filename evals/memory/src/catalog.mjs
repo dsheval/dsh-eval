@@ -135,7 +135,7 @@ export async function fetchRankings(url, fetchImpl = fetch) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `总榜拉不下来（--all-memory 需要能访问 dsheval.ai，或改用 --rankings 本地文件）: ${message}`,
+      `总榜拉不下来（--all-memory 需要能访问 www.dsheval.ai，或改用 --rankings 本地文件）: ${message}`,
     );
   }
 }

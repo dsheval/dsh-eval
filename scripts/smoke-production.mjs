@@ -65,7 +65,8 @@ for (const [path, expected] of pages) {
   }
 
   const canonical = html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/);
-  if (!canonical || new URL(canonical[1]).href !== `https://dsheval.ai${path}`) throw new Error(`Wrong canonical: ${path}`);
+  if (!canonical || new URL(canonical[1]).href !== `https://www.dsheval.ai${path}`) throw new Error(`Wrong canonical: ${path}`);
+  if (html.includes('https://dsheval.ai')) throw new Error(`Old domain in page metadata or links: ${path}`);
   if (!html.includes('href="/top100/"')) throw new Error(`Missing Top100 navigation: ${path}`);
   for (const marker of ['class="dsh-site-header"', 'class="dsh-site-footer"', 'class="dsh-mobile-menu"', '公开评测，发现值得关注的项目。', '© 2026 DSH-Eval', 'href="/site-chrome.css?v=20260905-type8c"']) {
     if (!html.includes(marker)) throw new Error(`Missing shared website shell: ${path}, ${marker}`);
@@ -115,6 +116,10 @@ if (!sitemap.ok || !sitemapText.includes('/methodology/memory') || !sitemapText.
   throw new Error('Sitemap failed');
 }
 if (!sitemapText.includes('/results/memory/2026-08-28') || oldReportPaths.some(([oldPath]) => sitemapText.includes(oldPath))) throw new Error('Sitemap must use dated report URLs');
+const sitemapLocations = [...sitemapText.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]));
+if (sitemapLocations.length !== pages.length || sitemapLocations.some((url) => url.origin !== 'https://www.dsheval.ai')) {
+  throw new Error('Sitemap must list every page on the www origin');
+}
 const researchResponse = await request('/eval-data/deep-research/v12/results.json');
 if (!researchResponse.ok) throw new Error('Deep Research download failed');
 const research = await researchResponse.json();
@@ -123,7 +128,7 @@ if (research.records?.length !== 40 || research.suiteId !== 'dsh-research-eval-v
 }
 const robots = await request('/robots.txt');
 const robotsText = await robots.text();
-if (!robots.ok || !robotsText.includes('https://dsheval.ai/sitemap.xml') || !robotsText.includes('https://dsheval.ai/top100/sitemap.xml')) {
+if (!robots.ok || !robotsText.includes('https://www.dsheval.ai/sitemap.xml') || !robotsText.includes('https://www.dsheval.ai/top100/sitemap.xml')) {
   throw new Error('Robots must advertise both website sitemaps');
 }
 const legacyScript = await request('/legacy-top100.js');

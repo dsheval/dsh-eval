@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://dsheval.ai'),
+  metadataBase: new URL('https://www.dsheval.ai'),
   title: {
     default: 'DSH-Eval · Agent 与插件公开评测',
     template: '%s',

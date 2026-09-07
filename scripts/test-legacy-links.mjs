@@ -10,7 +10,7 @@ function destination(path) {
   runInNewContext(source, {
     URL,
     window: { location: {
-      href: `https://dsheval.ai${path}`,
+      href: `https://www.dsheval.ai${path}`,
       replace: (value) => { result = value; },
     } },
   });

@@ -2,7 +2,7 @@
   "id": "dsh-memory-catalog-v2",
   "profile": "memory-eval",
   "port": 3180,
-  "rankingsUrl": "https://dsheval.ai/data",
+  "rankingsUrl": "https://www.dsheval.ai/data",
   "baseline": {
     "id": "C0",
     "plugin": "none",

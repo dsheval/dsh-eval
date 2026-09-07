@@ -16,7 +16,7 @@ export default function ResearchResultsPage() {
   return <>
     <a className="skip-link" href="#main-content">跳到主要内容</a><SiteHeader active="results" />
     <main id="main-content" className="content-page reading-page report-page benchmark-report research-report">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Dataset', name: `DSH-Eval 深度研究评测 · ${researchPublicationLabel}`, version: 'V12', description: 'C0 与七个插件的 40 条脱敏记录，包含派生诊断；本轮复用部分已验证的历史记录。', url: `https://dsheval.ai${researchUrl}`, datePublished: researchDate, creator: { '@type': 'Organization', name: 'DSH-Eval' }, distribution: { '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: `https://dsheval.ai${researchDownloadUrl}/results.json` } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'Dataset', name: `DSH-Eval 深度研究评测 · ${researchPublicationLabel}`, version: 'V12', description: 'C0 与七个插件的 40 条脱敏记录，包含派生诊断；本轮复用部分已验证的历史记录。', url: `https://www.dsheval.ai${researchUrl}`, datePublished: researchDate, creator: { '@type': 'Organization', name: 'DSH-Eval' }, distribution: { '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: `https://www.dsheval.ai${researchDownloadUrl}/results.json` } }) }} />
       <ReportCover
         title="深度研究评测报告"
         label="DEEP RESEARCH EVALUATION"
