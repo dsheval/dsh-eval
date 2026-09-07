@@ -6,9 +6,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: `${ORIGIN}/`,
-      lastModified: new Date('2026-09-04'),
+      lastModified: new Date('2026-09-07'),
       changeFrequency: 'weekly',
       priority: 1,
+    },
+    {
+      url: `${ORIGIN}/about`,
+      lastModified: new Date('2026-09-07'),
+      changeFrequency: 'monthly',
+      priority: 0.9,
     },
     {
       url: `${ORIGIN}/results`,
@@ -48,7 +54,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${ORIGIN}/faq`,
-      lastModified: new Date('2026-09-02'),
+      lastModified: new Date('2026-09-07'),
       changeFrequency: 'monthly',
       priority: 0.7,
     },

@@ -10,9 +10,10 @@ const siteJsonLd = {
       '@type': 'Organization',
       '@id': 'https://www.dsheval.ai/#organization',
       name: 'DSH-Eval',
+      alternateName: ['DSHEval', 'DSHeval'],
       url: 'https://www.dsheval.ai/',
       logo: 'https://www.dsheval.ai/favicon-a.svg',
-      description: '面向 Agent 与插件生态的公开评测平台，在统一环境中执行真实任务，公开测试过程、结果与适用边界。',
+      description: '面向 DeepSeek Harness（DSH）Agent 与插件的通用测评平台，围绕任务执行、逐题证据、统一标签评分与原生基线比较设计。',
     },
     {
       '@type': 'WebSite',
@@ -29,7 +30,7 @@ export default function Home() {
   return (
     <>
       <a className="skip-link" href="#main-content">跳到主要内容</a>
-      <SiteHeader active="about" />
+      <SiteHeader active="home" />
 
       <main id="main-content" className="home-page home-product-page">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />

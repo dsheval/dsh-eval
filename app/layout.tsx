@@ -4,10 +4,10 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.dsheval.ai'),
   title: {
-    default: 'DSH-Eval · Agent 与插件公开评测',
+    default: 'DSH-Eval · 万物皆可测',
     template: '%s',
   },
-  description: 'DSH-Eval 在固定环境中执行真实任务，公开 Agent 与插件的测试条件、结果、可公开的证据与适用范围。',
+  description: 'DSH-Eval 是面向 DeepSeek Harness（DSH）Agent 与插件的通用测评平台。了解产品方法设计、独立测评报告与 Top100 发现栏目。',
   alternates: {
     canonical: '/',
   },
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     url: '/',
-    title: 'DSH-Eval · Agent 与插件公开评测',
-    description: '让每一项能力结论都建立在真实任务、闭合证据和可复现结果之上。',
+    title: 'DSH-Eval · 万物皆可测',
+    description: '面向 DeepSeek Harness（DSH）Agent 与插件的通用测评平台，围绕任务、逐题证据与原生基线比较设计。',
     siteName: 'DSH-Eval',
     type: 'website',
     locale: 'zh_CN',
@@ -42,8 +42,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DSH-Eval · Agent 与插件公开评测',
-    description: '让每一项能力结论都建立在真实任务、闭合证据和可复现结果之上。',
+    title: 'DSH-Eval · 万物皆可测',
+    description: '面向 DeepSeek Harness（DSH）Agent 与插件的通用测评平台，围绕任务、逐题证据与原生基线比较设计。',
     images: ['/og.png'],
   },
 };

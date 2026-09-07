@@ -10199,3 +10199,41 @@ main {
     --page-end-space: 48px;
   }
 }
+
+/* Product introduction reuses the existing reading-page type and spacing. */
+.product-intro-body { padding: 0 var(--page-gutter) var(--page-end-space); }
+.product-intro-section {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.7fr);
+  gap: var(--reading-section-gap);
+  padding-block: var(--reading-section-gap);
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 100px;
+}
+.product-intro-section p,
+.product-intro-section dd { font-size: 16px; line-height: 1.85; color: var(--muted); }
+.product-intro-section header > p:last-child { margin-top: 16px; }
+.product-intro-copy > p + p,
+.product-intro-copy > div + p,
+.product-intro-copy > dl + p { margin-top: 20px; }
+.product-intro-copy a { color: var(--pine); text-underline-offset: 4px; }
+.product-intro-copy > p a { text-decoration: underline; }
+.product-method-steps { list-style: decimal; margin: 0; padding-left: 1.5rem; }
+.product-method-steps li { padding-left: 8px; }
+.product-method-steps li + li { margin-top: 24px; }
+.product-method-steps li::marker { color: var(--pine); font-weight: 600; }
+.product-method-steps p { margin-top: 8px; }
+.product-evidence-levels { margin: 0; }
+.product-evidence-levels > div { padding: 16px 0; border-bottom: 1px solid var(--line); }
+.product-evidence-levels > div:first-child { padding-top: 0; }
+.product-evidence-levels dt { font-size: 16px; font-weight: 600; }
+.product-evidence-levels dd { margin: 4px 0 0; }
+.product-intro-copy .method-capabilities { margin-top: 24px; }
+.product-intro-copy .method-capabilities article > a { display: flex; width: fit-content; min-height: 44px; align-items: center; }
+@media (max-width: 960px) {
+  .product-intro-section { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}
+
+@media (max-width: 720px) {
+  .product-intro-body { padding-inline: 20px; }
+}
