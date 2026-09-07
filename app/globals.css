@@ -10210,8 +10210,13 @@ main {
   border-top: 1px solid var(--line);
   scroll-margin-top: 100px;
 }
-.product-intro-section p,
-.product-intro-section dd { font-size: 16px; line-height: 1.85; color: var(--muted); }
+.product-intro-page .product-intro-section:not(.faq-list) :is(p:not(.section-label), dd) {
+  --site-copy-body-size: 18px;
+  --site-copy-color: var(--ink);
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--ink);
+}
 .product-intro-section header > p:last-child { margin-top: 16px; }
 .product-intro-copy > p + p,
 .product-intro-copy > div + p,
@@ -10223,6 +10228,21 @@ main {
 .product-method-steps li + li { margin-top: 24px; }
 .product-method-steps li::marker { color: var(--pine); font-weight: 600; }
 .product-method-steps p { margin-top: 8px; }
+.product-intro-page :is(#definition, #method-design) > .reading-section-heading { margin: 0; }
+.product-intro-page :is(#definition, #method-design) .section-title { margin-bottom: 0; }
+.product-key-questions {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--pine);
+}
+.product-key-questions li { font-size: 22px; line-height: 1.5; font-weight: 600; color: var(--ink); }
+.product-intro-page #definition .product-intro-copy > p { margin: 0; }
+.product-intro-page .product-method-steps h3 { margin: 0; }
+.product-intro-page .product-method-steps p { margin: 8px 0 0; }
+.product-intro-page #method-design .reading-section-heading > p:last-child { margin-bottom: 0; }
 .product-evidence-levels { margin: 0; }
 .product-evidence-levels > div { padding: 16px 0; border-bottom: 1px solid var(--line); }
 .product-evidence-levels > div:first-child { padding-top: 0; }
@@ -10236,4 +10256,13 @@ main {
 
 @media (max-width: 720px) {
   .product-intro-body { padding-inline: 20px; }
+}
+
+/* Keep the embedded FAQ aligned with the other product sections. */
+.reading-page .product-intro-section.faq-list {
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.7fr);
+  padding: var(--reading-section-gap) 0;
+}
+@media (max-width: 960px) {
+  .reading-page .product-intro-section.faq-list { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 }

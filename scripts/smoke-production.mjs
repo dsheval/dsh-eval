@@ -10,7 +10,6 @@ const pages = [
   ['/results', 'result-report-status'],
   ['/results/memory/2026-08-28', 'verification-run-sequence'],
   ['/results/deep-research/2026-09-04', 'research-overview'],
-  ['/faq', 'inner-page-hero'],
 ];
 const pageNames = {
   '/methodology': '评测方法',
@@ -19,7 +18,6 @@ const pageNames = {
   '/results': '评测结果',
   '/results/memory/2026-08-28': '跨会话记忆评测报告',
   '/results/deep-research/2026-09-04': '深度研究评测报告',
-  '/faq': '常见问题',
 };
 const oldReportPaths = [
   ['/results/deep-research/v12', '/results/deep-research/2026-09-04'],
@@ -33,6 +31,13 @@ for (const [oldPath, newPath] of oldReportPaths) {
   }
   console.log(`PASS report redirect ${oldPath}`);
 }
+
+const faqRedirect = await fetch(`${base}/faq?from=shared`, { redirect: 'manual', signal: AbortSignal.timeout(15000) });
+const faqDestination = new URL(faqRedirect.headers.get('location') || '', base);
+if (faqRedirect.status !== 308 || faqDestination.pathname !== '/about' || faqDestination.hash !== '#faq' || faqDestination.search !== '?from=shared') {
+  throw new Error('FAQ redirect must preserve the query and point to /about#faq');
+}
+console.log('PASS FAQ redirect');
 
 const assets = new Set();
 const icons = [
@@ -60,13 +65,15 @@ for (const [path, expected] of pages) {
     if (heading !== pageName) throw new Error(`Wrong page heading: ${path}`);
   }
   if (path === '/about') {
-    for (const marker of ['<title>DSH-Eval 是什么 · 产品介绍</title>', '万物皆可测', 'DeepSeek Harness', '五个环节设计', '两份独立报告']) {
+    const faq = html.match(/<section[^>]*id="faq"[^>]*>([\s\S]*?)<\/section>/)?.[1] || '';
+    if ([...faq.matchAll(/<details(?:\s|>)/g)].length !== 6 || /<details[^>]*\bopen\b/.test(faq)) throw new Error('Expected six collapsed FAQs');
+    for (const marker of ['<title>DSH-Eval 是什么 · 产品介绍</title>', '万物皆可测', 'DeepSeek Harness', '五个环节设计', 'id="faq"', 'FAQPage', '如何提交项目或对结果提出异议？']) {
       if (!html.includes(marker)) throw new Error(`Missing product introduction: ${marker}`);
     }
   }
   const nav = html.match(/<nav[^>]*aria-label="DSH-Eval 主导航"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
   const navHrefs = [...nav.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
-  if (JSON.stringify(navHrefs) !== JSON.stringify(['/', '/top100/', '/results', '/methodology', '/about', '/faq'])) {
+  if (JSON.stringify(navHrefs) !== JSON.stringify(['/', '/top100/', '/results', '/methodology', '/about'])) {
     throw new Error(`Wrong primary navigation order: ${path}`);
   }
   if (path.startsWith('/results/')) {
@@ -128,7 +135,7 @@ if (!sitemap.ok || !sitemapText.includes('https://www.dsheval.ai/about</loc>') |
 }
 if (!sitemapText.includes('/results/memory/2026-08-28') || oldReportPaths.some(([oldPath]) => sitemapText.includes(oldPath))) throw new Error('Sitemap must use dated report URLs');
 const sitemapLocations = [...sitemapText.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]));
-if (sitemapLocations.length !== pages.length || sitemapLocations.some((url) => url.origin !== 'https://www.dsheval.ai')) {
+if (sitemapLocations.some((url) => url.pathname === '/faq') || sitemapLocations.length !== pages.length || sitemapLocations.some((url) => url.origin !== 'https://www.dsheval.ai')) {
   throw new Error('Sitemap must list every page on the www origin');
 }
 const researchResponse = await request('/eval-data/deep-research/v12/results.json');

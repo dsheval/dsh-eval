@@ -35,6 +35,7 @@ async function request(path, apex = false) {
 }
 
 for (const [path, target] of [
+  ['/faq?from=shared', '/about?from=shared#faq'],
   ['/dsheval', '/'],
   ['/dsheval/?from=github', '/?from=github'],
   ['/dsheval/results?from=github', '/results?from=github'],
