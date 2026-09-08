@@ -12,7 +12,7 @@ const siteJsonLd = {
       name: 'DSH-Eval',
       alternateName: ['DSHEval', 'DSHeval'],
       url: 'https://www.dsheval.ai/',
-      logo: 'https://www.dsheval.ai/favicon-a.svg',
+      logo: 'https://www.dsheval.ai/brand-mark.svg?v=20260908-slashed-d1',
       description: '面向 DeepSeek Harness（DSH）Agent 与插件的通用测评平台，围绕任务执行、逐题证据、统一标签评分与原生基线比较设计。',
     },
     {

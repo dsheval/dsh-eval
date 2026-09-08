@@ -49,6 +49,8 @@ npm run build
 - `app/layout.tsx`：页面标题、SEO、Open Graph 和分享图配置。
 - `app/sitemap.ts`：生成 `/sitemap.xml`。
 - `public/og.png`：社交平台分享预览图。
+- `public/brand-mark.svg`：官网与 Top100 共用的精修斜切 D，用于独立品牌素材与结构化数据；页头/页脚仅保留 DSH / EVAL 字标。字形与切口保持母版，不通过字体或生成式图像重绘。
+- `public/favicon-a.svg` / `.png`、`apple-touch-icon-a.png`：`app/layout.tsx` 的实际图标入口；无 `-a` 的同名文件与 `favicon.ico` 保留兼容。手机收藏图标为 180×180 米白底。图标与分享图缓存版本为 `20260908-slashed-d1`，导航 CSS 版本为 `20260908-wordmark2`，改动时同步 Top100 三页引用与共用 CSS。
 - `app/components/MemoryBenchmark.tsx`：记忆插件双轨协议、排名和过程指标。
 - `public/eval-data/memory/`：评测运行器导出的脱敏榜单快照。
 - `evals/memory/`：可独立执行的记忆评测代码、题集、协议、评分与单测。
