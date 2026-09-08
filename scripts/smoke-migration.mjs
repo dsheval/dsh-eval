@@ -59,7 +59,7 @@ for (const [path, target] of [
 for (const [path, marker] of [
   ['/', '万物皆可测'],
   ['/about', 'product-intro-page'],
-  ['/results', 'result-report-status'],
+  ['/results', 'results-index-list'],
   ['/top100/', 'data-content-switch="ranking"'],
   ['/top100/?page=dsh', 'data-content-switch="dsh"'],
   ['/top100/skills.html', 'Skills'],
