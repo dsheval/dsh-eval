@@ -24,7 +24,7 @@ function NavigationLinks({ active }: { active?: NavKey }) {
 
 export function SiteHeader({ active }: { active?: NavKey }) {
   return (
-    <header className="dsh-site-header">
+    <header className="dsh-site-header dsh-nav-emphasis">
       <div className="dsh-site-container dsh-header-inner">
         <a className="dsh-brand-link" href="/" aria-label="DSH-Eval 首页"><Brand /></a>
         <nav className="dsh-desktop-nav" aria-label="DSH-Eval 主导航"><NavigationLinks active={active} /></nav>

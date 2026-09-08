@@ -7,7 +7,7 @@ const pages = [
   ['/methodology', 'inner-page-hero'],
   ['/methodology/memory', 'memory-protocol-timeline'],
   ['/methodology/deep-research', 'research-protocol-page'],
-  ['/results', 'result-report-status'],
+  ['/results', 'results-index-list'],
   ['/results/memory/2026-08-28', 'verification-run-sequence'],
   ['/results/deep-research/2026-09-04', 'research-overview'],
 ];
@@ -68,6 +68,15 @@ for (const [path, expected] of pages) {
     throw new Error(`Page failed: ${path}, HTTP ${response.status}`);
   }
   if ([...html.matchAll(/<h1(?:\s|>)/g)].length !== 1) throw new Error(`Expected one h1: ${path}`);
+  if (path === '/results') {
+    const reportList = html.match(/<section[^>]*class="results-index-list"[^>]*>([\s\S]*?)<\/section>/)?.[1] || '';
+    for (const reportPath of ['/results/deep-research/2026-09-04', '/results/memory/2026-08-28']) {
+      if (!reportList.includes(`href="${reportPath}"`)) throw new Error(`Missing report link: ${reportPath}`);
+    }
+    if ([...reportList.matchAll(/class="results-index-report"/g)].length !== 2 || [...reportList.matchAll(/已完成测试/g)].length !== 2) {
+      throw new Error('Expected two completed public reports');
+    }
+  }
   const pageName = pageNames[path];
   if (pageName) {
     const title = `${pageName} · DSH-Eval`;
@@ -97,7 +106,7 @@ for (const [path, expected] of pages) {
   if (!canonical || new URL(canonical[1]).href !== `https://www.dsheval.ai${path}`) throw new Error(`Wrong canonical: ${path}`);
   if (html.includes('https://dsheval.ai')) throw new Error(`Old domain in page metadata or links: ${path}`);
   if (!html.includes('href="/top100/"')) throw new Error(`Missing Top100 navigation: ${path}`);
-  for (const marker of ['class="dsh-site-header"', 'class="dsh-site-footer"', 'class="dsh-mobile-menu"', '公开评测，发现值得关注的项目。', '© 2026 DSH-Eval', 'href="/site-chrome.css?v=20260908-wordmark2"']) {
+  for (const marker of ['class="dsh-site-header dsh-nav-emphasis"', 'class="dsh-site-footer"', 'class="dsh-mobile-menu"', '公开评测，发现值得关注的项目。', '© 2026 DSH-Eval', 'href="/site-chrome.css?v=20260908-nav3"']) {
     if (!html.includes(marker)) throw new Error(`Missing shared website shell: ${path}, ${marker}`);
   }
   if (oldReportPaths.some(([oldPath]) => html.includes(`href="${oldPath}"`))) throw new Error(`Old report link remains: ${path}`);

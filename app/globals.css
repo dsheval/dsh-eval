@@ -10212,10 +10212,10 @@ main {
 }
 .product-intro-page .product-intro-section:not(.faq-list) :is(p:not(.section-label), dd) {
   --site-copy-body-size: 18px;
-  --site-copy-color: var(--ink);
+  --site-copy-color: var(--muted);
   font-size: 18px;
   line-height: 1.8;
-  color: var(--ink);
+  color: var(--muted);
 }
 .product-intro-section header > p:last-child { margin-top: 16px; }
 .product-intro-copy > p + p,
@@ -10225,23 +10225,23 @@ main {
 .product-intro-copy > p a { text-decoration: underline; }
 .product-method-steps { list-style: decimal; margin: 0; padding-left: 1.5rem; }
 .product-method-steps li { padding-left: 8px; }
-.product-method-steps li + li { margin-top: 24px; }
-.product-method-steps li::marker { color: var(--pine); font-weight: 600; }
+.product-method-steps li + li { margin-top: 32px; }
+.product-method-steps li::marker { color: var(--pine); font-size: 20px; font-weight: 600; }
 .product-method-steps p { margin-top: 8px; }
 .product-intro-page :is(#definition, #method-design) > .reading-section-heading { margin: 0; }
 .product-intro-page :is(#definition, #method-design) .section-title { margin-bottom: 0; }
 .product-key-questions {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   list-style: none;
   margin: 0 0 20px;
   padding: 0 0 0 20px;
   border-left: 2px solid var(--pine);
 }
-.product-key-questions li { font-size: 22px; line-height: 1.5; font-weight: 600; color: var(--ink); }
+.product-key-questions li { font-size: 20px; line-height: 1.6; font-weight: 600; color: var(--ink); }
 .product-intro-page #definition .product-intro-copy > p { margin: 0; }
-.product-intro-page .product-method-steps h3 { margin: 0; }
-.product-intro-page .product-method-steps p { margin: 8px 0 0; }
+#main-content.product-intro-page .product-method-steps h3 { margin: 0; font-size: 20px; line-height: 1.5; font-weight: 600; }
+.product-intro-page .product-method-steps p { margin: 6px 0 0; }
 .product-intro-page #method-design .reading-section-heading > p:last-child { margin-bottom: 0; }
 .product-evidence-levels { margin: 0; }
 .product-evidence-levels > div { padding: 16px 0; border-bottom: 1px solid var(--line); }
@@ -10265,4 +10265,74 @@ main {
 }
 @media (max-width: 960px) {
   .reading-page .product-intro-section.faq-list { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}
+
+/* Report and method actions use compact, explicit destinations. */
+.minimal-results-list .result-report-link,
+.results-index-page .result-report-link,
+.method-capabilities a {
+  min-height: 44px; width: fit-content; padding: 10px 16px;
+  border: 1px solid var(--pine); background: transparent; color: var(--pine);
+  font-family: var(--site-ui-font); font-size: 14px; font-weight: 600;
+  gap: 8px; text-decoration: none;
+}
+.minimal-results-list .result-report-link { margin-top: 24px; }
+.minimal-results-list .result-report-entry:is(:hover, :focus-visible) {
+  border-color: var(--pine);
+}
+.minimal-results-list .result-report-entry:is(:hover, :focus-visible) .result-report-link,
+.method-capabilities a:hover { color: #174c41; border-color: #174c41; background: #edf2ef; text-decoration: none; }
+.method-capabilities a:focus-visible,
+.minimal-results-list .result-report-entry:focus-visible { outline: 2px solid var(--pine); outline-offset: 4px; }
+/* Keep the homepage relationship note subordinate to the main content. */
+.home-product-page .home-product-relationship p { font-size: clamp(20px, 2.2vw, 28px); }
+
+/* Method index: a focused introduction beside two destinations. */
+.method-index-layout { min-height: 100svh; display: flex; flex-direction: column; }
+.method-index-layout > :is(.dsh-site-header, .dsh-site-footer) { flex-shrink: 0; }
+#main-content:is(.method-overview-page, .results-index-page) {
+  flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  align-content: stretch; align-items: center; gap: clamp(64px, 7vw, 120px);
+  width: 100%; max-width: none; margin: 0;
+  padding: clamp(40px, 5vh, 64px) var(--page-gutter);
+}
+:is(.method-overview-page, .results-index-page) .inner-page-hero { min-height: 400px; padding: 32px 0; border-bottom: 0; }
+:is(.method-overview-page, .results-index-page) .inner-page-hero-summary { max-width: 400px; }
+.method-overview-page .method-index-entries { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0; }
+.method-overview-page .method-index-entries article { border: 0; padding: 32px 0; }
+.method-overview-page .method-index-entries article + article { border-top: 1px solid var(--line-soft); }
+#main-content.method-overview-page .method-index-entries h2 { margin: 0; font-size: 28px; font-weight: 600; line-height: 1.4; }
+.method-overview-page .method-index-entries p { margin: 16px 0 24px; }
+@media (max-width: 960px) {
+  #main-content:is(.method-overview-page, .results-index-page) { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 40px; align-content: start; }
+  :is(.method-overview-page, .results-index-page) .inner-page-hero { min-height: 0; padding: 0; }
+  :is(.method-overview-page, .results-index-page) .inner-page-hero-summary { max-width: 680px; }
+  .method-overview-page .method-index-entries article { padding-block: 28px; }
+}
+@media (max-width: 600px) {
+  #main-content:is(.method-overview-page, .results-index-page) { padding: 32px 20px; gap: 24px; }
+  #main-content.method-overview-page .method-index-entries h2 { font-size: 24px; }
+}
+
+/* Reports share the method index layout, with findings kept beside their context. */
+.results-index-page .results-index-list { display: grid; gap: 0; padding: 0; }
+.results-index-report { display: block; padding: 32px 0; color: var(--ink); text-decoration: none; }
+.results-index-report + .results-index-report { border-top: 1px solid var(--line-soft); }
+.results-index-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 14px; }
+.results-index-meta > span { color: var(--pine); }
+#main-content.results-index-page .results-index-report h2 { font-size: 28px; line-height: 1.4; font-weight: 600; margin: 16px 0 10px; }
+.results-index-question { font-size: 16px; color: var(--muted); line-height: 1.75; margin: 0; }
+.results-index-finding { margin: 20px 0 6px; font-size: 16px; line-height: 1.75; }
+.results-index-finding strong { color: var(--pine); font-weight: 600; margin-right: 8px; }
+.results-index-scope { font-size: 14px; line-height: 1.6; color: var(--muted); margin: 0; }
+.results-index-page .result-report-link { margin-top: 20px; }
+.results-index-report:is(:hover, :focus-visible) h2 { color: var(--pine); }
+.results-index-report:is(:hover, :focus-visible) .result-report-link { background: #edf2ef; }
+.results-index-report:focus-visible { outline: 2px solid var(--pine); outline-offset: 4px; }
+.results-index-page .results-index-count { font-size: 14px; color: var(--muted); margin: 24px 0 0; }
+@media (max-width: 960px) {
+  .results-index-report { padding-block: 28px; }
+}
+@media (max-width: 600px) {
+  #main-content.results-index-page .results-index-report h2 { font-size: 24px; }
 }

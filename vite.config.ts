@@ -46,9 +46,17 @@ export default defineConfig(async () => {
 
   return {
     css: { postcss: { plugins: [tailwindcss()] } },
-    server: isCodexSeatbeltSandbox
-      ? { watch: { useFsEvents: false, usePolling: true } }
-      : undefined,
+    server: {
+      host: '127.0.0.1',
+      watch: isCodexSeatbeltSandbox ? { useFsEvents: false, usePolling: true } : undefined,
+      // Local integration: run Top100 with WEB_PORT=3100 npm run serve.
+      // Production continues to route these paths through its existing web server.
+      proxy: {
+        '^/top100(?:[/?]|$)': 'http://127.0.0.1:3100',
+        '/data/': 'http://127.0.0.1:3100',
+        '/api/events': 'http://127.0.0.1:3100',
+      },
+    },
     plugins: [
       vinext(),
       sites(),

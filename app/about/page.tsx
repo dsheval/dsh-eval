@@ -52,7 +52,6 @@ export default function AboutPage() {
           eyebrow="ABOUT DSH-EVAL"
           title="万物皆可测"
           description="DSH-Eval 是面向 DeepSeek Harness（DSH）Agent 与插件的通用测评平台。通过任务、证据与基线比较，帮助开发者和选型团队判断能力与插件增益。"
-          actions={<a className="method-results-link" href="#method-design">了解方法设计 <span aria-hidden="true">↓</span></a>}
         />
 
         <div className="product-intro-body">
