@@ -41,9 +41,20 @@ console.log('PASS FAQ redirect');
 
 const assets = new Set();
 const icons = [
+  ['/favicon-a.svg?v=20260908-slashed-d1', 'image/svg+xml'],
+  ['/favicon-a.png?v=20260908-slashed-d1', 'image/png'],
+  ['/apple-touch-icon-a.png?v=20260908-slashed-d1', 'image/png'],
+];
+// Standalone brand art and old bookmarks remain available without requiring
+// them to appear as link elements in the wordmark-only page navigation.
+const additionalBrandAssets = [
+  ['/brand-mark.svg?v=20260908-slashed-d1', 'image/svg+xml'],
   ['/favicon-a.svg', 'image/svg+xml'],
   ['/favicon-a.png', 'image/png'],
   ['/apple-touch-icon-a.png', 'image/png'],
+  ['/favicon.svg', 'image/svg+xml'],
+  ['/favicon.png', 'image/png'],
+  ['/apple-touch-icon.png', 'image/png'],
 ];
 
 function request(path) {
@@ -86,7 +97,7 @@ for (const [path, expected] of pages) {
   if (!canonical || new URL(canonical[1]).href !== `https://www.dsheval.ai${path}`) throw new Error(`Wrong canonical: ${path}`);
   if (html.includes('https://dsheval.ai')) throw new Error(`Old domain in page metadata or links: ${path}`);
   if (!html.includes('href="/top100/"')) throw new Error(`Missing Top100 navigation: ${path}`);
-  for (const marker of ['class="dsh-site-header"', 'class="dsh-site-footer"', 'class="dsh-mobile-menu"', '公开评测，发现值得关注的项目。', '© 2026 DSH-Eval', 'href="/site-chrome.css?v=20260905-type8c"']) {
+  for (const marker of ['class="dsh-site-header"', 'class="dsh-site-footer"', 'class="dsh-mobile-menu"', '公开评测，发现值得关注的项目。', '© 2026 DSH-Eval', 'href="/site-chrome.css?v=20260908-wordmark2"']) {
     if (!html.includes(marker)) throw new Error(`Missing shared website shell: ${path}, ${marker}`);
   }
   if (oldReportPaths.some(([oldPath]) => html.includes(`href="${oldPath}"`))) throw new Error(`Old report link remains: ${path}`);
@@ -115,7 +126,7 @@ for (const url of assets) {
   }
 }
 
-for (const [path, type] of icons) {
+for (const [path, type] of [...icons, ...additionalBrandAssets]) {
   const response = await request(path);
   if (!response.ok || !response.headers.get('content-type')?.includes(type) || !(await response.arrayBuffer()).byteLength) {
     throw new Error(`Icon failed: ${path}`);
