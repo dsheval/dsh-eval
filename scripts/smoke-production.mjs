@@ -41,10 +41,20 @@ console.log('PASS FAQ redirect');
 
 const assets = new Set();
 const icons = [
+  ['/favicon-a.svg?v=20260908-slashed-d1', 'image/svg+xml'],
+  ['/favicon-a.png?v=20260908-slashed-d1', 'image/png'],
+  ['/apple-touch-icon-a.png?v=20260908-slashed-d1', 'image/png'],
+];
+// Standalone brand art and old bookmarks remain available without requiring
+// them to appear as link elements in the wordmark-only page navigation.
+const additionalBrandAssets = [
   ['/brand-mark.svg?v=20260908-slashed-d1', 'image/svg+xml'],
   ['/favicon-a.svg', 'image/svg+xml'],
   ['/favicon-a.png', 'image/png'],
   ['/apple-touch-icon-a.png', 'image/png'],
+  ['/favicon.svg', 'image/svg+xml'],
+  ['/favicon.png', 'image/png'],
+  ['/apple-touch-icon.png', 'image/png'],
 ];
 
 function request(path) {
@@ -116,7 +126,7 @@ for (const url of assets) {
   }
 }
 
-for (const [path, type] of icons) {
+for (const [path, type] of [...icons, ...additionalBrandAssets]) {
   const response = await request(path);
   if (!response.ok || !response.headers.get('content-type')?.includes(type) || !(await response.arrayBuffer()).byteLength) {
     throw new Error(`Icon failed: ${path}`);
