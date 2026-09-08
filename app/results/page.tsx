@@ -30,7 +30,6 @@ export default function ResultsPage() {
         <InnerPageHero
           eyebrow="PUBLIC RESULTS"
           title="评测结果"
-          actions={<p className="results-index-count">已公开 2 项评测</p>}
           description="查看 DSH-Eval 已公开的评测。每份报告都会说明评测对象、测试条件、证据、限制和复查状态。"
         />
 

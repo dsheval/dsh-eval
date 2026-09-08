@@ -40,7 +40,6 @@ export function ProductFaq() {
     <section className="product-intro-section faq-list" id="faq" aria-labelledby="faq-title">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <header className="reading-section-heading">
-        <p className="section-label" data-site-label="section" lang="en">FAQ</p>
         <h2 className="section-title" id="faq-title" data-site-title="section">常见问题</h2>
       </header>
       <div>

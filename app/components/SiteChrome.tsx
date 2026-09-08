@@ -49,6 +49,7 @@ export function SiteFooter() {
           <a href="https://github.com/dsheval/dsh-eval" target="_blank" rel="noopener noreferrer">评测源码 <span aria-hidden="true">↗</span><span className="dsh-visually-hidden">（新窗口打开）</span></a>
           <a href="https://github.com/dsheval/dsh-top100" target="_blank" rel="noopener noreferrer">Top100 源码 <span aria-hidden="true">↗</span><span className="dsh-visually-hidden">（新窗口打开）</span></a>
           <a href="/about#faq">常见问题</a>
+          <a href="/about#official">官方信息</a>
         </nav>
         <span className="dsh-copyright">© 2026 DSH-Eval</span>
       </div>
