@@ -3,7 +3,7 @@ import EvaluationEvidence from '@/app/components/EvaluationEvidence';
 import MemoryBenchmark from '@/app/components/MemoryBenchmark';
 import benchmark from '@/app/data/memory/locomo20-2026-08-28.json';
 import { SiteFooter, SiteHeader } from '@/app/components/SiteChrome';
-import { ReportCover, ReportResources, ReportNextLinks } from '@/app/components/ReportElements';
+import { ReportCover, ReportResources } from '@/app/components/ReportElements';
 
 const RESULT_URL = '/results/memory/2026-08-28';
 
@@ -51,19 +51,14 @@ export default function MemoryResultPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(resultJsonLd) }} />
         <ReportCover
           title="跨会话记忆评测报告"
-          label="MEMORY EVALUATION"
           date="2026-08-28"
-          description="换一个会话，Agent 还记得吗？用同一组题，对比不提醒与明确提醒使用记忆时的表现。"
           finding={`明确提示后，${benchmark.pluginCount} 个 Agent 的正确率均提升`}
-          context="正确率提升 10–60 个百分点。结果仅适用于本轮题集与环境，部分 Agent 共享核心实现。"
-          facts={[["参评 Agent", `${benchmark.pluginCount} 个`], ["每轨题目", `${benchmark.sampleSizePerTrack} 道`], ["提示方式", "无提示 / 有提示"]]}
-          methodUrl="/methodology/memory"
+          scope={`${benchmark.pluginCount} 个 Agent · 每组 ${benchmark.sampleSizePerTrack} 道题 · 无提示 / 有提示`}
         />
         <MemoryBenchmark />
         <EvaluationEvidence />
         <ReportResources dataFilename="跨会话记忆评测数据-2026-08-28.json" dataUrl="/eval-data/memory/locomo20-2026-08-28.json" codeUrl="https://github.com/dsheval/dsh-eval/tree/main/evals/memory" />
 
-        <ReportNextLinks />
       </main>
       <SiteFooter />
     </>

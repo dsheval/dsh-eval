@@ -73,8 +73,8 @@ for (const [path, expected] of pages) {
     for (const reportPath of ['/results/deep-research/2026-09-04', '/results/memory/2026-08-28']) {
       if (!reportList.includes(`href="${reportPath}"`)) throw new Error(`Missing report link: ${reportPath}`);
     }
-    if ([...reportList.matchAll(/class="results-index-report"/g)].length !== 2 || [...reportList.matchAll(/已完成测试/g)].length !== 2) {
-      throw new Error('Expected two completed public reports');
+    if ([...reportList.matchAll(/class="results-index-report"/g)].length !== 2 || [...reportList.matchAll(/<time(?:\s|>)/g)].length !== 2) {
+      throw new Error('Expected two dated public reports');
     }
   }
   const pageName = pageNames[path];
@@ -98,8 +98,11 @@ for (const [path, expected] of pages) {
   }
   if (path.startsWith('/results/')) {
     for (const id of ['report-results', 'report-verification', 'report-resources']) {
-      if (!html.includes(`id="${id}"`) || !html.includes(`href="#${id}"`)) throw new Error(`Missing report section: ${path}, ${id}`);
+      if (!html.includes(`id="${id}"`)) throw new Error(`Missing report section: ${path}, ${id}`);
     }
+    const resources = html.match(/<details[^>]*id="report-resources"[^>]*>([\s\S]*?)<\/details>/);
+    if (!resources || /<details[^>]*id="report-resources"[^>]*\bopen\b/.test(resources[0])) throw new Error(`Expected collapsed report resources: ${path}`);
+    if ([...resources[1].matchAll(/<a(?:\s|>)/g)].length !== 2 || !resources[1].includes('结果数据（JSON）') || !resources[1].includes('评测代码')) throw new Error(`Expected data and code links: ${path}`);
   }
 
   const canonical = html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/);
