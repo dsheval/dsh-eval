@@ -27,14 +27,15 @@ const currentTestSteps = [
 export default function EvaluationEvidence() {
   return (
     <section className="proof-section" id="result-evidence">
-      <ReportStatus evidence="0 次评测故障，结果数据与评测代码已公开。" limitation="同一组 20 道题、两种提示方式；结果仅适用于本轮环境，部分 Agent 共享核心实现。" />
+      <ReportStatus limitation="结果仅适用于本轮题集与环境，部分 Agent 共享核心实现。" />
 
-      <details className="verification-disclosure" id="evaluation-pipeline">
+      <details className="verification-disclosure report-disclosure" id="evaluation-pipeline">
         <summary>
-          <div><h2 className="verification-disclosure-title" data-site-title="minor">评测与验证说明</h2><b>测试方法、证据与适用范围</b></div>
+          <div><h2 className="verification-disclosure-title" data-site-title="minor">评测与验证说明</h2></div>
           <i aria-hidden="true">+</i>
         </summary>
         <div className="verification-content">
+          <p data-site-copy="note">0 次评测故障，结果数据与评测代码已公开。</p>
           <section className="verification-block" aria-labelledby="verification-test-title">
             <header><span data-site-label="section" lang="en">CURRENT TEST</span><h3 id="verification-test-title" data-site-title="group">本次测试怎样执行</h3></header>
             <div className="verification-test-body">

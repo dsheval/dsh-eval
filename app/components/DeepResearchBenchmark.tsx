@@ -27,48 +27,39 @@ const number = (n: number | null) => n == null ? '—' : n.toLocaleString('zh-CN
 const minutes = (n: number | null) => n == null ? '—' : `${(n / 60000).toFixed(1)} 分钟`;
 const percent = (n: number | null) => n == null ? '—' : `${(n * 100).toFixed(1)}%`;
 
-function reportOutcome(records: ResearchRecord[]) {
-  return Object.entries(statuses).flatMap(([status, label]) => {
-    const count = records.filter(r => r.status === status).length;
-    return count ? [`${count} 题${label}`] : [];
-  }).join('，');
-}
-
 export default function DeepResearchBenchmark({ conditions, records }: {
   conditions: ResearchCondition[];
   records: ResearchRecord[];
 }) {
   return (
     <section className="research-benchmark" aria-labelledby="research-results-title">
-      <ReportHeading id="research-results-title" title="研究任务表现" sample="4 个独立题面 · 小样本" />
-      <div className="research-overview report-result-surface">
+      <ReportHeading id="research-results-title" title="结果对比" sample="点击插件查看详情" />
+      <div className="research-overview report-result-surface" aria-label="检索与报告通过情况">
         <div className="research-overview-head" aria-hidden="true">
-          <span>插件</span><span>找对答案 <small>2 题</small></span><span>完成报告 <small>2 题</small></span><span />
+          <span>参评插件</span><span>检索通过 / 2 题</span><span>报告通过 / 2 题</span><span />
         </div>
         {conditions.map(condition => {
           const baseline = condition.condition === 'C0';
           const name = baseline ? 'DSH 原生基线' : condition.plugin;
           const rows = records.filter(r => r.condition === condition.condition);
-          const longform = rows.filter(r => r.taskId === 'R6' || r.taskId === 'R7');
           return (
             <details className={`research-plugin${baseline ? ' research-plugin-baseline' : ''}`} key={condition.condition}>
               <summary className="research-plugin-summary">
                 <span className="research-plugin-name"><strong>{name}</strong>{baseline ? <small data-site-copy="note">不安装研究插件</small> : null}</span>
-                <span className="research-answer-result"><span className="research-mobile-label">找对答案 · 2 题</span>{condition.sfPassed} 题通过</span>
-                <span className="research-report-result"><span className="research-mobile-label">完成报告 · 2 题</span>{reportOutcome(longform)}</span>
+                <span className="research-task-cell"><span className="research-mobile-label">检索通过 / 2 题</span><strong>{condition.sfPassed} / 2</strong></span>
+                <span className="research-task-cell"><span className="research-mobile-label">报告通过 / 2 题</span><strong>{condition.lfPassed} / 2</strong><small>{condition.lfPartial} 题部分完成</small></span>
                 <span className="research-expand" aria-label="展开或收起详情">+</span>
               </summary>
               <div className="research-plugin-detail">
+                <h3 data-site-title="minor">{name} · 任务与资源明细</h3>
                 <div className="research-task-list">
-                  <h3 data-site-title="minor">各项任务表现</h3>
                   {rows.map(record => (
-                    <details className={`research-task${record.taskId === 'R10' ? ' research-task-derived' : ''}`} key={record.taskId}>
-                      <summary>
-                        <span>{taskNames[record.taskId]}{record.taskId === 'R10' ? <small data-site-copy="note">复用健康报告，不单独运行</small> : null}</span>
+                    <section className={`research-task-card${record.taskId === 'R10' ? ' research-task-derived' : ''}`} key={record.taskId}>
+                      <header>
+                        <h4>{taskNames[record.taskId]}</h4>
                         <span className={`research-task-status status-${record.status.toLowerCase()}`}>{statuses[record.status] ?? record.status}</span>
-                        <span className="research-expand" aria-hidden="true">+</span>
-                      </summary>
-                      <div className="research-task-detail">
+                      </header>
+                      {record.taskId === 'R10' ? <p data-site-copy="note">复用健康报告的派生诊断，不计入上方四项独立任务。</p> : null}
                         <p data-site-copy="note">{uplifts[record.uplift]}</p>
                         <dl className="research-metrics">
                           <div><dt>耗时</dt><dd>{minutes(record.latencyMs)}</dd></div>
@@ -78,8 +69,7 @@ export default function DeepResearchBenchmark({ conditions, records }: {
                           <div><dt>引用忠实度</dt><dd>{percent(record.faithfulness)}</dd></div>
                         </dl>
                         <p data-site-copy="note">{record.reused ? '复用上一批已验证的记录。' : '本轮重新运行的多跳检索题。'}{record.taskId === 'R10' ? ' 派生诊断的耗时和 Token 不适用。' : ` 运行保护：${record.budget ? budgetLabels[record.budget] ?? record.budget : '未触发'}。`}</p>
-                      </div>
-                    </details>
+                    </section>
                   ))}
                 </div>
                 <div className="research-plugin-metrics">
@@ -98,7 +88,7 @@ export default function DeepResearchBenchmark({ conditions, records }: {
           );
         })}
       </div>
-      <p className="research-table-note" data-site-copy="note">部分完成表示仍有缺项，未达到通过标准。点击插件可展开任务和运行指标；插件顺序沿用本轮榜单。</p>
+      <p className="research-table-note" data-site-copy="note">部分完成不计为通过。原生基线不参与排名。</p>
     </section>
   );
 }
