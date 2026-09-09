@@ -10331,15 +10331,31 @@ main {
 .home-product-page .home-product-relationship p { font-size: clamp(20px, 2.2vw, 28px); }
 
 /* Method index: a focused introduction beside two destinations. */
-.method-index-layout { min-height: 100svh; display: flex; flex-direction: column; }
+.method-index-layout {
+  --index-block-space: clamp(40px, 5vh, 64px);
+  /* Desktop footer: 96px content plus its 1px border. Reserve the same
+     visual frame on both routes even when the right column grows. */
+  --index-footer-space: 97px;
+  min-height: 100svh; display: flex; flex-direction: column;
+}
 .method-index-layout > :is(.dsh-site-header, .dsh-site-footer) { flex-shrink: 0; }
 #main-content:is(.method-overview-page, .results-index-page) {
   flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
   align-content: stretch; align-items: center; gap: clamp(64px, 7vw, 120px);
   width: 100%; max-width: none; margin: 0;
-  padding: clamp(40px, 5vh, 64px) var(--page-gutter);
+  padding: var(--index-block-space) var(--page-gutter);
 }
-:is(.method-overview-page, .results-index-page) .inner-page-hero { min-height: 400px; padding: 32px 0; border-bottom: 0; }
+:is(.method-overview-page, .results-index-page) .inner-page-hero {
+  min-height: 400px; padding: 32px 0; border-bottom: 0;
+  align-self: start;
+  /* Centre the original 400px title block in the viewport's reading frame,
+     not in a grid row whose height depends on the report list. */
+  margin-block-start: max(0px, calc((100svh - var(--site-header-height) - var(--index-footer-space) - 400px) / 2 - var(--index-block-space)));
+}
+@media (min-width: 961px) and (max-width: 1100px) {
+  /* The shared footer wraps into two 44px rows, an 8px gap and 40px padding. */
+  .method-index-layout { --index-footer-space: 137px; }
+}
 :is(.method-overview-page, .results-index-page) .inner-page-hero-summary { max-width: 400px; }
 .method-overview-page .method-index-entries { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0; }
 .method-overview-page .method-index-entries article { border: 0; padding: 32px 0; }
@@ -10348,7 +10364,7 @@ main {
 .method-overview-page .method-index-entries p { margin: 16px 0 24px; }
 @media (max-width: 960px) {
   #main-content:is(.method-overview-page, .results-index-page) { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 40px; align-content: start; }
-  :is(.method-overview-page, .results-index-page) .inner-page-hero { min-height: 0; padding: 0; }
+  :is(.method-overview-page, .results-index-page) .inner-page-hero { min-height: 0; padding: 0; margin-block-start: 0; }
   :is(.method-overview-page, .results-index-page) .inner-page-hero-summary { max-width: 680px; }
   .method-overview-page .method-index-entries article { padding-block: 28px; }
 }
@@ -10365,7 +10381,7 @@ main {
 .results-index-meta > span { color: var(--pine); }
 #main-content.results-index-page .results-index-report h2 { font-size: 28px; line-height: 1.4; font-weight: 600; margin: 16px 0 10px; }
 .results-index-question { font-size: 16px; color: var(--muted); line-height: 1.75; margin: 0; }
-.results-index-finding { margin: 12px 0 6px; font-size: 16px; line-height: 1.75; }
+.results-index-finding { margin: 20px 0 6px; font-size: 16px; line-height: 1.75; }
 .results-index-finding strong { color: var(--pine); font-weight: 600; margin-right: 8px; }
 .results-index-scope { font-size: 14px; line-height: 1.6; color: var(--muted); margin: 0; }
 .results-index-page .result-report-link { margin-top: 20px; }
