@@ -31,14 +31,14 @@ export default function MethodologyPage() {
 
         <section className="method-index-entries method-capabilities" aria-label="选择评测方法">
           <article>
-            <h2 data-site-title="group">跨会话记忆</h2>
-            <p data-site-copy="body">换一个会话后，Agent 还能找回之前的信息吗？</p>
-            <a href="/methodology/memory">查看评测方法 <span aria-hidden="true">→</span></a>
-          </article>
-          <article>
             <h2 data-site-title="group">深度研究</h2>
             <p data-site-copy="body">研究插件能否找对答案，并完成有依据的报告？</p>
             <a href="/methodology/deep-research">查看评测方法 <span aria-hidden="true">→</span></a>
+          </article>
+          <article>
+            <h2 data-site-title="group">跨会话记忆</h2>
+            <p data-site-copy="body">换一个会话后，Agent 还能找回之前的信息吗？</p>
+            <a href="/methodology/memory">查看评测方法 <span aria-hidden="true">→</span></a>
           </article>
         </section>
       </main>
