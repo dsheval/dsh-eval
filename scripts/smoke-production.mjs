@@ -7,6 +7,7 @@ const pages = [
   ['/methodology', 'inner-page-hero'],
   ['/methodology/memory', 'memory-protocol-timeline'],
   ['/methodology/deep-research', 'research-protocol-page'],
+  ['/methodology/agent-evidence', 'id="framework-title"'],
   ['/results', 'results-index-list'],
   ['/results/memory/2026-08-28', 'verification-run-sequence'],
   ['/results/deep-research/2026-09-04', 'research-overview'],
@@ -87,8 +88,19 @@ for (const [path, expected] of pages) {
   if (path === '/about') {
     const faq = html.match(/<section[^>]*id="faq"[^>]*>([\s\S]*?)<\/section>/)?.[1] || '';
     if ([...faq.matchAll(/<details(?:\s|>)/g)].length !== 6 || /<details[^>]*\bopen\b/.test(faq)) throw new Error('Expected six collapsed FAQs');
-    for (const marker of ['<title>DSH-Eval 是什么 · 产品介绍</title>', '万物皆可测', 'DeepSeek Harness', '五个环节设计', 'id="faq"', 'FAQPage', '如何提交项目或对结果提出异议？']) {
+    for (const marker of ['<title>DSH-Eval 是什么 · 产品介绍</title>', '万物皆可测', 'DeepSeek Harness', 'id="method-design"', 'id="eval-framework"', 'id="faq"', 'FAQPage', '新框架的 PASS、FAIL 与 UNEVALUABLE 如何理解？']) {
       if (!html.includes(marker)) throw new Error(`Missing product introduction: ${marker}`);
+    }
+  }
+  if (path === '/methodology/agent-evidence') {
+    const schemas = [...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((match) => JSON.parse(match[1]));
+    const article = schemas.find((schema) => schema['@type'] === 'Article');
+    const heading = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1].replace(/<[^>]+>/g, '');
+    if (!article || article.headline !== heading || article.url !== `https://www.dsheval.ai${path}` || article.author?.name !== 'DSH-Eval' || !article.dateModified) {
+      throw new Error('Article structured data must match its visible heading, author and canonical URL');
+    }
+    for (const marker of ['<title>Agent 任务评测：运行轨迹与环境证据 · DSH-Eval</title>', '新框架 · 开发中', '尚未发布评测结果', 'href="/about#eval-framework"']) {
+      if (!html.includes(marker)) throw new Error(`Missing new framework article metadata or scope: ${marker}`);
     }
   }
   const nav = html.match(/<nav[^>]*aria-label="DSH-Eval 主导航"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
