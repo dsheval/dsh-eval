@@ -40,6 +40,11 @@ export default function MethodologyPage() {
             <p data-site-copy="body">换一个会话后，Agent 还能找回之前的信息吗？</p>
             <a href="/methodology/memory">查看评测方法 <span aria-hidden="true">→</span></a>
           </article>
+          <article id="eval-framework">
+            <h2 data-site-title="group">新框架：运行轨迹与环境证据</h2>
+            <p data-site-copy="body">开发中，尚无评测结果。了解如何将任务过程、环境结果与检查条件关联起来。</p>
+            <a href="/methodology/agent-evidence">查看方法说明 <span aria-hidden="true">→</span></a>
+          </article>
         </section>
       </main>
       <SiteFooter />

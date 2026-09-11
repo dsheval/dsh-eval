@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${ORIGIN}/about`,
-      lastModified: new Date('2026-09-08'),
+      lastModified: new Date('2026-09-11'),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
@@ -36,7 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${ORIGIN}/methodology`,
-      lastModified: new Date('2026-09-02'),
+      lastModified: new Date('2026-09-11'),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
@@ -49,6 +49,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${ORIGIN}/methodology/deep-research`,
       lastModified: new Date('2026-09-04'),
+      changeFrequency: 'monthly',
+      priority: 0.75,
+    },
+    {
+      url: `${ORIGIN}/methodology/agent-evidence`,
+      lastModified: new Date('2026-09-11'),
       changeFrequency: 'monthly',
       priority: 0.75,
     },
