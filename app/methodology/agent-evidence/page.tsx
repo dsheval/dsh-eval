@@ -4,7 +4,7 @@ import AgentEvidenceArticle from './AgentEvidenceArticle';
 import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 
 const title = 'Agent 任务评测：运行轨迹与环境证据 · DSH-Eval';
-const description = '了解开发中的 DSH-Eval 新框架如何关联运行轨迹、环境证据与任务判定。新框架尚无评测结果，现有报告继续按原方法解释。';
+const description = '了解开发中的 DSH-Eval 新框架如何结合运行轨迹、环境变化与交付物进行维度评分，区分无法判断与评分错误。真实能力验收待完成，现有报告继续按原方法解释。';
 const url = '/methodology/agent-evidence';
 const canonicalUrl = `https://www.dsheval.ai${url}`;
 
@@ -16,7 +16,7 @@ const articleJsonLd = {
   headline: '从运行轨迹与环境证据判断 Agent 是否完成任务',
   description,
   inLanguage: 'zh-CN',
-  dateModified: '2026-09-11',
+  dateModified: '2026-09-14',
   articleSection: '评测方法',
   mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
   author: {

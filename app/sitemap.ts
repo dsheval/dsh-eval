@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${ORIGIN}/about`,
-      lastModified: new Date('2026-09-11'),
+      lastModified: new Date('2026-09-14'),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
@@ -36,7 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${ORIGIN}/methodology`,
-      lastModified: new Date('2026-09-11'),
+      lastModified: new Date('2026-09-14'),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
@@ -54,7 +54,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${ORIGIN}/methodology/agent-evidence`,
-      lastModified: new Date('2026-09-11'),
+      lastModified: new Date('2026-09-14'),
       changeFrequency: 'monthly',
       priority: 0.75,
     },

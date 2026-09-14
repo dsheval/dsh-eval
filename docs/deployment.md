@@ -42,6 +42,8 @@ GitHub 对外信息统一使用以下内容；本地修改不会自动更新远�
 - `.github/workflows/ci.yml` 检查依赖安全、lint、类型、三个评测套件、应用构建、Compose 配置和完整容器。CI 只做验证，不持有服务器凭证，也不自动部署。功能改动由 PR 触发检查，主分支 push 再验证合并提交；同一分支的新提交会取消旧检查。
 - npm 审计必须检查完整依赖树；部分 `devDependencies` 会进入服务端构建。任何 high / critical 漏洞或审计异常都需要先处理，不能跳过。安装使用 `--no-audit` 避免隐式重复审计，随后明确执行完整审计；每个审计请求最多等待 5 分钟、重试 1 次，服务不可用时仍阻断发布。CI 每轮独立审计一次，Dockerfile 不重复审计；手动发布必须确认目标提交的审计已通过。
 - 应用只在 Docker 构建阶段编译一次，随后验收该镜像。Buildx 使用 GitHub Actions 缓存复用镜像层；缓存不替代每轮独立审计、测试和容器验收，也不会推送镜像。
+- Docker 构建输入由 `Dockerfile` 的显式 `COPY` 与 `.dockerignore` 白名单共同限定：网站源码 `app/`、静态资源 `public/`、包清单、Vite / Next / TypeScript 配置、`.openai/hosting.json`，以及网站直接导入的 `evals/deep-research/results/v12/results.json` 和 `leaderboard.json`。运行镜像另复制 `docker/nginx.conf`。新增构建依赖时须同步两处；不能排除这两份评测结果或删除公开下载资源。
+- 文档、CI 脚本与评测执行器不进入网站镜像构建输入，但仍由现有 CI 执行审计、测试和配置检查。Nginx 安装层位于 npm 包清单复制之前，锁文件变更不必重新安装系统软件。缓存可用时，无关文档改动应复用网站构建层；修改页面、静态资源或结果 JSON 则应使该层失效。缓存命中不保证固定耗时，镜像加载及缓存传输仍有开销。
 - `scripts/smoke-production.mjs` 验证九个页面（产品介绍 `/about` 含常见问题）及 `/faq` 重定向、生产 JS/CSS、品牌图标、公开结果 JSON 与 sitemap。必须对完整 Nginx + Node 服务运行，不能只对裸 Vinext 端口运行。
 - `node --test scripts/test-legacy-links.mjs` 验证旧链接片段和参数兼容；`scripts/smoke-migration.mjs` 对独立联合网关或已授权发布后的公网执行只读迁移验收。
 - 本机缺少 Deep Research 私有题集时，对应测试会跳过，不能将其写成已通过。私有题集及任何秘密不得上传 GitHub 或 CI。

@@ -1,7 +1,30 @@
-.git
-.DS_Store
-.next
-.vinext
-dist
-node_modules
-npm-debug.log*
+# Only website build inputs and runtime configuration enter the build context.
+# Keep this allowlist aligned with Dockerfile COPY instructions.
+**
+!Dockerfile
+!.dockerignore
+!package.json
+!package-lock.json
+!vite.config.ts
+!next.config.ts
+!tsconfig.json
+!.openai/
+!.openai/hosting.json
+!app/
+!app/**
+!public/
+!public/**
+!evals/
+!evals/deep-research/
+!evals/deep-research/results/
+!evals/deep-research/results/v12/
+!evals/deep-research/results/v12/results.json
+!evals/deep-research/results/v12/leaderboard.json
+!docker/
+!docker/nginx.conf
+
+# Also exclude local artifacts if they appear inside an allowed directory.
+**/.DS_Store
+**/.env*
+**/node_modules
+**/*.tsbuildinfo

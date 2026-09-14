@@ -42,7 +42,7 @@ export default function MethodologyPage() {
           </article>
           <article id="eval-framework">
             <h2 data-site-title="group">新框架：运行轨迹与环境证据</h2>
-            <p data-site-copy="body">开发中，尚无评测结果。了解如何将任务过程、环境结果与检查条件关联起来。</p>
+            <p data-site-copy="body">开发中，真实能力验收待完成。了解如何结合运行轨迹、环境变化与交付物评分，并记录无法判断与评分错误。</p>
             <a href="/methodology/agent-evidence">查看方法说明 <span aria-hidden="true">→</span></a>
           </article>
         </section>
