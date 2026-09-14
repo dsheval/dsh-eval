@@ -88,7 +88,7 @@ for (const [path, expected] of pages) {
   if (path === '/about') {
     const faq = html.match(/<section[^>]*id="faq"[^>]*>([\s\S]*?)<\/section>/)?.[1] || '';
     if ([...faq.matchAll(/<details(?:\s|>)/g)].length !== 6 || /<details[^>]*\bopen\b/.test(faq)) throw new Error('Expected six collapsed FAQs');
-    for (const marker of ['<title>DSH-Eval 是什么 · 产品介绍</title>', '万物皆可测', 'DeepSeek Harness', 'id="method-design"', 'id="eval-framework"', 'id="faq"', 'FAQPage', '新框架的 PASS、FAIL 与 UNEVALUABLE 如何理解？']) {
+    for (const marker of ['<title>DSH-Eval 是什么 · 产品介绍</title>', '万物皆可测', 'DeepSeek Harness', 'id="method-design"', 'id="eval-framework"', 'id="faq"', 'FAQPage', '新框架如何区分已评分、无法判断与评分错误？']) {
       if (!html.includes(marker)) throw new Error(`Missing product introduction: ${marker}`);
     }
   }
@@ -99,7 +99,7 @@ for (const [path, expected] of pages) {
     if (!article || article.headline !== heading || article.url !== `https://www.dsheval.ai${path}` || article.author?.name !== 'DSH-Eval' || !article.dateModified) {
       throw new Error('Article structured data must match its visible heading, author and canonical URL');
     }
-    for (const marker of ['<title>Agent 任务评测：运行轨迹与环境证据 · DSH-Eval</title>', '新框架 · 开发中', '尚未发布评测结果', 'href="/about#eval-framework"']) {
+    for (const marker of ['<title>Agent 任务评测：运行轨迹与环境证据 · DSH-Eval</title>', '新框架 · 开发中', '真实端到端能力验收尚待完成', 'SCORED', 'UNASSESSABLE', 'ERROR', '当前不自动汇总为通过或失败', 'href="/about#eval-framework"']) {
       if (!html.includes(marker)) throw new Error(`Missing new framework article metadata or scope: ${marker}`);
     }
   }
