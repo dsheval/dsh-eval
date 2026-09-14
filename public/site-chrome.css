@@ -266,6 +266,21 @@
   min-height: 32px;
   font-size: 12px;
 }
+:is(main#main-content, main#top, main) #ranking-search-clear {
+  min-width: 44px;
+  min-height: 44px;
+  padding-inline: 8px;
+  border: 0;
+  color: var(--site-control-accent);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+}
+:is(main#main-content, main#top, main) #ranking-search-clear:hover {
+  color: var(--site-control-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 :is(main#main-content, main#top, main) :is(.release-badge, .trust-pill, .type-pill, .skill-kind, .result-report-status, .verification-current-marker, .research-task-status, .dossier-head > span:last-child) {
   box-sizing: border-box;
   font-family: var(--site-ui-font);
